@@ -30,25 +30,6 @@
       </button>
     </div>
 
-    <!-- KPI summary -->
-    <div v-if="totals" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-      <div class="card py-3 px-4">
-        <p class="text-xs text-gray-400 font-medium uppercase tracking-wide">Shifts</p>
-        <p class="text-2xl font-bold text-gray-800 mt-1">{{ totals.shift_count }}</p>
-      </div>
-      <div class="card py-3 px-4">
-        <p class="text-xs text-gray-400 font-medium uppercase tracking-wide">Total Revenue</p>
-        <p class="text-2xl font-bold text-amber-700 mt-1">{{ lkr(totals.total_revenue) }}</p>
-      </div>
-      <div class="card py-3 px-4">
-        <p class="text-xs text-gray-400 font-medium uppercase tracking-wide">Total Handover</p>
-        <p class="text-2xl font-bold text-red-600 mt-1">{{ lkr(totals.total_handover) }}</p>
-      </div>
-      <div class="card py-3 px-4">
-        <p class="text-xs text-gray-400 font-medium uppercase tracking-wide">Total Leftover</p>
-        <p class="text-2xl font-bold text-green-700 mt-1">{{ lkr(totals.total_leftover) }}</p>
-      </div>
-    </div>
 
     <!-- No data -->
     <div v-if="!loading && shifts.length === 0 && totals" class="card p-10 text-center text-gray-400">
@@ -79,7 +60,7 @@
                 <span v-if="shift.status === 'open'" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-700 uppercase tracking-wide">Live</span>
               </div>
               <p class="text-xs text-gray-400">
-                {{ formatTime(shift.opened_at) }} — {{ shift.closed_at ? formatTime(shift.closed_at) : 'ongoing' }}
+                {{ formatDateTime(shift.opened_at) }} — {{ shift.closed_at ? formatDateTime(shift.closed_at) : 'ongoing' }}
                 <span class="ml-1 text-gray-300">·</span>
                 <span class="ml-1">{{ shift.total_sales }} bills · {{ shift.total_items }} items</span>
               </p>
@@ -211,19 +192,6 @@
       </div>
     </template>
 
-    <!-- Grand totals -->
-    <div v-if="totals && shifts.length" class="card p-0 overflow-hidden">
-      <div class="px-5 py-3 bg-amber-50 border-b border-amber-200">
-        <span class="font-bold text-amber-800 text-sm">Grand Total — {{ formatDate(selectedDate) }}{{ cashierFilter ? ' · ' + cashierFilter : '' }}</span>
-      </div>
-      <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 divide-x divide-gray-100">
-        <div v-for="(item, idx) in grandTotalCells" :key="idx" class="px-4 py-3 text-center">
-          <p class="text-xs text-gray-400 font-medium">{{ item.label }}</p>
-          <p class="text-sm font-bold mt-0.5" :class="item.cls">{{ item.value }}</p>
-        </div>
-      </div>
-    </div>
-
   </div>
 
   <!-- Item Sales Modal -->
@@ -316,6 +284,11 @@ function formatDate(dateStr) {
 function formatTime(dt) {
   if (!dt) return '—'
   return new Date(dt).toLocaleTimeString('en-LK', { hour: '2-digit', minute: '2-digit' })
+}
+
+function formatDateTime(dt) {
+  if (!dt) return '—'
+  return new Date(dt).toLocaleString('en-LK', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
 
 function catPct(val, total) {
