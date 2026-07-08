@@ -148,6 +148,11 @@ class CashierShiftController extends Controller
 
             $paymentBreakdown = $payments->map(fn($v, $k) => ['method' => $k, 'total' => $v])->values();
 
+            $invoicePayments = SalePayment::whereIn('sale_id', $saleIds)
+                ->select('sale_id', 'payment_method', 'amount')
+                ->get()
+                ->groupBy('sale_id');
+
             $cashOutList = $shift->cashOuts->map(fn($co) => [
                 'reason' => $co->reason,
                 'amount' => (float) $co->amount,
@@ -205,6 +210,10 @@ class CashierShiftController extends Controller
                     'total'          => (float) $s->total,
                     'payment_status' => $s->payment_status,
                     'sold_at'        => $s->sold_at,
+                    'payments'       => ($invoicePayments[$s->id] ?? collect())->map(fn($p) => [
+                        'method' => $p->payment_method,
+                        'amount' => (float) $p->amount,
+                    ])->values(),
                 ]),
             ];
         });

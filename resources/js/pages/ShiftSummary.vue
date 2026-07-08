@@ -87,11 +87,18 @@
           <!-- Action bar -->
           <div class="px-5 py-2 border-b border-gray-100 flex items-center justify-between bg-gray-50/60">
             <span class="text-xs text-gray-500 font-medium">{{ shift.total_sales }} invoice{{ shift.total_sales !== 1 ? 's' : '' }} · {{ shift.total_items }} items sold</span>
-            <button @click="openItemModal(shift)"
-              class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold border border-gray-200 bg-white hover:border-amber-300 hover:text-amber-700 transition-colors">
-              <i class="fas fa-box-open text-amber-500"></i>
-              View Item Sales
-            </button>
+            <div class="flex items-center gap-2">
+              <button @click="openInvoiceModal(shift)"
+                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold border border-gray-200 bg-white hover:border-blue-300 hover:text-blue-700 transition-colors">
+                <i class="fas fa-file-invoice text-blue-500"></i>
+                Invoices
+              </button>
+              <button @click="openItemModal(shift)"
+                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold border border-gray-200 bg-white hover:border-amber-300 hover:text-amber-700 transition-colors">
+                <i class="fas fa-box-open text-amber-500"></i>
+                View Item Sales
+              </button>
+            </div>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-100">
@@ -194,6 +201,64 @@
 
   </div>
 
+  <!-- Invoices Modal -->
+  <teleport to="body">
+    <div v-if="invoiceModal.show" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="invoiceModal.show = false"></div>
+      <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col">
+
+        <!-- Modal header -->
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+          <div>
+            <p class="font-bold text-gray-800">Invoices — {{ invoiceModal.cashier }}</p>
+            <p class="text-xs text-gray-400 mt-0.5">{{ formatDateTime(invoiceModal.opened_at) }} – {{ invoiceModal.closed_at ? formatDateTime(invoiceModal.closed_at) : 'ongoing' }} · {{ invoiceModal.invoices.length }} invoices</p>
+          </div>
+          <button @click="invoiceModal.show = false" class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors text-xl leading-none">✕</button>
+        </div>
+
+        <!-- Table -->
+        <div class="overflow-y-auto flex-1">
+          <table class="w-full text-sm">
+            <thead class="bg-gray-50 sticky top-0">
+              <tr>
+                <th class="text-left px-5 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">#</th>
+                <th class="text-left px-3 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">Invoice</th>
+                <th class="text-left px-3 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">Time</th>
+                <th class="text-left px-3 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">Payment</th>
+                <th class="text-right px-5 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">Total</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+              <tr v-for="(inv, idx) in invoiceModal.invoices" :key="inv.id" class="hover:bg-blue-50/30 transition-colors">
+                <td class="px-5 py-2.5 text-gray-400 text-xs">{{ idx + 1 }}</td>
+                <td class="px-3 py-2.5 font-medium text-gray-800">{{ inv.invoice_number }}</td>
+                <td class="px-3 py-2.5 text-gray-500 text-xs">{{ formatTime(inv.sold_at) }}</td>
+                <td class="px-3 py-2.5">
+                  <div class="flex flex-wrap gap-1">
+                    <span v-for="p in inv.payments" :key="p.method"
+                      class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium"
+                      :class="methodClass(p.method)">
+                      {{ p.method.replace('_', ' ') }}
+                      <span class="font-bold">{{ lkr(p.amount) }}</span>
+                    </span>
+                  </div>
+                </td>
+                <td class="px-5 py-2.5 text-right font-bold text-gray-900">{{ lkr(inv.total) }}</td>
+              </tr>
+            </tbody>
+            <tfoot class="bg-gray-50 border-t-2 border-gray-200 sticky bottom-0">
+              <tr>
+                <td colspan="4" class="px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Total</td>
+                <td class="px-5 py-3 text-right font-bold text-gray-900">{{ lkr(invoiceModal.invoices.reduce((s, r) => s + r.total, 0)) }}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </teleport>
+
   <!-- Item Sales Modal -->
   <teleport to="body">
     <div v-if="itemModal.show" class="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -259,10 +324,19 @@ const shifts   = ref([])
 const totals   = ref(null)
 const cashiers = ref([])
 const expanded  = reactive({})
-const itemModal = reactive({ show: false, cashier: '', opened_at: null, closed_at: null, items: [] })
+const itemModal     = reactive({ show: false, cashier: '', opened_at: null, closed_at: null, items: [] })
+const invoiceModal  = reactive({ show: false, cashier: '', opened_at: null, closed_at: null, invoices: [] })
 
 function toggleShift(id) {
   expanded[id] = !expanded[id]
+}
+
+function openInvoiceModal(shift) {
+  invoiceModal.cashier   = shift.cashier
+  invoiceModal.opened_at = shift.opened_at
+  invoiceModal.closed_at = shift.closed_at
+  invoiceModal.invoices  = shift.invoices ?? []
+  invoiceModal.show      = true
 }
 
 function openItemModal(shift) {
