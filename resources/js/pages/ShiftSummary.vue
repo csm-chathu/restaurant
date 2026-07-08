@@ -221,35 +221,44 @@
           <table class="w-full text-sm">
             <thead class="bg-gray-50 sticky top-0">
               <tr>
-                <th class="text-left px-5 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">#</th>
+                <th class="text-left px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">#</th>
                 <th class="text-left px-3 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">Invoice</th>
                 <th class="text-left px-3 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">Time</th>
-                <th class="text-left px-3 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">Payment</th>
-                <th class="text-right px-5 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">Total</th>
+                <th class="text-right px-3 py-2.5 text-xs font-semibold text-green-600 uppercase tracking-wide">Cash</th>
+                <th class="text-right px-3 py-2.5 text-xs font-semibold text-blue-600 uppercase tracking-wide">Card</th>
+                <th class="text-right px-3 py-2.5 text-xs font-semibold text-purple-600 uppercase tracking-wide">Other</th>
+                <th class="text-right px-4 py-2.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">Total</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-50">
-              <tr v-for="(inv, idx) in invoiceModal.invoices" :key="inv.id" class="hover:bg-blue-50/30 transition-colors">
-                <td class="px-5 py-2.5 text-gray-400 text-xs">{{ idx + 1 }}</td>
-                <td class="px-3 py-2.5 font-medium text-gray-800">{{ inv.invoice_number }}</td>
-                <td class="px-3 py-2.5 text-gray-500 text-xs">{{ formatTime(inv.sold_at) }}</td>
-                <td class="px-3 py-2.5">
-                  <div class="flex flex-wrap gap-1">
-                    <span v-for="p in inv.payments" :key="p.method"
-                      class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium"
-                      :class="methodClass(p.method)">
-                      {{ p.method.replace('_', ' ') }}
-                      <span class="font-bold">{{ lkr(p.amount) }}</span>
-                    </span>
-                  </div>
+              <tr v-for="(inv, idx) in invoiceModal.invoices" :key="inv.id"
+                  class="hover:bg-blue-50/30 transition-colors"
+                  :class="{ 'bg-amber-50/40': inv.payments.length > 1 }">
+                <td class="px-4 py-2.5 text-gray-400 text-xs">{{ idx + 1 }}</td>
+                <td class="px-3 py-2.5 font-medium text-gray-800">
+                  {{ inv.invoice_number }}
+                  <span v-if="inv.payments.length > 1" class="ml-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700">Split</span>
                 </td>
-                <td class="px-5 py-2.5 text-right font-bold text-gray-900">{{ lkr(inv.total) }}</td>
+                <td class="px-3 py-2.5 text-gray-500 text-xs">{{ formatTime(inv.sold_at) }}</td>
+                <td class="px-3 py-2.5 text-right font-medium text-green-700">
+                  {{ invPayment(inv, 'cash') ? lkr(invPayment(inv, 'cash')) : '—' }}
+                </td>
+                <td class="px-3 py-2.5 text-right font-medium text-blue-700">
+                  {{ invPayment(inv, 'card') ? lkr(invPayment(inv, 'card')) : '—' }}
+                </td>
+                <td class="px-3 py-2.5 text-right font-medium text-purple-700">
+                  {{ invOther(inv) ? lkr(invOther(inv)) : '—' }}
+                </td>
+                <td class="px-4 py-2.5 text-right font-bold text-gray-900">{{ lkr(inv.total) }}</td>
               </tr>
             </tbody>
             <tfoot class="bg-gray-50 border-t-2 border-gray-200 sticky bottom-0">
               <tr>
-                <td colspan="4" class="px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Total</td>
-                <td class="px-5 py-3 text-right font-bold text-gray-900">{{ lkr(invoiceModal.invoices.reduce((s, r) => s + r.total, 0)) }}</td>
+                <td colspan="3" class="px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Total</td>
+                <td class="px-3 py-3 text-right font-bold text-green-700">{{ lkr(invoiceModal.invoices.reduce((s, r) => s + (invPayment(r, 'cash') || 0), 0)) }}</td>
+                <td class="px-3 py-3 text-right font-bold text-blue-700">{{ lkr(invoiceModal.invoices.reduce((s, r) => s + (invPayment(r, 'card') || 0), 0)) }}</td>
+                <td class="px-3 py-3 text-right font-bold text-purple-700">{{ lkr(invoiceModal.invoices.reduce((s, r) => s + (invOther(r) || 0), 0)) }}</td>
+                <td class="px-4 py-3 text-right font-bold text-gray-900">{{ lkr(invoiceModal.invoices.reduce((s, r) => s + r.total, 0)) }}</td>
               </tr>
             </tfoot>
           </table>
@@ -329,6 +338,15 @@ const invoiceModal  = reactive({ show: false, cashier: '', opened_at: null, clos
 
 function toggleShift(id) {
   expanded[id] = !expanded[id]
+}
+
+function invPayment(inv, method) {
+  const p = inv.payments?.find(p => p.method === method)
+  return p ? p.amount : 0
+}
+
+function invOther(inv) {
+  return inv.payments?.filter(p => p.method !== 'cash' && p.method !== 'card').reduce((s, p) => s + p.amount, 0) ?? 0
 }
 
 function openInvoiceModal(shift) {
