@@ -16,6 +16,10 @@
           class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg font-medium text-sm shadow-sm transition-colors">
           <CreditCardIcon class="w-4 h-4" /> Change Payment
         </button>
+        <router-link to="/sales/new"
+          class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg font-medium text-sm shadow-sm transition-colors">
+          <PlusIcon class="w-4 h-4" /> New Sale
+        </router-link>
         <button @click="printReceipt" :disabled="loading || !sale || printing"
           class="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white rounded-lg font-medium text-sm shadow-sm transition-colors">
           <svg v-if="printing" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -283,7 +287,7 @@
 import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
-import { ArrowLeftIcon, PrinterIcon, ArrowPathIcon, CreditCardIcon } from '@heroicons/vue/24/outline'
+import { ArrowLeftIcon, PrinterIcon, ArrowPathIcon, CreditCardIcon, PlusIcon } from '@heroicons/vue/24/outline'
 
 const route          = useRoute()
 const router         = useRouter()

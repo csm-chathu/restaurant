@@ -193,8 +193,9 @@ const allNavItems = [
   { to: '/tables',     label: 'Tables',           icon: TableCellsIcon,   roles: ['admin', 'owner', 'manager'] },
   { to: '/suppliers',  label: 'Suppliers',        icon: TruckIcon,        roles: ['admin', 'owner', 'manager'] },
   { to: '/sales',        label: 'POS Billing',      icon: ShoppingCartIcon, roles: null },
-  { to: '/open-bottles', label: 'Open Bottles',    icon: SparklesIcon,     roles: ['admin', 'owner', 'manager', 'cashier'] },
-  { to: '/reports',      label: 'Reports',          icon: ChartBarIcon,     roles: ['admin', 'owner', 'manager'] },
+  { to: '/open-bottles',    label: 'Open Bottles',    icon: SparklesIcon,     roles: ['admin', 'owner', 'manager', 'cashier'] },
+  { to: '/my-shift-summary', label: 'My Shift',      icon: ChartBarIcon,     roles: ['cashier'] },
+  { to: '/reports',          label: 'Reports',        icon: ChartBarIcon,     roles: ['admin', 'owner', 'manager'] },
   { to: '/purchases',    label: 'Purchase Orders',  icon: ArchiveBoxIcon,   roles: ['admin', 'owner', 'manager', 'store_keeper'] },
 ]
 
@@ -237,7 +238,8 @@ const pageTitles = {
   'users':         'Users & Roles',
   'settings':      'Restaurant Settings',
   'reports':        'Reports & Analytics',
-  'shift-summary':  'Shift Summary Report',
+  'shift-summary':    'Shift Summary Report',
+  'my-shift-summary': 'My Shift Summary',
   'finance':        'Finance Management',
   'day-end':       'Shift Close',
   'audit-log':     'Stock Ledger',

@@ -233,6 +233,97 @@ class CashierShiftController extends Controller
         return response()->json(['shifts' => $result, 'totals' => $totals]);
     }
 
+    public function myShifts(Request $request)
+    {
+        $from = $request->filled('date_from')
+            ? Carbon::parse($request->input('date_from'))->startOfDay()
+            : now()->subDays(1)->startOfDay(); // default: yesterday + today
+
+        $to = $request->filled('date_to')
+            ? Carbon::parse($request->input('date_to'))->endOfDay()
+            : now()->endOfDay();
+
+        $shifts = CashierShift::where('user_id', $request->user()->id)
+            ->when($request->user()->branch_id, fn($q) => $q->where('branch_id', $request->user()->branch_id))
+            ->where('opened_at', '>=', $from)
+            ->where('opened_at', '<=', $to)
+            ->latest('opened_at')
+            ->get(['id', 'status', 'opening_cash', 'closing_cash', 'opened_at', 'closed_at'])
+            ->map(fn($s) => [
+                'id'           => $s->id,
+                'status'       => $s->status,
+                'opened_at'    => $s->opened_at,
+                'closed_at'    => $s->closed_at,
+                'opening_cash' => (float) $s->opening_cash,
+                'closing_cash' => (float) ($s->closing_cash ?? 0),
+            ]);
+
+        return response()->json($shifts);
+    }
+
+    public function myShiftSummary(Request $request, CashierShift $shift)
+    {
+        if ($shift->user_id !== $request->user()->id) {
+            return response()->json(['message' => 'Not found.'], 404);
+        }
+
+        $shift->load('user:id,name');
+        $shiftEnd = $shift->closed_at ?? now();
+
+        $saleIds = Sale::where('branch_id', $shift->branch_id)
+            ->where('status', 'completed')
+            ->whereBetween('sold_at', [$shift->opened_at, $shiftEnd])
+            ->pluck('id');
+
+        $paymentBreakdown = SalePayment::whereIn('sale_id', $saleIds)
+            ->select('payment_method', DB::raw('SUM(amount) as total'))
+            ->groupBy('payment_method')
+            ->get()->keyBy('payment_method')
+            ->map(fn($r) => (float) $r->total);
+
+        $cashSales      = (float) ($paymentBreakdown['cash'] ?? 0);
+        $cardSales      = (float) ($paymentBreakdown['card'] ?? 0);
+        $otherSales     = $paymentBreakdown->except(['cash', 'card'])->sum();
+        $otherBreakdown = $paymentBreakdown->except(['cash', 'card'])->map(fn($v) => (float) $v);
+
+        $cashOutRecords = $shift->cashOuts()->with('user:id,name')->get();
+        $totalCashOuts  = (float) $cashOutRecords->sum('amount');
+
+        $expectedCash = (float) $shift->opening_cash + $cashSales - $totalCashOuts;
+        $variance     = $shift->closing_cash !== null ? (float) $shift->closing_cash - $expectedCash : null;
+
+        $categoryBreakdown = SaleItem::whereIn('sale_id', $saleIds)
+            ->join('products', 'sale_items.product_id', '=', 'products.id')
+            ->leftJoin('categories', 'products.category_id', '=', 'categories.id')
+            ->select(
+                DB::raw("COALESCE(categories.name, 'Uncategorized') as name"),
+                DB::raw('SUM(sale_items.quantity) as qty'),
+                DB::raw('SUM(sale_items.total) as total')
+            )
+            ->groupBy('categories.id', 'categories.name')
+            ->orderByDesc('total')
+            ->get()
+            ->map(fn($r) => ['name' => $r->name, 'qty' => (int) $r->qty, 'total' => (float) $r->total]);
+
+        return response()->json([
+            'shift'             => $shift,
+            'total_sales_count' => $saleIds->count(),
+            'total_items'       => (int) SaleItem::whereIn('sale_id', $saleIds)->sum('quantity'),
+            'total_revenue'     => (float) Sale::whereIn('id', $saleIds)->sum('total'),
+            'cash_sales'        => $cashSales,
+            'card_sales'        => $cardSales,
+            'other_sales'       => $otherSales,
+            'other_breakdown'   => $otherBreakdown,
+            'cash_outs'         => $cashOutRecords,
+            'total_cash_outs'   => $totalCashOuts,
+            'expected_cash'     => $expectedCash,
+            'variance'          => $variance,
+            'handover_amount'   => (float) ($shift->handover_amount ?? $shift->closing_cash ?? 0),
+            'leftover_amount'   => (float) ($shift->leftover_amount ?? 0),
+            'category_breakdown'=> $categoryBreakdown,
+        ]);
+    }
+
     public function suggestedOpening(Request $request)
     {
         $last = CashierShift::where('status', 'closed')
