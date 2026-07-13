@@ -299,7 +299,7 @@ async function fetchData() {
         search:         search.value,
         date_from:      dateFrom.value,
         date_to:        dateTo.value,
-        status:         statusFilter.value,
+        payment_status: statusFilter.value,
         payment_method: paymentMethodFilter.value,
       },
     })

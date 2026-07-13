@@ -61,7 +61,6 @@ class SaleController extends Controller
             ->when($request->filled('date_to'), fn($q) => $q->whereDate('sold_at', '<=', $request->input('date_to')));
 
         $summary = (clone $base)
-            ->where('status', 'completed')
             ->selectRaw('payment_status, COUNT(*) as count, SUM(total) as total')
             ->groupBy('payment_status')
             ->get()

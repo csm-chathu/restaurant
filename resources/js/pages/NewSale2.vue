@@ -104,6 +104,14 @@
             class="w-11 rounded-xl bg-gray-50 border border-gray-200 text-gray-400 hover:border-amber-400 hover:text-amber-600 flex items-center justify-center shrink-0 transition-colors">
             <QrCodeIcon class="w-5 h-5" />
           </button>
+          <button type="button" @click="toggleGridView" :title="gridView === 'grid' ? 'Switch to list view' : 'Switch to grid view'"
+            class="w-11 rounded-xl border-2 flex items-center justify-center shrink-0 transition-colors"
+            :class="gridView === 'list'
+              ? 'bg-amber-50 border-amber-400 text-amber-600'
+              : 'bg-gray-50 border-gray-200 text-gray-400 hover:border-amber-400 hover:text-amber-600'">
+            <ListBulletIcon v-if="gridView === 'grid'" class="w-5 h-5" />
+            <Squares2X2Icon v-else class="w-5 h-5" />
+          </button>
         </div>
 
         <!-- Barcode error -->
@@ -117,7 +125,9 @@
             <ShoppingBagIcon class="w-16 h-16 opacity-20 mb-3" />
             <p class="text-sm font-medium">No products found</p>
           </div>
-          <div class="grid grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3">
+
+          <!-- ── Big tile grid ── -->
+          <div v-if="gridView === 'grid'" class="grid grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3">
             <button
               v-for="(product, idx) in gridProducts"
               :key="product.id"
@@ -134,25 +144,20 @@
                     ? 'border-amber-400 shadow-lg shadow-amber-100'
                     : 'border-gray-200 hover:border-amber-300 hover:shadow-md active:scale-95'"
             >
-              <!-- In-bill qty badge -->
               <div
                 v-if="isInBill(product.id)"
                 class="absolute top-2 right-2 z-10 w-7 h-7 bg-amber-500 text-white rounded-full text-sm font-bold flex items-center justify-center shadow-lg"
               >{{ getBillQty(product.id) }}</div>
-
-              <!-- Image -->
               <div class="w-full aspect-[4/3] overflow-hidden bg-gray-100 shrink-0 relative">
                 <img v-if="product.image" :src="product.image" :alt="product.name" class="w-full h-full object-cover" />
                 <div v-else class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
                   <ShoppingBagIcon class="w-10 h-10 text-gray-300" />
                 </div>
-                <!-- Overlay quick-add button -->
                 <div class="absolute inset-x-0 bottom-0 py-2 px-2 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex justify-end"
                      v-if="!(isStockTracked(product) && product.stock_quantity < 1 && !(product.open_bottles_remaining_ml > 0))">
                   <span class="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg">+</span>
                 </div>
               </div>
-
               <div class="p-2.5 flex flex-col gap-1">
                 <p class="text-sm font-semibold text-gray-800 leading-tight line-clamp-2">{{ product.name }}</p>
                 <p class="text-base font-bold text-amber-600">LKR {{ lkr(product.selling_price) }}</p>
@@ -171,6 +176,67 @@
                     {{ product.stock_quantity <= product.min_stock_level ? '⚠ ' : '' }}{{ product.stock_quantity }} in stock
                   </template>
                 </p>
+              </div>
+            </button>
+          </div>
+
+          <!-- ── Compact list ── -->
+          <div v-else class="flex flex-col gap-1">
+            <button
+              v-for="(product, idx) in gridProducts"
+              :key="product.id"
+              :data-grid-idx="idx"
+              @click="addProductFromGrid(product)"
+              :disabled="isStockTracked(product) && product.stock_quantity < 1 && !(product.open_bottles_remaining_ml > 0)"
+              type="button"
+              class="relative flex items-center gap-2.5 w-full rounded-xl border-2 text-left transition-all select-none px-2.5 py-2 bg-white"
+              :class="isStockTracked(product) && product.stock_quantity < 1 && !(product.open_bottles_remaining_ml > 0)
+                ? 'border-gray-100 opacity-40 cursor-not-allowed'
+                : gridFocusIndex === idx
+                  ? 'border-amber-500 ring-2 ring-amber-400 shadow-md shadow-amber-100'
+                  : isInBill(product.id)
+                    ? 'border-amber-400 bg-amber-50/50'
+                    : 'border-gray-200 hover:border-amber-300 hover:shadow-sm active:scale-[0.99]'"
+            >
+              <!-- Thumbnail -->
+              <div class="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 shrink-0 border border-gray-100">
+                <img v-if="product.image" :src="product.image" :alt="product.name" class="w-full h-full object-cover" />
+                <div v-else class="w-full h-full flex items-center justify-center">
+                  <ShoppingBagIcon class="w-5 h-5 text-gray-300" />
+                </div>
+              </div>
+
+              <!-- Name + price + stock -->
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-gray-800 leading-tight line-clamp-2">{{ product.name }}</p>
+                <div class="flex items-center gap-2 flex-wrap">
+                  <p class="text-xs font-bold text-amber-600">LKR {{ lkr(product.selling_price) }}</p>
+                  <p v-if="isStockTracked(product)" class="text-xs"
+                    :class="product.stock_quantity < 1 && product.open_bottles_remaining_ml > 0 ? 'text-blue-500' : product.stock_quantity <= product.min_stock_level ? 'text-red-500' : 'text-gray-400'">
+                    <template v-if="product.stock_quantity < 1 && product.open_bottles_remaining_ml > 0">
+                      ~{{ Math.round(product.open_bottles_remaining_ml) }}ml
+                    </template>
+                    <template v-else>
+                      {{ product.stock_quantity <= product.min_stock_level ? '⚠ ' : '' }}{{ product.stock_quantity }}
+                    </template>
+                  </p>
+                  <div v-if="product.shot_variants?.length" class="flex gap-1 flex-wrap">
+                    <span v-for="v in product.shot_variants" :key="v.name"
+                      class="text-[10px] font-semibold text-purple-600 bg-purple-50 border border-purple-200 rounded-full px-1.5 py-0.5">
+                      {{ v.name }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- In-bill qty badge -->
+              <div v-if="isInBill(product.id)"
+                class="w-7 h-7 bg-amber-500 text-white rounded-full text-sm font-bold flex items-center justify-center shadow shrink-0">
+                {{ getBillQty(product.id) }}
+              </div>
+              <div v-else
+                class="w-7 h-7 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center shrink-0 font-bold text-lg leading-none">
+                +
               </div>
             </button>
           </div>
@@ -767,6 +833,7 @@ import {
   ShoppingCartIcon, CheckCircleIcon, ArrowPathIcon,
   ExclamationTriangleIcon, QrCodeIcon, MagnifyingGlassIcon, ShoppingBagIcon,
   QuestionMarkCircleIcon, TableCellsIcon, ChevronDownIcon, PrinterIcon,
+  Squares2X2Icon, ListBulletIcon,
 } from '@heroicons/vue/24/outline'
 
 const router = useRouter()
@@ -822,6 +889,12 @@ const showProductPanel    = ref(true)
 const barcodeInput = ref('')
 const barcodeError = ref('')
 let barcodeClearTimer = null
+
+const gridView = ref(localStorage.getItem('pos_grid_view') || 'grid') // 'grid' | 'list'
+function toggleGridView() {
+  gridView.value = gridView.value === 'grid' ? 'list' : 'grid'
+  localStorage.setItem('pos_grid_view', gridView.value)
+}
 
 const openBottlePicker = reactive({ show: false, item: null, bottles: [], loading: false })
 

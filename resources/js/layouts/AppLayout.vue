@@ -93,6 +93,11 @@
             <ArrowsPointingInIcon v-else class="w-3.5 h-3.5" />
             {{ sidebarHidden ? 'Exit Full Screen' : 'Full Screen' }}
           </button>
+          <button @click="() => window.location.reload()"
+            title="Refresh page"
+            class="p-1.5 rounded-lg border border-gray-200 text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-colors">
+            <ArrowPathIcon class="w-4 h-4" />
+          </button>
           <span>{{ currentDate }}</span>
           <button @click="openShiftModal"
             :class="currentShift
@@ -150,7 +155,7 @@ import {
   UserGroupIcon, ClipboardDocumentCheckIcon,
   ClipboardDocumentListIcon, CurrencyDollarIcon, FireIcon, TableCellsIcon, ChartBarIcon, Cog6ToothIcon, BanknotesIcon,
   ChevronDoubleLeftIcon, ChevronDoubleRightIcon,
-  ArrowsPointingOutIcon, ArrowsPointingInIcon,
+  ArrowsPointingOutIcon, ArrowsPointingInIcon, ArrowPathIcon,
 } from '@heroicons/vue/24/outline'
 
 const auth      = useAuthStore()
