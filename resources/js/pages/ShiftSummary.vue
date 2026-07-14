@@ -7,9 +7,6 @@
         <h2 class="text-xl font-semibold text-gray-800">Shift-wise Report</h2>
         <p class="text-sm text-gray-500 mt-0.5">Detailed breakdown per cashier shift</p>
       </div>
-      <button @click="print" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white border border-gray-200 text-gray-700 hover:border-amber-300 hover:text-amber-700 no-print">
-        <i class="fas fa-print"></i> Print
-      </button>
     </div>
 
     <!-- Filters -->

@@ -13,6 +13,8 @@ class CashierShift extends Model
     ];
 
     protected $casts = [
+        'user_id'         => 'integer',
+        'branch_id'       => 'integer',
         'opening_cash'    => 'decimal:2',
         'closing_cash'    => 'decimal:2',
         'handover_amount' => 'decimal:2',
