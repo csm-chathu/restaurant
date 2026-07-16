@@ -127,6 +127,16 @@
         </div>
       </header>
 
+      <!-- Hosting maintenance alert -->
+      <div v-if="showMaintenanceAlert"
+        class="flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white text-xs font-medium shrink-0">
+        <span class="text-base leading-none">⚠️</span>
+        <span>
+          <strong>Service Notice:</strong> The hosting service will be unavailable after
+          <strong>July 22, 2026</strong>. Please contact your administrator to avoid disruption.
+        </span>
+      </div>
+
       <!-- Page -->
       <main :class="route.name === 'sales.new' ? 'flex-1 overflow-hidden' : 'flex-1 overflow-auto p-6'">
         <router-view />
@@ -175,6 +185,8 @@ const restaurant = ref({ name: 'Liquor Shop + Bar', logo_url: '', address: '' })
 
 const collapsed = ref(localStorage.getItem('sidebar_collapsed') === 'true')
 const sidebarHidden = ref(false)
+
+const showMaintenanceAlert = new Date() <= new Date('2026-07-22')
 
 watch(() => route.name, (name) => {
   if (name === 'sales.new') collapsed.value = true
