@@ -276,20 +276,8 @@
 
 <style>
 @media print {
-  html, body {
-    height: auto !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: visible !important;
-    background: #fff !important;
-  }
-  /* Hide every direct child of body except our slip wrapper */
-  body > *:not(#my-shift-slip-wrapper) {
-    display: none !important;
-  }
   #my-shift-slip-wrapper {
-    display: block !important;
-    padding: 0 !important;
+    padding: 0 5mm !important;
     background: #fff !important;
   }
   .my-shift-slip-paper {

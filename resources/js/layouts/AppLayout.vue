@@ -129,7 +129,7 @@
 
       <!-- Hosting maintenance alert -->
       <div v-if="showMaintenanceAlert"
-        class="flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white text-xs font-medium shrink-0">
+        class="no-print flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white text-xs font-medium shrink-0">
         <span class="text-base leading-none">⚠️</span>
         <span>
           <strong>Service Notice:</strong> The hosting service will be unavailable after
@@ -139,7 +139,7 @@
 
       <!-- Server offline alert -->
       <div v-if="!serverOnline"
-        class="flex items-center justify-center gap-2 px-4 py-2 bg-orange-600 text-white text-xs font-semibold shrink-0 animate-pulse">
+        class="no-print flex items-center justify-center gap-2 px-4 py-2 bg-orange-600 text-white text-xs font-semibold shrink-0 animate-pulse">
         <span class="w-2 h-2 rounded-full bg-white shrink-0"></span>
         <span>Server unreachable — check your connection. Data may not save correctly.</span>
       </div>
