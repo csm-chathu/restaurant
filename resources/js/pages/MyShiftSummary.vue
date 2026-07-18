@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-2xl mx-auto space-y-6">
+  <div class="no-print max-w-2xl mx-auto space-y-6">
 
     <!-- Header -->
     <div class="flex items-center justify-between">
@@ -181,105 +181,136 @@
 
   </div>
 
-  <!-- Thermal slip (teleported to body, same mechanism as ShiftModal) -->
-  <Teleport to="body">
-    <div id="my-shift-slip-wrapper" style="display:none;">
-      <div id="my-shift-slip" class="my-shift-slip-paper">
-        <div style="text-align:center; margin-bottom:4px;" v-if="summary">
-          <div style="font-size:15px; font-weight:bold; letter-spacing:1px; text-transform:uppercase;">{{ restaurant.name || 'POS System' }}</div>
-          <div v-if="restaurant.address" style="font-size:10px; margin-top:2px; white-space:pre-line; font-weight:600;">{{ restaurant.address }}</div>
-          <div style="font-size:12px; margin-top:5px; font-weight:bold; letter-spacing:0.5px;">====  SHIFT CLOSED  ====</div>
-        </div>
+  <!-- Print-only slip (inline, no Teleport — CSS controls visibility) -->
+  <div id="my-shift-slip-section">
+    <div class="my-shift-slip-paper">
+      <div style="text-align:center; margin-bottom:4px;" v-if="summary">
+        <div style="font-size:15px; font-weight:bold; letter-spacing:1px; text-transform:uppercase;">{{ restaurant.name || 'POS System' }}</div>
+        <div v-if="restaurant.address" style="font-size:10px; margin-top:2px; white-space:pre-line; font-weight:600;">{{ restaurant.address }}</div>
+        <div style="font-size:12px; margin-top:5px; font-weight:bold; letter-spacing:0.5px;">====  SHIFT CLOSED  ====</div>
+      </div>
+      <hr style="border:none; border-top:1px dashed #666; margin:5px 0;" />
+
+      <div style="font-size:11px; line-height:1.8; font-weight:600;" v-if="summary">
+        <div style="display:flex; justify-content:space-between;"><span>Cashier</span><span>{{ summary.shift?.user?.name }}</span></div>
+        <div style="display:flex; justify-content:space-between;"><span>Date</span><span>{{ slipDate }}</span></div>
+        <div style="display:flex; justify-content:space-between;"><span>Opened</span><span>{{ slipOpenedTime }}</span></div>
+        <div style="display:flex; justify-content:space-between;"><span>Closed</span><span>{{ slipClosedTime }}</span></div>
+      </div>
+
+      <template v-if="summary">
         <hr style="border:none; border-top:1px dashed #666; margin:5px 0;" />
-
-        <div style="font-size:11px; line-height:1.8; font-weight:600;" v-if="summary">
-          <div style="display:flex; justify-content:space-between;"><span>Cashier</span><span>{{ summary.shift?.user?.name }}</span></div>
-          <div style="display:flex; justify-content:space-between;"><span>Date</span><span>{{ slipDate }}</span></div>
-          <div style="display:flex; justify-content:space-between;"><span>Opened</span><span>{{ slipOpenedTime }}</span></div>
-          <div style="display:flex; justify-content:space-between;"><span>Closed</span><span>{{ slipClosedTime }}</span></div>
+        <div style="font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:3px;">Sales Summary</div>
+        <div style="font-size:11px; line-height:1.8; font-weight:600;">
+          <div style="display:flex; justify-content:space-between;"><span>Total Bills</span><span>{{ summary.total_sales_count }}</span></div>
+          <div style="display:flex; justify-content:space-between;"><span>Total Items</span><span>{{ summary.total_items }}</span></div>
+          <div style="display:flex; justify-content:space-between; font-weight:800;"><span>Total Revenue</span><span>LKR {{ lkr(summary.total_revenue) }}</span></div>
         </div>
 
-        <template v-if="summary">
+        <template v-if="summary.category_breakdown?.length">
           <hr style="border:none; border-top:1px dashed #666; margin:5px 0;" />
-          <div style="font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:3px;">Sales Summary</div>
+          <div style="font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:3px;">By Category</div>
           <div style="font-size:11px; line-height:1.8; font-weight:600;">
-            <div style="display:flex; justify-content:space-between;"><span>Total Bills</span><span>{{ summary.total_sales_count }}</span></div>
-            <div style="display:flex; justify-content:space-between;"><span>Total Items</span><span>{{ summary.total_items }}</span></div>
-            <div style="display:flex; justify-content:space-between; font-weight:800;"><span>Total Revenue</span><span>LKR {{ lkr(summary.total_revenue) }}</span></div>
-          </div>
-
-          <template v-if="summary.category_breakdown?.length">
-            <hr style="border:none; border-top:1px dashed #666; margin:5px 0;" />
-            <div style="font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:3px;">By Category</div>
-            <div style="font-size:11px; line-height:1.8; font-weight:600;">
-              <div v-for="cat in summary.category_breakdown" :key="cat.name" style="display:flex; justify-content:space-between;">
-                <span>{{ cat.name }} <span style="font-weight:500;">(×{{ cat.qty }})</span></span>
-                <span>{{ lkr(cat.total) }}</span>
-              </div>
-            </div>
-          </template>
-
-          <hr style="border:none; border-top:1px dashed #666; margin:5px 0;" />
-          <div style="font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:3px;">Payment Methods</div>
-          <div style="font-size:11px; line-height:1.8; font-weight:600;">
-            <div style="display:flex; justify-content:space-between;"><span>Cash</span><span>LKR {{ lkr(summary.cash_sales) }}</span></div>
-            <div style="display:flex; justify-content:space-between;"><span>Card</span><span>LKR {{ lkr(summary.card_sales) }}</span></div>
-            <div v-if="summary.other_sales > 0" style="display:flex; justify-content:space-between;"><span>Other</span><span>LKR {{ lkr(summary.other_sales) }}</span></div>
-          </div>
-
-          <template v-if="summary.cash_outs?.length">
-            <hr style="border:none; border-top:1px dashed #666; margin:5px 0;" />
-            <div style="font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:3px;">Cash Outs</div>
-            <div style="font-size:11px; line-height:1.8; font-weight:600;">
-              <div v-for="co in summary.cash_outs" :key="co.id" style="display:flex; justify-content:space-between;">
-                <span>{{ co.reason }}</span><span>- {{ lkr(co.amount) }}</span>
-              </div>
-              <div style="display:flex; justify-content:space-between; font-weight:800;">
-                <span>Total Cash Outs</span><span>- LKR {{ lkr(summary.total_cash_outs) }}</span>
-              </div>
-            </div>
-          </template>
-
-          <hr style="border:none; border-top:1px dashed #666; margin:5px 0;" />
-          <div style="font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:3px;">Cash Drawer</div>
-          <div style="font-size:11px; line-height:1.8; font-weight:600;">
-            <div style="display:flex; justify-content:space-between;"><span>Opening Cash</span><span>LKR {{ lkr(summary.shift?.opening_cash) }}</span></div>
-            <div style="display:flex; justify-content:space-between;"><span>+ Cash Sales</span><span>LKR {{ lkr(summary.cash_sales) }}</span></div>
-            <div v-if="summary.total_cash_outs > 0" style="display:flex; justify-content:space-between;"><span>- Cash Outs</span><span>LKR {{ lkr(summary.total_cash_outs) }}</span></div>
-            <div style="display:flex; justify-content:space-between;"><span>Expected Cash</span><span>LKR {{ lkr(summary.expected_cash) }}</span></div>
-            <div style="display:flex; justify-content:space-between;"><span>Closing Cash</span><span>LKR {{ lkr(summary.shift?.closing_cash) }}</span></div>
-            <div style="display:flex; justify-content:space-between; font-weight:800; font-size:12px; margin-top:2px;"
-                 :style="(summary.variance ?? 0) < 0 ? 'color:#c00;' : 'color:#080;'">
-              <span>Variance</span>
-              <span>{{ (summary.variance ?? 0) >= 0 ? '+' : '' }}LKR {{ lkr(summary.variance) }}</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; margin-top:4px; border-top:1px dashed #999; padding-top:3px;">
-              <span>Handover to Boss</span><span style="color:#c00; font-weight:700;">LKR {{ lkr(summary.handover_amount) }}</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; font-weight:800; font-size:12px; color:#b45309;">
-              <span>Leftover / Next Opening</span><span>LKR {{ lkr(summary.leftover_amount) }}</span>
+            <div v-for="cat in summary.category_breakdown" :key="cat.name" style="display:flex; justify-content:space-between;">
+              <span>{{ cat.name }} <span style="font-weight:500;">(×{{ cat.qty }})</span></span>
+              <span>{{ lkr(cat.total) }}</span>
             </div>
           </div>
-
-          <template v-if="summary.shift?.notes">
-            <hr style="border:none; border-top:1px dashed #666; margin:5px 0;" />
-            <div style="font-size:10px; font-weight:600; color:#555;">Notes: {{ summary.shift.notes }}</div>
-          </template>
         </template>
 
         <hr style="border:none; border-top:1px dashed #666; margin:5px 0;" />
-        <div style="text-align:center; font-size:10px; font-weight:600;">*** Thank You ***</div>
-      </div>
+        <div style="font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:3px;">Payment Methods</div>
+        <div style="font-size:11px; line-height:1.8; font-weight:600;">
+          <div style="display:flex; justify-content:space-between;"><span>Cash</span><span>LKR {{ lkr(summary.cash_sales) }}</span></div>
+          <div style="display:flex; justify-content:space-between;"><span>Card</span><span>LKR {{ lkr(summary.card_sales) }}</span></div>
+          <div v-if="summary.other_sales > 0" style="display:flex; justify-content:space-between;"><span>Other</span><span>LKR {{ lkr(summary.other_sales) }}</span></div>
+        </div>
+
+        <template v-if="summary.cash_outs?.length">
+          <hr style="border:none; border-top:1px dashed #666; margin:5px 0;" />
+          <div style="font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:3px;">Cash Outs</div>
+          <div style="font-size:11px; line-height:1.8; font-weight:600;">
+            <div v-for="co in summary.cash_outs" :key="co.id" style="display:flex; justify-content:space-between;">
+              <span>{{ co.reason }}</span><span>- {{ lkr(co.amount) }}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-weight:800;">
+              <span>Total Cash Outs</span><span>- LKR {{ lkr(summary.total_cash_outs) }}</span>
+            </div>
+          </div>
+        </template>
+
+        <hr style="border:none; border-top:1px dashed #666; margin:5px 0;" />
+        <div style="font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:3px;">Cash Drawer</div>
+        <div style="font-size:11px; line-height:1.8; font-weight:600;">
+          <div style="display:flex; justify-content:space-between;"><span>Opening Cash</span><span>LKR {{ lkr(summary.shift?.opening_cash) }}</span></div>
+          <div style="display:flex; justify-content:space-between;"><span>+ Cash Sales</span><span>LKR {{ lkr(summary.cash_sales) }}</span></div>
+          <div v-if="summary.total_cash_outs > 0" style="display:flex; justify-content:space-between;"><span>- Cash Outs</span><span>LKR {{ lkr(summary.total_cash_outs) }}</span></div>
+          <div style="display:flex; justify-content:space-between;"><span>Expected Cash</span><span>LKR {{ lkr(summary.expected_cash) }}</span></div>
+          <div style="display:flex; justify-content:space-between;"><span>Closing Cash</span><span>LKR {{ lkr(summary.shift?.closing_cash) }}</span></div>
+          <div style="display:flex; justify-content:space-between; font-weight:800; font-size:12px; margin-top:2px;"
+               :style="(summary.variance ?? 0) < 0 ? 'color:#c00;' : 'color:#080;'">
+            <span>Variance</span>
+            <span>{{ (summary.variance ?? 0) >= 0 ? '+' : '' }}LKR {{ lkr(summary.variance) }}</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-top:4px; border-top:1px dashed #999; padding-top:3px;">
+            <span>Handover to Boss</span><span style="color:#c00; font-weight:700;">LKR {{ lkr(summary.handover_amount) }}</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-weight:800; font-size:12px; color:#b45309;">
+            <span>Leftover / Next Opening</span><span>LKR {{ lkr(summary.leftover_amount) }}</span>
+          </div>
+        </div>
+
+        <template v-if="summary.shift?.notes">
+          <hr style="border:none; border-top:1px dashed #666; margin:5px 0;" />
+          <div style="font-size:10px; font-weight:600; color:#555;">Notes: {{ summary.shift.notes }}</div>
+        </template>
+      </template>
+
+      <hr style="border:none; border-top:1px dashed #666; margin:5px 0;" />
+      <div style="text-align:center; font-size:10px; font-weight:600;">*** Thank You ***</div>
     </div>
-  </Teleport>
+  </div>
 </template>
 
 <style>
+/* Screen: hide the print-only slip section */
+#my-shift-slip-section { display: none; }
+
 @media print {
-  #my-shift-slip-wrapper {
-    padding: 0 5mm !important;
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
     background: #fff !important;
   }
+
+  /* Same layout reset as SaleReceipt — unclips the flex/overflow-hidden wrappers */
+  #app,
+  #app > div,
+  #app > div > div,
+  #app > div > div > div,
+  #app main {
+    display: block !important;
+    width: auto !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: #fff !important;
+    flex: none !important;
+  }
+
+  aside, header, .no-print { display: none !important; }
+
+  /* Show only the slip section */
+  #my-shift-slip-section {
+    display: block !important;
+  }
+
   .my-shift-slip-paper {
     font-family: 'Courier New', Courier, monospace !important;
     font-size: 11pt !important;
@@ -291,12 +322,13 @@
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
+
   @page { size: 76mm auto; margin: 0; }
 }
 </style>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 import { PrinterIcon, CalendarDaysIcon, ArrowLeftIcon } from '@heroicons/vue/24/outline'
 import { useRouter } from 'vue-router'
@@ -383,6 +415,7 @@ function formatDate(dt) {
   return new Date(dt).toLocaleDateString('en-LK', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
+
 function formatTime(dt) {
   if (!dt) return ''
   return new Date(dt).toLocaleTimeString('en-LK', { hour: '2-digit', minute: '2-digit' })
@@ -395,21 +428,8 @@ function formatDateTime(dt) {
          d.toLocaleTimeString('en-LK', { hour: '2-digit', minute: '2-digit' })
 }
 
-async function printSlip() {
-  await nextTick()
-  const app     = document.getElementById('app')
-  const wrapper = document.getElementById('my-shift-slip-wrapper')
-  if (!wrapper) return
-
-  if (app) app.style.setProperty('display', 'none', 'important')
-  wrapper.style.display = 'block'
-  void document.body.offsetHeight
-
+function printSlip() {
   window.print()
-  await new Promise(r => setTimeout(r, 600))
-
-  wrapper.style.display = 'none'
-  if (app) app.style.removeProperty('display')
 }
 </script>
 
