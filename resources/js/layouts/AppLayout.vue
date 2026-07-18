@@ -137,6 +137,13 @@
         </span>
       </div>
 
+      <!-- Server offline alert -->
+      <div v-if="!serverOnline"
+        class="flex items-center justify-center gap-2 px-4 py-2 bg-orange-600 text-white text-xs font-semibold shrink-0 animate-pulse">
+        <span class="w-2 h-2 rounded-full bg-white shrink-0"></span>
+        <span>Server unreachable — check your connection. Data may not save correctly.</span>
+      </div>
+
       <!-- Page -->
       <main :class="route.name === 'sales.new' ? 'flex-1 overflow-hidden' : 'flex-1 overflow-auto p-6'">
         <router-view />
@@ -150,7 +157,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useUiStore } from '@/stores/ui'
@@ -187,6 +194,18 @@ const collapsed = ref(localStorage.getItem('sidebar_collapsed') === 'true')
 const sidebarHidden = ref(false)
 
 const showMaintenanceAlert = new Date() <= new Date('2026-07-22')
+
+const serverOnline = ref(true)
+let healthInterval = null
+
+async function checkHealth() {
+  try {
+    await axios.get('/api/health', { timeout: 60000 })
+    serverOnline.value = true
+  } catch {
+    serverOnline.value = false
+  }
+}
 
 watch(() => route.name, (name) => {
   if (name === 'sales.new') collapsed.value = true
@@ -319,7 +338,13 @@ function onShifted(shift) {
   }
 }
 
+onUnmounted(() => {
+  clearInterval(healthInterval)
+})
+
 onMounted(async () => {
+  checkHealth()
+  healthInterval = setInterval(checkHealth, 60000)
   loadRestaurant()
   await loadCurrentShift()
   if (auth.user?.role === 'cashier') {

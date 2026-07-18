@@ -274,6 +274,39 @@
   </Teleport>
 </template>
 
+<style>
+@media print {
+  html, body {
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+  /* Hide every direct child of body except our slip wrapper */
+  body > *:not(#my-shift-slip-wrapper) {
+    display: none !important;
+  }
+  #my-shift-slip-wrapper {
+    display: block !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+  .my-shift-slip-paper {
+    font-family: 'Courier New', Courier, monospace !important;
+    font-size: 11pt !important;
+    font-weight: 700 !important;
+    line-height: 1.7 !important;
+    color: #000 !important;
+    width: 66mm !important;
+    max-width: 66mm !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  @page { size: 76mm auto; margin: 0; }
+}
+</style>
+
 <script setup>
 import { ref, computed, onMounted, nextTick } from 'vue'
 import axios from 'axios'
@@ -392,31 +425,3 @@ async function printSlip() {
 }
 </script>
 
-<style>
-@media print {
-  html, body {
-    height: auto !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-  #app { display: none !important; }
-  .no-print { display: none !important; }
-  #my-shift-slip-wrapper {
-    display: block !important;
-    padding: 0 5mm !important;
-    background: #fff !important;
-  }
-  .my-shift-slip-paper {
-    font-family: 'Courier New', Courier, monospace !important;
-    font-size: 11pt !important;
-    font-weight: 700 !important;
-    line-height: 1.7 !important;
-    color: #000 !important;
-    width: 66mm !important;
-    max-width: 66mm !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  @page { size: 76mm auto; margin: 0; }
-}
-</style>
