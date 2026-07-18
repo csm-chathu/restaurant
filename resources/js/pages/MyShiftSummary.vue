@@ -394,8 +394,15 @@ async function printSlip() {
 
 <style>
 @media print {
+  html, body {
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  #app { display: none !important; }
   .no-print { display: none !important; }
   #my-shift-slip-wrapper {
+    display: block !important;
     padding: 0 5mm !important;
     background: #fff !important;
   }
