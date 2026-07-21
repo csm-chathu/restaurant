@@ -127,15 +127,7 @@
         </div>
       </header>
 
-      <!-- Hosting maintenance alert -->
-      <div v-if="showMaintenanceAlert"
-        class="no-print flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white text-xs font-medium shrink-0">
-        <span class="text-base leading-none">⚠️</span>
-        <span>
-          <strong>Service Notice:</strong> The hosting service will be unavailable after
-          <strong>July 22, 2026</strong>. Please contact your administrator to avoid disruption.
-        </span>
-      </div>
+  
 
       <!-- Server offline alert -->
       <div v-if="!serverOnline"
