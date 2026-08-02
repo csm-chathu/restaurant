@@ -14,14 +14,15 @@ class RestaurantSettingController extends Controller
         $branch = $this->resolveBranch($request);
 
         return response()->json([
-            'id' => $branch->id,
-            'name' => $branch->name,
-            'code' => $branch->code,
-            'address' => $branch->address,
-            'city' => $branch->city,
-            'country' => $branch->country,
-            'logo_url' => $branch->logo_url,
-            'shop_type' => $branch->shop_type ?? 'restaurant',
+            'id'                    => $branch->id,
+            'name'                  => $branch->name,
+            'code'                  => $branch->code,
+            'address'               => $branch->address,
+            'city'                  => $branch->city,
+            'country'               => $branch->country,
+            'logo_url'              => $branch->logo_url,
+            'shop_type'             => $branch->shop_type ?? 'restaurant',
+            'enabled_product_types' => $branch->enabled_product_types ?? ['food', 'other'],
         ]);
     }
 
@@ -37,8 +38,10 @@ class RestaurantSettingController extends Controller
             'address' => 'nullable|string|max:255',
             'city' => 'nullable|string|max:100',
             'country' => 'nullable|string|max:100',
-            'logo' => 'nullable|image|max:2048',
-            'shop_type' => 'nullable|in:restaurant,hotel,retail,cycle',
+            'logo'                  => 'nullable|image|max:2048',
+            'shop_type'             => 'nullable|in:restaurant,hotel,retail,cycle',
+            'enabled_product_types' => 'nullable|array|min:1',
+            'enabled_product_types.*' => 'in:food,other',
         ]);
 
         if ($request->hasFile('logo')) {
@@ -62,7 +65,8 @@ class RestaurantSettingController extends Controller
                 'city' => $branch->city,
                 'country' => $branch->country,
                 'logo_url' => $branch->logo_url,
-                'shop_type' => $branch->shop_type ?? 'restaurant',
+                'shop_type'             => $branch->shop_type ?? 'restaurant',
+                'enabled_product_types' => $branch->enabled_product_types ?? ['food', 'other'],
             ],
         ]);
     }

@@ -76,6 +76,38 @@
         </div>
       </div>
 
+      <!-- Product Types -->
+      <div class="border-t pt-5 space-y-3">
+        <div>
+          <p class="text-sm font-medium text-gray-800">Product Types</p>
+          <p class="text-xs text-gray-500 mt-0.5">Choose which product types are available when adding products. At least one must be enabled.</p>
+        </div>
+        <div class="flex gap-6">
+          <label class="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              :checked="form.enabled_product_types.includes('food')"
+              @change="toggleProductType('food')"
+              :disabled="form.enabled_product_types.length === 1 && form.enabled_product_types.includes('food')"
+              class="w-4 h-4 rounded text-amber-500"
+            />
+            <span class="text-sm text-gray-700 font-medium">Food</span>
+            <span class="text-xs text-gray-400">Kitchen / prepared items</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              :checked="form.enabled_product_types.includes('other')"
+              @change="toggleProductType('other')"
+              :disabled="form.enabled_product_types.length === 1 && form.enabled_product_types.includes('other')"
+              class="w-4 h-4 rounded text-amber-500"
+            />
+            <span class="text-sm text-gray-700 font-medium">Other</span>
+            <span class="text-xs text-gray-400">Liquor, retail, bar items</span>
+          </label>
+        </div>
+      </div>
+
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label class="form-label">Shop Type *</label>
@@ -142,6 +174,7 @@ const form = reactive({
   city: '',
   country: '',
   shop_type: 'restaurant',
+  enabled_product_types: ['food', 'other'],
 })
 
 const branches = ref([])
@@ -161,6 +194,15 @@ const billLayout = ref(localStorage.getItem('pos_bill_layout') || '1')
 function toggleKbShortcuts() {
   kbShortcutsEnabled.value = !kbShortcutsEnabled.value
   localStorage.setItem('pos_keyboard_shortcuts', kbShortcutsEnabled.value ? 'true' : 'false')
+}
+
+function toggleProductType(type) {
+  const idx = form.enabled_product_types.indexOf(type)
+  if (idx === -1) {
+    form.enabled_product_types.push(type)
+  } else if (form.enabled_product_types.length > 1) {
+    form.enabled_product_types.splice(idx, 1)
+  }
 }
 
 function setBillLayout(v) {
@@ -186,6 +228,7 @@ async function load() {
   form.city = data.city ?? ''
   form.country = data.country ?? ''
   form.shop_type = data.shop_type ?? 'restaurant'
+  form.enabled_product_types = data.enabled_product_types ?? ['food', 'other']
   branchCode.value = data.code ?? ''
   currentLogo.value = data.logo_url ?? ''
   previewLogo.value = ''
@@ -213,6 +256,7 @@ async function save() {
     payload.append('city', form.city || '')
     payload.append('country', form.country || '')
     payload.append('shop_type', form.shop_type || 'restaurant')
+    form.enabled_product_types.forEach(t => payload.append('enabled_product_types[]', t))
     if (canSelectBranch.value && selectedBranchId.value) payload.append('branch_id', selectedBranchId.value)
     if (logoFile.value) payload.append('logo', logoFile.value)
 

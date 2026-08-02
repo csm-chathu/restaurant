@@ -1,7 +1,7 @@
 <template>
   <!-- Modal backdrop -->
   <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-    <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+    <div class="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-2xl max-h-[90vh] flex flex-col">
       <div class="flex items-center justify-between px-6 py-4 border-b">
         <h3 class="text-lg font-semibold">{{ product ? 'Edit Product' : 'Add Product' }}</h3>
         <button @click="$emit('close')" class="text-gray-400 hover:text-gray-600">✕</button>
@@ -25,10 +25,10 @@
             <label class="form-label">Custom Barcode <span class="text-gray-400 font-normal">(optional override)</span></label>
             <input v-model="form.barcode" class="form-input font-mono" placeholder="Scan or type barcode — leave blank to use SKU" />
           </div>
-          <div class="col-span-2">
+          <div v-if="enabledTypes.length > 1" class="col-span-2">
             <label class="form-label mb-1">Type *</label>
             <div class="flex rounded-lg border border-gray-200 overflow-hidden w-fit">
-              <button type="button"
+              <button v-if="enabledTypes.includes('food')" type="button"
                 @click="setTab('food')"
                 :class="activeTab === 'food'
                   ? 'bg-amber-500 text-white font-semibold'
@@ -36,12 +36,13 @@
                 class="px-6 py-2 text-sm transition-colors">
                 Food
               </button>
-              <button type="button"
+              <button v-if="enabledTypes.includes('other')" type="button"
                 @click="setTab('other')"
-                :class="activeTab === 'other'
-                  ? 'bg-amber-500 text-white font-semibold'
-                  : 'bg-white text-gray-600 hover:bg-gray-50'"
-                class="px-6 py-2 text-sm border-l border-gray-200 transition-colors">
+                :class="[
+                  activeTab === 'other' ? 'bg-amber-500 text-white font-semibold' : 'bg-white text-gray-600 hover:bg-gray-50',
+                  enabledTypes.includes('food') ? 'border-l border-gray-200' : ''
+                ]"
+                class="px-6 py-2 text-sm transition-colors">
                 Other
               </button>
             </div>
@@ -162,14 +163,18 @@
 import { reactive, ref, computed, watch, onMounted } from 'vue'
 import axios from 'axios'
 
-const props = defineProps({ product: Object, categories: Array, suppliers: Array, taxes: Array })
+const props = defineProps({ product: Object, categories: Array, suppliers: Array, taxes: Array, enabledTypes: { type: Array, default: () => ['food', 'other'] } })
 const emit  = defineEmits(['close', 'saved'])
 
 const unitTypes = ['Bottle', 'Can', 'Pack', 'Glass', 'Case', 'Plate', 'Serving']
 
 const FOOD_CATEGORY_NAMES = ['food', 'snacks']
 
-const activeTab = ref('other')
+const activeTab = ref(
+  props.product
+    ? 'other'  // will be overridden in onMounted based on actual category
+    : (props.enabledTypes.includes('other') ? 'other' : 'food')
+)
 
 const isFood = computed(() => activeTab.value === 'food')
 

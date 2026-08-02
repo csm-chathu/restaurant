@@ -26,8 +26,8 @@
           <span v-if="!collapsed">{{ item.label }}</span>
         </router-link>
 
-        <!-- Admin-only section -->
-        <template v-if="['admin', 'owner'].includes(auth.user?.role)">
+        <!-- Admin / feature section -->
+        <template v-if="adminNavItems.length > 0">
           <div v-if="!collapsed" class="px-4 mt-4 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Admin</div>
           <div v-else class="my-3 mx-3 border-t border-gray-700"></div>
           <router-link v-for="item in adminNavItems" :key="item.to" :to="item.to"
@@ -214,37 +214,52 @@ function toggleSidebarHidden() {
 
 
 const allNavItems = [
-  { to: '/',           label: 'Dashboard',        icon: HomeIcon,         roles: null },
-  { to: '/products',   label: 'Products',         icon: CubeIcon,         roles: ['admin', 'owner', 'manager', 'store_keeper'] },
-  { to: '/categories', label: 'Menu Categories',  icon: TagIcon,          roles: ['admin', 'owner', 'manager'] },
-  { to: '/customers',  label: 'Guests',           icon: UsersIcon,        roles: ['admin', 'owner', 'manager'] },
-  { to: '/tables',     label: 'Tables',           icon: TableCellsIcon,   roles: ['admin', 'owner', 'manager'] },
-  { to: '/suppliers',  label: 'Suppliers',        icon: TruckIcon,        roles: ['admin', 'owner', 'manager'] },
-  { to: '/sales',        label: 'POS Billing',      icon: ShoppingCartIcon, roles: null },
-  { to: '/open-bottles',    label: 'Open Bottles',    icon: SparklesIcon,     roles: ['admin', 'owner', 'manager', 'cashier'] },
-  { to: '/my-shift-summary', label: 'My Shift',      icon: ChartBarIcon,     roles: ['cashier'] },
-  { to: '/reports',          label: 'Reports',        icon: ChartBarIcon,     roles: ['admin', 'owner', 'manager'] },
-  { to: '/purchases',    label: 'Purchase Orders',  icon: ArchiveBoxIcon,   roles: ['admin', 'owner', 'manager', 'store_keeper'] },
+  { to: '/',                 label: 'Dashboard',       icon: HomeIcon,                    feature: 'dashboard' },
+  { to: '/products',         label: 'Products',        icon: CubeIcon,                    feature: 'products' },
+  { to: '/categories',       label: 'Menu Categories', icon: TagIcon,                     feature: 'menu_categories' },
+  { to: '/customers',        label: 'Guests',          icon: UsersIcon,                   feature: 'guests' },
+  { to: '/tables',           label: 'Tables',          icon: TableCellsIcon,              feature: 'tables' },
+  { to: '/suppliers',        label: 'Suppliers',       icon: TruckIcon,                   feature: 'suppliers' },
+  { to: '/sales',            label: 'POS Billing',     icon: ShoppingCartIcon,            feature: 'pos_billing' },
+  { to: '/open-bottles',     label: 'Open Bottles',    icon: SparklesIcon,                feature: 'open_bottles' },
+  { to: '/my-shift-summary', label: 'My Shift',        icon: ChartBarIcon,                feature: 'my_shift' },
+  { to: '/reports',          label: 'Reports',         icon: ChartBarIcon,                feature: 'reports' },
+  { to: '/purchases',        label: 'Purchase Orders', icon: ArchiveBoxIcon,              feature: 'purchases' },
 ]
 
-const navItems = computed(() => {
-  const role = auth.user?.role
-  return allNavItems.filter(item => !item.roles || item.roles.includes(role))
+const allAdminNavItems = [
+  { to: '/price-matrix',     label: 'Price Matrix',    icon: SparklesIcon,                feature: 'price_matrix' },
+  { to: '/opening-balance',  label: 'Opening Balance', icon: ClipboardDocumentListIcon,   feature: 'opening_balance' },
+  { to: '/grn',              label: 'GRN',             icon: ClipboardDocumentCheckIcon,  feature: 'grn' },
+  { to: '/supplier-returns', label: 'Supplier Returns',icon: ArchiveBoxIcon,              feature: 'supplier_returns' },
+  { to: '/bottle-deposits',  label: 'Bottle Deposits', icon: CurrencyDollarIcon,          feature: 'bottle_deposits' },
+  { to: '/finance',          label: 'Finance',         icon: BanknotesIcon,               feature: 'finance' },
+  { to: '/shift-summary',    label: 'Shift Summary',   icon: ChartBarIcon,                feature: 'shift_summary' },
+  { to: '/damages',          label: 'Damages',         icon: FireIcon,                    feature: 'damages' },
+  { to: '/audit-log',        label: 'Stock Ledger',    icon: ClipboardDocumentListIcon,   feature: 'stock_ledger' },
+  { to: '/users',            label: 'Users & Roles',   icon: UserGroupIcon,               feature: 'users_roles' },
+  { to: '/settings',         label: 'Settings',        icon: Cog6ToothIcon,               feature: 'settings' },
+]
+
+function hasFeature(feature) {
+  const user = auth.user
+  if (!user) return false
+  if (user.is_super_admin) return true
+  const allowed = user.allowed_features ?? []
+  return allowed.includes(feature)
+}
+
+const navItems = computed(() =>
+  allNavItems.filter(item => hasFeature(item.feature))
+)
+
+const adminNavItems = computed(() => {
+  const items = allAdminNavItems.filter(item => hasFeature(item.feature))
+  if (auth.user?.is_super_admin) {
+    items.push({ to: '/role-features', label: 'Role Features', icon: Cog6ToothIcon, feature: null })
+  }
+  return items
 })
-
-const adminNavItems = [
-  { to: '/price-matrix', label: 'Price Matrix',   icon: SparklesIcon },
-  { to: '/opening-balance', label: 'Opening Balance', icon: ClipboardDocumentListIcon },
-  { to: '/grn',        label: 'GRN',            icon: ClipboardDocumentCheckIcon },
-  { to: '/supplier-returns', label: 'Supplier Returns', icon: ArchiveBoxIcon },
-  { to: '/bottle-deposits', label: 'Bottle Deposits', icon: CurrencyDollarIcon },
-  { to: '/finance',       label: 'Finance',        icon: BanknotesIcon },
-  { to: '/shift-summary', label: 'Shift Summary',  icon: ChartBarIcon },
-  { to: '/damages',       label: 'Damages',        icon: FireIcon },
-  { to: '/audit-log',     label: 'Stock Ledger',   icon: ClipboardDocumentListIcon },
-  { to: '/users',         label: 'Users & Roles',  icon: UserGroupIcon },
-  { to: '/settings',      label: 'Settings',       icon: Cog6ToothIcon },
-]
 
 const pageTitles = {
   dashboard:     'Dashboard',

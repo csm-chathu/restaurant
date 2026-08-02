@@ -26,6 +26,10 @@ class AuthController extends Controller
         }
         $token = $user->createToken('spa-token')->plainTextToken;
 
+        $user->allowed_features = $user->isSuperAdmin()
+            ? \App\Models\RoleFeature::ALL_FEATURES
+            : \App\Models\RoleFeature::featuresForRole($user->role);
+
         return response()->json(['token' => $token, 'user' => $user]);
     }
 

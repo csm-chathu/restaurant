@@ -49,12 +49,13 @@
             <td class="table-td text-sm text-gray-600">{{ u.branch?.name ?? '—' }}</td>
             <td class="table-td">
               <div class="flex gap-1 flex-wrap">
+                <span v-if="u.is_super_admin" class="badge bg-purple-100 text-purple-700 text-xs">⭐ Super Admin</span>
                 <span v-if="u.can_override_gold_rate" class="badge bg-gold-100 text-gold-700 text-xs">Rate Override</span>
                 <span v-if="u.can_delete_transactions" class="badge bg-red-100 text-red-700 text-xs">Delete Txn</span>
                 <span v-if="u.role === 'cashier'" class="badge bg-blue-100 text-blue-700 text-xs">Sell Items</span>
                 <span v-if="u.role === 'store_keeper'" class="badge bg-emerald-100 text-emerald-700 text-xs">Stock In</span>
                 <span v-if="u.role === 'manager'" class="badge bg-amber-100 text-amber-700 text-xs">Approve</span>
-                <span v-if="!u.can_override_gold_rate && !u.can_delete_transactions && u.role !== 'admin' && u.role !== 'owner'" class="text-xs text-gray-400">Standard</span>
+                <span v-if="!u.is_super_admin && !u.can_override_gold_rate && !u.can_delete_transactions && u.role !== 'admin' && u.role !== 'owner'" class="text-xs text-gray-400">Standard</span>
               </div>
             </td>
             <td class="table-td">
@@ -84,7 +85,7 @@
 
     <!-- Modal -->
     <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div class="bg-white rounded-xl shadow-xl w-full max-w-lg">
+      <div class="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-lg">
         <div class="flex items-center justify-between px-6 py-4 border-b">
           <h3 class="font-semibold text-gray-800">{{ editing ? 'Edit User' : 'Add User' }}</h3>
           <button @click="showModal = false" class="text-gray-400 hover:text-gray-600">✕</button>
@@ -142,6 +143,14 @@
                 <p class="text-xs text-gray-400">Inactive users cannot log in</p>
               </div>
             </label>
+            <!-- Super Admin — only visible to current super admin -->
+            <label v-if="authUser?.is_super_admin" class="flex items-center gap-3 cursor-pointer select-none border-t pt-3">
+              <input type="checkbox" v-model="form.is_super_admin" class="w-4 h-4 rounded text-purple-600" />
+              <div>
+                <p class="text-sm font-medium text-purple-700">Super Admin</p>
+                <p class="text-xs text-gray-400">Can manage role feature access for all roles</p>
+              </div>
+            </label>
           </div>
 
           <p v-if="formError" class="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{{ formError }}</p>
@@ -191,7 +200,7 @@ const roleOptions = [
 
 const form = reactive({
   name: '', email: '', password: '', role: 'cashier', branch_id: null,
-  can_override_gold_rate: false, can_delete_transactions: false, is_active: true,
+  can_override_gold_rate: false, can_delete_transactions: false, is_active: true, is_super_admin: false,
 })
 
 async function load() {
@@ -210,6 +219,7 @@ function openModal(user) {
     can_override_gold_rate: user?.can_override_gold_rate ?? false,
     can_delete_transactions: user?.can_delete_transactions ?? false,
     is_active: user?.is_active ?? true,
+    is_super_admin: user?.is_super_admin ?? false,
   })
   showModal.value = true
 }

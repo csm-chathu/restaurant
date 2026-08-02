@@ -15,6 +15,17 @@ export const useAuthStore = defineStore('auth', () => {
         axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`
     }
 
+    async function refreshUser() {
+        if (!token.value) return
+        try {
+            const { data } = await axios.get('/api/user')
+            user.value = data
+            localStorage.setItem('user', JSON.stringify(data))
+        } catch {
+            // token expired — leave user as-is, app will redirect on next 401
+        }
+    }
+
     async function logout() {
         try {
             await axios.post('/api/logout')
@@ -27,5 +38,5 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
-    return { token, user, login, logout }
+    return { token, user, login, logout, refreshUser }
 })

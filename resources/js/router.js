@@ -33,6 +33,7 @@ const routes = [
             { path: 'bottle-deposits', name: 'bottle-deposits', component: () => import('@/pages/BottleDeposits.vue') },
             { path: 'damages',       name: 'damages',       component: () => import('@/pages/Damages.vue') },
             { path: 'users',         name: 'users',         component: () => import('@/pages/Users.vue') },
+            { path: 'role-features', name: 'role-features', component: () => import('@/pages/RoleFeatures.vue') },
             { path: 'settings',      name: 'settings',      component: () => import('@/pages/RestaurantSettings.vue') },
             { path: 'reports',       name: 'reports',       component: () => import('@/pages/Reports.vue') },
             { path: 'shift-summary',    name: 'shift-summary',    component: () => import('@/pages/ShiftSummary.vue') },

@@ -49,7 +49,7 @@
 
     <!-- Modal -->
     <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div class="bg-white rounded-xl shadow-xl w-full max-w-lg p-6">
+      <div class="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-lg p-6">
         <h3 class="text-lg font-semibold mb-4">{{ editing ? 'Edit' : 'Add' }} Customer</h3>
         <div class="grid grid-cols-2 gap-3">
           <div class="col-span-2"><label class="form-label">Name *</label><input v-model="form.name" required class="form-input" /></div>

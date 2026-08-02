@@ -26,6 +26,7 @@ class User extends Authenticatable
         'can_override_gold_rate',
         'can_delete_transactions',
         'is_active',
+        'is_super_admin',
     ];
 
     /**
@@ -49,6 +50,7 @@ class User extends Authenticatable
         'can_override_gold_rate'   => 'boolean',
         'can_delete_transactions'  => 'boolean',
         'is_active'                => 'boolean',
+        'is_super_admin'           => 'boolean',
         'branch_id'                => 'integer',
     ];
 
@@ -105,5 +107,10 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return in_array($this->role, ['admin', 'owner'], true);
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return (bool) $this->is_super_admin;
     }
 }

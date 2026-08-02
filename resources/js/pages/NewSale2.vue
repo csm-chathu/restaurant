@@ -43,35 +43,8 @@
       </div>
     </div>
 
-    <!-- Main 3-column layout: category sidebar + product grid + bill -->
+    <!-- Main layout: product grid + category sidebar + bill -->
     <div class="flex flex-1 overflow-hidden">
-
-      <!-- ── Category sidebar (always visible) ── -->
-      <div class="flex flex-col w-[4.5rem] bg-white border-r border-gray-200 overflow-y-auto shrink-0">
-        <!-- Collapse/expand toggle -->
-        <button
-          @click="showProductPanel = !showProductPanel"
-          type="button"
-          class="flex items-center justify-center py-2.5 border-b border-gray-100 text-gray-400 hover:text-amber-600 hover:bg-amber-50 transition-colors shrink-0"
-          :title="showProductPanel ? 'Hide products' : 'Show products'"
-        >
-          <span class="text-base font-bold">{{ showProductPanel ? '◀' : '▶' }}</span>
-        </button>
-        <!-- Category buttons -->
-        <button
-          v-for="(cat, idx) in categoryTabs"
-          :key="cat"
-          @click="activeCategory = cat; showProductPanel = true"
-          class="flex flex-col items-center justify-center gap-0.5 px-1 py-2.5 text-center transition-all border-b border-gray-100 shrink-0 relative"
-          :class="activeCategory === cat
-            ? 'bg-amber-50 text-amber-700'
-            : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'"
-        >
-          <span v-if="activeCategory === cat" class="absolute left-0 inset-y-0 w-0.5 bg-amber-500 rounded-r"></span>
-          <span class="text-xl leading-none">{{ getCategoryEmoji(cat) }}</span>
-          <span class="text-[8px] font-semibold leading-tight mt-0.5 w-full text-center line-clamp-2 px-0.5">{{ cat }}</span>
-        </button>
-      </div>
 
       <!-- ── LEFT: Product browser (collapsible) ── -->
       <div v-show="showProductPanel" class="flex flex-col flex-1 overflow-hidden bg-white border-r border-gray-200">
@@ -127,7 +100,7 @@
           </div>
 
           <!-- ── Big tile grid ── -->
-          <div v-if="gridView === 'grid'" class="grid grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3">
+          <div v-if="gridView === 'grid'" class="grid grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-2">
             <button
               v-for="(product, idx) in gridProducts"
               :key="product.id"
@@ -135,7 +108,7 @@
               @click="addProductFromGrid(product)"
               :disabled="isStockTracked(product) && product.stock_quantity < 1 && !(product.open_bottles_remaining_ml > 0)"
               type="button"
-              class="relative flex flex-col rounded-2xl border-2 text-left transition-all select-none overflow-hidden group bg-white"
+              class="relative flex flex-col rounded-xl border-2 text-left transition-all select-none overflow-hidden group bg-white"
               :class="isStockTracked(product) && product.stock_quantity < 1 && !(product.open_bottles_remaining_ml > 0)
                 ? 'border-gray-100 opacity-40 cursor-not-allowed'
                 : gridFocusIndex === idx
@@ -146,28 +119,28 @@
             >
               <div
                 v-if="isInBill(product.id)"
-                class="absolute top-2 right-2 z-10 w-7 h-7 bg-amber-500 text-white rounded-full text-sm font-bold flex items-center justify-center shadow-lg"
+                class="absolute top-1.5 right-1.5 z-10 w-5 h-5 bg-amber-500 text-white rounded-full text-xs font-bold flex items-center justify-center shadow-lg"
               >{{ getBillQty(product.id) }}</div>
               <div class="w-full aspect-[4/3] overflow-hidden bg-gray-100 shrink-0 relative">
                 <img v-if="product.image" :src="product.image" :alt="product.name" class="w-full h-full object-cover" />
                 <div v-else class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-                  <ShoppingBagIcon class="w-10 h-10 text-gray-300" />
+                  <ShoppingBagIcon class="w-7 h-7 text-gray-300" />
                 </div>
-                <div class="absolute inset-x-0 bottom-0 py-2 px-2 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex justify-end"
+                <div class="absolute inset-x-0 bottom-0 py-1 px-1 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex justify-end"
                      v-if="!(isStockTracked(product) && product.stock_quantity < 1 && !(product.open_bottles_remaining_ml > 0))">
-                  <span class="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg">+</span>
+                  <span class="w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center text-white font-bold text-base shadow-lg">+</span>
                 </div>
               </div>
-              <div class="p-2.5 flex flex-col gap-1">
-                <p class="text-sm font-semibold text-gray-800 leading-tight line-clamp-2">{{ product.name }}</p>
-                <p class="text-base font-bold text-amber-600">LKR {{ lkr(product.selling_price) }}</p>
-                <div v-if="product.shot_variants?.length" class="flex flex-wrap gap-1 mt-0.5">
+              <div class="p-1.5 flex flex-col gap-0.5">
+                <p class="text-xs font-semibold text-gray-800 leading-tight line-clamp-2">{{ product.name }}</p>
+                <p class="text-sm font-bold text-amber-600">LKR {{ lkr(product.selling_price) }}</p>
+                <div v-if="product.shot_variants?.length" class="flex flex-wrap gap-0.5 mt-0.5">
                   <span v-for="v in product.shot_variants" :key="v.name"
-                    class="text-xs font-semibold text-purple-600 bg-purple-50 border border-purple-200 rounded-full px-1.5 py-0.5">
+                    class="text-[10px] font-semibold text-purple-600 bg-purple-50 border border-purple-200 rounded-full px-1 py-0">
                     {{ v.name }} LKR {{ lkr(v.price) }}
                   </span>
                 </div>
-                <p v-if="isStockTracked(product)" class="text-xs"
+                <p v-if="isStockTracked(product)" class="text-[10px]"
                   :class="product.stock_quantity < 1 && product.open_bottles_remaining_ml > 0 ? 'text-blue-500' : product.stock_quantity <= product.min_stock_level ? 'text-red-500' : 'text-gray-400'">
                   <template v-if="product.stock_quantity < 1 && product.open_bottles_remaining_ml > 0">
                     ~{{ Math.round(product.open_bottles_remaining_ml) }}ml open
@@ -240,6 +213,26 @@
               </div>
             </button>
           </div>
+        </div>
+      </div>
+
+      <!-- ── Category sidebar (between grid and cart) ── -->
+      <div class="flex flex-col w-[11rem] bg-white border-l border-r border-gray-200 overflow-y-auto shrink-0">
+        <!-- Category buttons — 2 per row -->
+        <div class="grid grid-cols-2">
+          <button
+            v-for="(cat, idx) in categoryTabs"
+            :key="cat"
+            @click="activeCategory = cat; showProductPanel = true"
+            class="flex flex-col items-center justify-center gap-1 px-1 py-3 text-center transition-all border-b border-r border-gray-100 relative"
+            :class="activeCategory === cat
+              ? 'bg-amber-50 text-amber-700'
+              : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'"
+          >
+            <span v-if="activeCategory === cat" class="absolute inset-0 border-2 border-amber-400 rounded pointer-events-none"></span>
+            <span class="text-2xl leading-none">{{ getCategoryEmoji(cat) }}</span>
+            <span class="text-[11px] font-semibold leading-tight w-full text-center line-clamp-2 px-0.5">{{ cat }}</span>
+          </button>
         </div>
       </div>
 

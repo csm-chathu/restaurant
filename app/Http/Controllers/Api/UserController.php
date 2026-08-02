@@ -42,7 +42,11 @@ class UserController extends Controller
             'can_override_gold_rate' => 'boolean',
             'can_delete_transactions'=> 'boolean',
             'is_active'              => 'boolean',
+            'is_super_admin'         => 'boolean',
         ]);
+        if (!empty($data['is_super_admin']) && !$request->user()->isSuperAdmin()) {
+            unset($data['is_super_admin']);
+        }
 
         $data = $this->normalizePermissions($data);
 
@@ -69,7 +73,11 @@ class UserController extends Controller
             'can_override_gold_rate' => 'boolean',
             'can_delete_transactions'=> 'boolean',
             'is_active'              => 'boolean',
+            'is_super_admin'         => 'boolean',
         ]);
+        if (isset($data['is_super_admin']) && !$request->user()->isSuperAdmin()) {
+            unset($data['is_super_admin']);
+        }
 
         $data = $this->normalizePermissions($data);
 

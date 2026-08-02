@@ -1,6 +1,6 @@
 <template>
   <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-    <div class="bg-white rounded-xl shadow-xl w-full max-w-md flex flex-col">
+    <div class="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-md flex flex-col">
       <div class="flex items-center justify-between px-6 py-4 border-b">
         <div>
           <h3 class="text-lg font-semibold text-gray-800">

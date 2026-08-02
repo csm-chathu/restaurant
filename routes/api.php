@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuditLogController;
+use App\Http\Controllers\Api\RoleFeaturesController;
 use App\Http\Controllers\Api\AccountingController;
 use App\Http\Controllers\Api\BottleDepositController;
 use App\Http\Controllers\Api\CategoryController;
@@ -45,7 +46,15 @@ Route::get('/public/settings', function () {
 });
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/user', fn(Request $request) => $request->user()->load('branch:id,name,code'));
+    Route::get('/user', function (Request $request) {
+        $user = $request->user()->load('branch:id,name,code');
+        $user->allowed_features = $user->isSuperAdmin()
+            ? \App\Models\RoleFeature::ALL_FEATURES
+            : \App\Models\RoleFeature::featuresForRole($user->role);
+        return $user;
+    });
+    Route::get('/role-features',          [RoleFeaturesController::class, 'index']);
+    Route::put('/role-features/{role}',   [RoleFeaturesController::class, 'update']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
     // Dashboard

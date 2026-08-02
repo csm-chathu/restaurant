@@ -39,7 +39,7 @@
               <th class="table-th">Name</th>
               <th class="table-th">Brand</th>
               <th class="table-th">Category</th>
-              <th class="table-th">Unit / Base</th>
+              <th v-if="enabledProductTypes.includes('other')" class="table-th">Unit / Base</th>
               <th class="table-th">Stock</th>
               <th class="table-th">Sell Price (LKR)</th>
               <th class="table-th">Deposit</th>
@@ -60,7 +60,7 @@
               <td class="table-td font-medium">{{ p.name }}</td>
               <td class="table-td text-gray-500">{{ p.brand || '—' }}</td>
               <td class="table-td text-gray-500">{{ p.category?.name }}</td>
-              <td class="table-td">{{ [p.unit_type, p.base_unit].filter(Boolean).join(' / ') || '—' }}</td>
+              <td v-if="enabledProductTypes.includes('other')" class="table-td">{{ [p.unit_type, p.base_unit].filter(Boolean).join(' / ') || '—' }}</td>
               <td class="table-td">
                 <span :class="p.stock_quantity <= p.min_stock_level ? 'badge bg-red-100 text-red-700' : 'badge bg-green-100 text-green-700'">
                   {{ p.stock_quantity }}
@@ -120,7 +120,7 @@
 
     <!-- Modal -->
     <ProductModal v-if="showModal" :product="editing" :categories="categories" :suppliers="suppliers"
-      :taxes="taxes"
+      :taxes="taxes" :enabled-types="enabledProductTypes"
       @close="showModal = false" @saved="onSaved" />
 
     <ConfirmModal :show="!!confirmDelete" :message="confirmMessage" @confirm="doDelete" @cancel="confirmDelete = null" />
@@ -156,10 +156,11 @@ import JsBarcode from 'jsbarcode'
 import ProductModal from '@/components/ProductModal.vue'
 import ConfirmModal from '@/components/ConfirmModal.vue'
 
-const products      = ref({ data: [] })
-const categories    = ref([])
-const suppliers     = ref([])
-const taxes         = ref([])
+const products            = ref({ data: [] })
+const categories          = ref([])
+const suppliers           = ref([])
+const taxes               = ref([])
+const enabledProductTypes = ref(['food', 'other'])
 const search        = ref('')
 const categoryFilter = ref('')
 const lowStockOnly  = ref(false)
@@ -194,10 +195,16 @@ async function fetchProducts() {
 }
 
 async function fetchRefs() {
-  const [c, s, t] = await Promise.all([axios.get('/api/categories/all'), axios.get('/api/suppliers/all'), axios.get('/api/tax-settings')])
-  categories.value = c.data
-  suppliers.value  = s.data
-  taxes.value      = t.data.data ?? t.data
+  const [c, s, t, rs] = await Promise.all([
+    axios.get('/api/categories/all'),
+    axios.get('/api/suppliers/all'),
+    axios.get('/api/tax-settings'),
+    axios.get('/api/settings/restaurant'),
+  ])
+  categories.value          = c.data
+  suppliers.value           = s.data
+  taxes.value               = t.data.data ?? t.data
+  enabledProductTypes.value = rs.data.enabled_product_types ?? ['food', 'other']
 }
 
 function openCreate() { editing.value = null; showModal.value = true }
