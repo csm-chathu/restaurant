@@ -94,13 +94,25 @@
 
         <!-- Product grid -->
         <div class="flex-1 overflow-y-auto p-3 bg-gray-50">
-          <div v-if="!gridProducts.length" class="flex flex-col items-center justify-center py-20 text-gray-400">
+
+          <!-- Skeleton loading -->
+          <div v-if="loadingProducts" class="grid grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-2">
+            <div v-for="n in 12" :key="n" class="rounded-xl border-2 border-gray-100 bg-white overflow-hidden animate-pulse">
+              <div class="w-full aspect-[4/3] bg-gray-200"></div>
+              <div class="p-1.5 space-y-1.5">
+                <div class="h-3 bg-gray-200 rounded w-3/4"></div>
+                <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+              </div>
+            </div>
+          </div>
+
+          <div v-else-if="!gridProducts.length" class="flex flex-col items-center justify-center py-20 text-gray-400">
             <ShoppingBagIcon class="w-16 h-16 opacity-20 mb-3" />
             <p class="text-sm font-medium">No products found</p>
           </div>
 
           <!-- ── Big tile grid ── -->
-          <div v-if="gridView === 'grid'" class="grid grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-2">
+          <div v-else-if="gridView === 'grid'" class="grid grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-2">
             <button
               v-for="(product, idx) in gridProducts"
               :key="product.id"
@@ -835,10 +847,11 @@ const route  = useRoute()
 // ── Data ──────────────────────────────────────────────
 const products        = ref([])
 const customers       = ref([])
-const availableTables = ref([])
-const taxes           = ref([])
-const draftBills      = ref([])
-const loadingDraft    = ref(false)
+const availableTables   = ref([])
+const taxes             = ref([])
+const draftBills        = ref([])
+const loadingProducts   = ref(true)
+const loadingDraft      = ref(false)
 const activeDraftId   = ref(null)
 const draftSaved      = ref(false)
 
@@ -1544,6 +1557,7 @@ function lkr(val) {
 }
 
 onMounted(async () => {
+  loadingProducts.value = true
   const [p, c, t, tb, drafts] = await Promise.all([
     axios.get('/api/products', { params: { per_page: 1000 } }),
     axios.get('/api/customers/all'),
@@ -1556,6 +1570,7 @@ onMounted(async () => {
   taxes.value           = t.data.filter(x => x.is_active)
   availableTables.value = tb.data
   draftBills.value      = drafts.data.data
+  loadingProducts.value = false
 
   const hasLiquor = products.value.some(p => p.category?.name === 'Liquor')
   if (hasLiquor) activeCategory.value = 'Liquor'

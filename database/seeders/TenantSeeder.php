@@ -14,6 +14,10 @@ class TenantSeeder extends Seeder
         // Chart of accounts — required for accounting to function
         $this->call(ChartOfAccountSeeder::class);
 
+        // Role feature defaults and super admin user
+        $this->call(RoleFeatureSeeder::class);
+        $this->call(SuperAdminSeeder::class);
+
         // Default branch
         $branch = Branch::firstOrCreate(
             ['code' => 'MAIN'],

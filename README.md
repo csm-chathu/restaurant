@@ -71,6 +71,7 @@ Open `http://localhost` and log in with `admin@store.local` / `password`.
 ```dotenv
 APP_NAME="My Shop Name"
 APP_URL=http://localhost
+APP_TIMEZONE=Asia/Colombo       # PHP timezone — Asia/Colombo for Sri Lanka (UTC+5:30)
 
 DB_HOST=127.0.0.1
 DB_PORT=3306
@@ -216,15 +217,17 @@ Seeded by `TenantSeeder` (fresh tenant — no demo data):
 ## Useful Commands
 
 ```bash
-# Run pending migrations
-php artisan migrate
+# Run pending migrations on a specific tenant database
+DB_DATABASE=restaurant php artisan migrate                          # local dev
+DB_DATABASE=lmucunal_restaurant php artisan migrate                 # production
+DB_DATABASE=lmucunal_res_demo php artisan migrate                   # demo
 
 # Fresh schema + demo data (DESTROYS ALL DATA — dev only)
-php artisan migrate:fresh --seed
+DB_DATABASE=restaurant php artisan migrate:fresh --seed
 
-# Fresh schema + login only (no demo data)
-php artisan migrate:fresh
-php artisan db:seed --class=TenantSeeder
+# Fresh schema + login only (no demo data) — safe for production
+DB_DATABASE=lmucunal_restaurant php artisan migrate:fresh
+DB_DATABASE=lmucunal_restaurant php artisan db:seed --class=TenantSeeder
 
 # Create a production tenant
 php artisan tenant:create shop1.example.com lmuc_shop1 --password=Secret123
@@ -261,6 +264,33 @@ npm run build
 
 All API calls use Axios with a Bearer token. All routes except `POST /api/login`,
 `GET /api/public/settings`, and `POST /api/tenants` require `auth:sanctum`.
+
+---
+
+## Docker — Running Artisan Commands
+
+The production app runs inside a Docker container named **`restaurant`**. Use `docker exec` to run any artisan command inside it:
+
+```bash
+# Run pending migrations
+docker exec -it restaurant php artisan migrate
+
+# Against a specific tenant database
+docker exec -it restaurant bash -c "DB_DATABASE=lmucunal_restaurant php artisan migrate"
+docker exec -it restaurant bash -c "DB_DATABASE=lmucunal_res_demo php artisan migrate"
+
+# Fresh schema + production seed (no demo data) — WIPES DATA
+docker exec -it restaurant php artisan migrate:fresh
+docker exec -it restaurant php artisan db:seed --class=TenantSeeder
+
+# Clear config cache (required after editing .env or config/tenants.php)
+docker exec -it restaurant php artisan config:clear
+
+# Open a shell inside the container
+docker exec -it restaurant bash
+```
+
+> **Never** run `migrate:fresh --seed` against a live production database — it destroys all data.
 
 ---
 
