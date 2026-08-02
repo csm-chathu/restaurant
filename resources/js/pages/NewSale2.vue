@@ -1337,7 +1337,7 @@ function maxShotsFromOpenBottle(item) {
 function selectShotVariant(item, variant) {
   const toggled = item.selected_shot_variant?.name === variant.name ? null : variant
   item.selected_shot_variant = toggled
-  item.serving_ml = toggled ? (Number(toggled.name) || 0) : 0
+  item.serving_ml = toggled ? (parseFloat(toggled.name) || 0) : 0
   recalcItem(item)
 }
 
@@ -1417,7 +1417,7 @@ async function submit(billStatus) {
         discount:              i.discount,
         empty_bottle_returned: i.empty_bottle_returned,
         bottle_deposit_amount: i.bottle_deposit_amount,
-        serving_ml:            i.selected_shot_variant ? (Number(i.selected_shot_variant.name) || i.serving_ml) : i.serving_ml,
+        serving_ml:            i.selected_shot_variant ? (parseFloat(i.selected_shot_variant.name) || i.serving_ml) : i.serving_ml,
         open_bottle_id:        i.open_bottle_id || null,
         item_notes:            [i.item_notes, i.item_notes_custom].filter(Boolean).join(', ') || null,
       })),
