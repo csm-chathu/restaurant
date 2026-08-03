@@ -603,9 +603,11 @@
                   v-model.number="form.amount_paid"
                   type="number"
                   min="0"
-                  class="flex-1 min-w-0 px-3 py-2.5 rounded-xl border-2 border-gray-200 text-lg font-bold text-center text-gray-900 focus:outline-none focus:border-amber-500"
-                  :placeholder="kbShortcutsEnabled ? 'Amount (F3)' : 'Amount received'"
+                  class="flex-1 min-w-0 px-3 py-2.5 rounded-xl border-2 text-lg font-bold text-center text-gray-900 focus:outline-none focus:border-amber-500 transition-colors"
+                  :class="amountShake ? 'border-red-500 shake' : 'border-gray-200'"
+                  placeholder="0"
                   @input="amountManuallySet = true; recalc()"
+                  @keydown.enter.prevent="submit('completed')"
                   @wheel.prevent
                 />
                 <button
@@ -878,6 +880,7 @@ const amountManuallySet   = ref(false)
 const searchInputRef   = ref(null)
 const barcodeInputRef  = ref(null)
 const amountInputRef   = ref(null)
+const amountShake      = ref(false)
 const showKbHelp       = ref(false)
 const kbShortcutsEnabled = ref(localStorage.getItem('pos_keyboard_shortcuts') !== 'false')
 const lastReceiptId = ref(localStorage.getItem('pos_last_receipt_id') || '')
@@ -1182,9 +1185,6 @@ function recalc() {
   if (form.tax_rate > 0) {
     form.tax = Math.round(subtotal.value * (form.tax_rate / 100) * 100) / 100
   }
-  if (!amountManuallySet.value) {
-    form.amount_paid = total.value
-  }
 }
 
 function applyTax() {
@@ -1395,6 +1395,12 @@ function closeScanner() {
 
 // ── Submit ─────────────────────────────────────────────
 async function submit(billStatus) {
+  if (billStatus === 'completed' && !splitPayment.value && Number(form.amount_paid || 0) === 0) {
+    amountShake.value = true
+    amountInputRef.value?.focus()
+    setTimeout(() => { amountShake.value = false }, 500)
+    return
+  }
   saving.value = true; error.value = ''
   try {
     const isSplit = splitPayment.value && billStatus !== 'draft'
@@ -1599,4 +1605,13 @@ onBeforeUnmount(() => {
 <style scoped>
 .fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-7px); }
+  40%       { transform: translateX(7px); }
+  60%       { transform: translateX(-4px); }
+  80%       { transform: translateX(4px); }
+}
+.shake { animation: shake 0.5s ease-in-out; }
 </style>
