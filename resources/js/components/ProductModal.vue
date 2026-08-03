@@ -49,10 +49,11 @@
           </div>
           <div>
             <label class="form-label">Category *</label>
-            <select v-model="form.category_id" required class="form-input">
-              <option value="" disabled>— Select —</option>
-              <option v-for="c in filteredCategories" :key="c.id" :value="c.id">{{ c.name }}</option>
-            </select>
+            <SearchableSelect
+              v-model="form.category_id"
+              :options="filteredCategories.map(c => ({ value: c.id, label: c.name }))"
+              placeholder="— Select category —"
+            />
           </div>
           <div v-if="!isFood">
             <label class="form-label">Supplier</label>
@@ -162,13 +163,13 @@
 <script setup>
 import { reactive, ref, computed, watch, onMounted } from 'vue'
 import axios from 'axios'
+import SearchableSelect from '@/components/SearchableSelect.vue'
 
 const props = defineProps({ product: Object, categories: Array, suppliers: Array, taxes: Array, enabledTypes: { type: Array, default: () => ['food', 'other'] } })
 const emit  = defineEmits(['close', 'saved'])
 
 const unitTypes = ['Bottle', 'Can', 'Pack', 'Glass', 'Case', 'Plate', 'Serving']
 
-const FOOD_CATEGORY_NAMES = ['food', 'snacks']
 
 const activeTab = ref(
   props.product
@@ -212,11 +213,11 @@ const imageFile = ref(null)
 const imagePreview = ref('')
 
 watch(isFood, (val) => {
-  if (val) {
-    form.stock_quantity = 1000
+  if (val && !props.product) {
+    form.stock_quantity = 5000
     form.purchase_price = form.selling_price
   }
-})
+}, { immediate: true })
 
 watch(() => form.selling_price, (val) => {
   if (isFood.value) form.purchase_price = val
@@ -225,7 +226,7 @@ watch(() => form.selling_price, (val) => {
 onMounted(() => {
   if (props.product) {
     const cat = (props.categories ?? []).find(c => c.id === props.product.category_id)
-    activeTab.value = FOOD_CATEGORY_NAMES.includes((cat?.name ?? '').toLowerCase()) ? 'food' : 'other'
+    activeTab.value = props.product.product_type === 'Food' ? 'food' : 'other'
     Object.assign(form, props.product)
     form.selling_variants = Array.isArray(props.product.selling_variants)
       ? props.product.selling_variants.join(', ')
@@ -243,10 +244,10 @@ async function submit() {
   error.value  = ''
   try {
     const cat = (props.categories ?? []).find(c => c.id === form.category_id)
-    const derivedType = CATEGORY_TYPE_MAP[(cat?.name ?? '').toLowerCase()] ?? 'Accessories'
+    const otherType = CATEGORY_TYPE_MAP[(cat?.name ?? '').toLowerCase()] ?? 'Accessories'
     const payload = {
       ...form,
-      product_type: derivedType,
+      product_type: isFood.value ? 'Food' : otherType,
       selling_variants: form.selling_variants ? form.selling_variants.split(',').map(v => v.trim()).filter(Boolean).join(', ') : '',
       shot_variants: JSON.stringify(form.shot_variants.filter(v => v.name)),
     }
