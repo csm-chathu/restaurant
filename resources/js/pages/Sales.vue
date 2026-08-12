@@ -263,7 +263,10 @@ const quickFilter          = ref('')
 const loading              = ref(false)
 
 function toDateStr(d) {
-  return d.toISOString().slice(0, 10)
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
 }
 
 function setQuick(range) {
@@ -389,5 +392,5 @@ async function doDelete() {
   fetchData()
 }
 
-onMounted(() => setQuick('today'))
+onMounted(() => { if (!isCashier.value) setQuick('today') })
 </script>
