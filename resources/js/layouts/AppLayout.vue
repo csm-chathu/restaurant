@@ -1,26 +1,26 @@
 <template>
   <div class="flex h-screen bg-gray-100 overflow-hidden">
     <!-- Sidebar -->
-    <aside :class="sidebarHidden ? 'w-0 overflow-hidden' : collapsed ? 'w-16' : 'w-64'" class="bg-purple-100 flex flex-col shrink-0 transition-all duration-200">
+    <aside :class="sidebarHidden ? 'w-0 overflow-hidden' : collapsed ? 'w-16' : 'w-64'" class="bg-gray-900 text-white flex flex-col shrink-0 transition-all duration-200">
       <!-- Logo -->
-      <div class="flex items-center gap-3 px-3 py-5 border-b border-purple-200 min-h-[72px]">
-        <img v-if="restaurant.logo_url" :src="restaurant.logo_url" alt="Restaurant logo" class="w-10 h-10 rounded-lg object-cover border border-purple-300 shrink-0" />
+      <div class="flex items-center gap-3 px-3 py-5 border-b border-gray-800 min-h-[72px]">
+        <img v-if="restaurant.logo_url" :src="restaurant.logo_url" alt="Restaurant logo" class="w-10 h-10 rounded-lg object-cover border border-gray-700 shrink-0" />
         <span v-else class="text-2xl shrink-0">🍻</span>
         <div v-if="!collapsed" class="overflow-hidden">
-          <p class="font-bold text-purple-900 text-sm leading-tight truncate">{{ restaurant.name }}</p>
-          <p class="text-xs text-purple-500">POS & Inventory System</p>
+          <p class="font-bold text-gold-400 text-sm leading-tight truncate">{{ restaurant.name }}</p>
+          <p class="text-xs text-gray-400">POS & Inventory System</p>
         </div>
       </div>
 
       <!-- Nav -->
       <nav class="flex-1 py-4 overflow-y-auto overflow-x-hidden">
-        <div v-if="!collapsed" class="px-4 mb-2 text-xs font-semibold text-purple-400 uppercase tracking-wider">Main</div>
+        <div v-if="!collapsed" class="px-4 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Main</div>
         <router-link v-for="item in navItems" :key="item.to" :to="item.to"
           :title="collapsed ? item.label : ''"
           :class="[
             'flex items-center py-2.5 mx-2 rounded-lg text-sm transition-colors',
             collapsed ? 'justify-center px-0' : 'gap-3 px-4',
-            isNavActive(item.to) ? 'bg-purple-700 text-white hover:bg-purple-800' : 'text-purple-800 hover:bg-purple-200 hover:text-purple-900'
+            isNavActive(item.to) ? 'bg-purple-600 text-white hover:bg-purple-700' : 'text-gray-300 hover:bg-gray-800 hover:text-white'
           ]">
           <component :is="item.icon" class="w-5 h-5 shrink-0" />
           <span v-if="!collapsed">{{ item.label }}</span>
@@ -28,14 +28,14 @@
 
         <!-- Admin / feature section -->
         <template v-if="adminNavItems.length > 0">
-          <div v-if="!collapsed" class="px-4 mt-4 mb-2 text-xs font-semibold text-purple-400 uppercase tracking-wider">Admin</div>
-          <div v-else class="my-3 mx-3 border-t border-purple-300"></div>
+          <div v-if="!collapsed" class="px-4 mt-4 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Admin</div>
+          <div v-else class="my-3 mx-3 border-t border-gray-700"></div>
           <router-link v-for="item in adminNavItems" :key="item.to" :to="item.to"
             :title="collapsed ? item.label : ''"
             :class="[
               'flex items-center py-2.5 mx-2 rounded-lg text-sm transition-colors',
               collapsed ? 'justify-center px-0' : 'gap-3 px-4',
-              isNavActive(item.to) ? 'bg-purple-700 text-white hover:bg-purple-800' : 'text-purple-800 hover:bg-purple-200 hover:text-purple-900'
+              isNavActive(item.to) ? 'bg-purple-600 text-white hover:bg-purple-700' : 'text-gray-300 hover:bg-gray-800 hover:text-white'
             ]">
             <component :is="item.icon" class="w-5 h-5 shrink-0" />
             <span v-if="!collapsed">{{ item.label }}</span>
@@ -44,30 +44,30 @@
       </nav>
 
       <!-- User info + collapse toggle -->
-      <div class="px-2 py-4 border-t border-purple-200 space-y-2">
+      <div class="px-2 py-4 border-t border-gray-800 space-y-2">
         <!-- Toggle button -->
         <button @click="toggleCollapse"
           :title="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
-          class="w-full flex items-center justify-center gap-2 py-1.5 rounded-lg text-purple-500 hover:text-purple-900 hover:bg-purple-200 transition-colors text-xs">
+          class="w-full flex items-center justify-center gap-2 py-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition-colors text-xs">
           <ChevronDoubleLeftIcon v-if="!collapsed" class="w-4 h-4" />
           <ChevronDoubleRightIcon v-else class="w-4 h-4" />
           <span v-if="!collapsed">Collapse</span>
         </button>
 
         <div :class="collapsed ? 'justify-center' : 'gap-3'" class="flex items-center">
-          <div class="w-8 h-8 rounded-full bg-purple-700 flex items-center justify-center text-sm font-bold text-white shrink-0">
+          <div class="w-8 h-8 rounded-full bg-gold-600 flex items-center justify-center text-sm font-bold shrink-0">
             {{ auth.user?.name?.charAt(0) }}
           </div>
           <div v-if="!collapsed" class="flex-1 min-w-0">
-            <p class="text-sm font-medium text-purple-900 truncate">{{ auth.user?.name }}</p>
-            <p class="text-xs text-purple-500 truncate">{{ auth.user?.email }}</p>
+            <p class="text-sm font-medium text-white truncate">{{ auth.user?.name }}</p>
+            <p class="text-xs text-gray-400 truncate">{{ auth.user?.email }}</p>
           </div>
           <button v-if="!collapsed" @click="doLogout" title="Logout"
-            class="p-1 rounded text-purple-500 hover:text-purple-900 hover:bg-purple-200 transition-colors">
+            class="p-1 rounded text-gray-400 hover:text-white hover:bg-gray-700 transition-colors">
             <ArrowRightOnRectangleIcon class="w-5 h-5" />
           </button>
           <button v-else @click="doLogout" title="Logout"
-            class="p-1 rounded text-purple-500 hover:text-purple-900 hover:bg-purple-200 transition-colors">
+            class="p-1 rounded text-gray-400 hover:text-white hover:bg-gray-700 transition-colors">
             <ArrowRightOnRectangleIcon class="w-4 h-4" />
           </button>
         </div>

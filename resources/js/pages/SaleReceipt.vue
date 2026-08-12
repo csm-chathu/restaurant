@@ -108,7 +108,7 @@
         <div style="text-align:center; margin-bottom:6px;">
           <div v-if="restaurant.logo_url" style="margin-bottom:5px;">
             <img :src="restaurant.logo_url" alt="Logo" class="receipt-logo"
-              style="max-width:120px; max-height:60px; width:auto; height:auto; display:inline-block; object-fit:contain;" />
+              style="max-width:160px; max-height:90px; width:auto; height:auto; display:inline-block; object-fit:contain;" />
           </div>
           <div style="font-size:15px; font-weight:bold; letter-spacing:1px; text-transform:uppercase;">
             {{ receiptCompanyName }}
@@ -544,8 +544,8 @@ onMounted(async () => {
   /* Keep logo visible when printing */
   #receipt-wrapper img.receipt-logo {
     display: inline-block !important;
-    max-width: 120px !important;
-    max-height: 60px !important;
+    max-width: 160px !important;
+    max-height: 90px !important;
   }
 
 
