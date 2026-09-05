@@ -14,8 +14,14 @@
       </button>
 
       <!-- Draft tabs -->
-      <div v-if="draftBills.length" class="flex items-center gap-1.5 ml-2 flex-wrap">
+      <div class="flex items-center gap-1.5 ml-2 flex-wrap">
         <span class="text-xs text-gray-400 font-medium shrink-0">Drafts:</span>
+        <button @click="refreshDrafts" :disabled="refreshingDrafts" title="Refresh drafts"
+          class="p-0.5 rounded text-gray-400 hover:text-amber-600 transition-colors disabled:opacity-40">
+          <svg :class="refreshingDrafts ? 'animate-spin' : ''" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+        </button>
         <button
           v-for="draft in draftBills"
           :key="draft.id"
@@ -723,6 +729,7 @@ const availableTables = ref([])
 const taxes           = ref([])
 const draftBills      = ref([])
 const loadingDraft    = ref(false)
+const refreshingDrafts = ref(false)
 const activeDraftId   = ref(null)
 
 // Product browser state
@@ -1046,6 +1053,16 @@ function resetForm() {
 }
 
 // ── Draft loading ──────────────────────────────────────
+async function refreshDrafts() {
+  refreshingDrafts.value = true
+  try {
+    const { data } = await axios.get('/api/sales', { params: { status: 'draft', per_page: 50 } })
+    draftBills.value = data.data
+  } finally {
+    refreshingDrafts.value = false
+  }
+}
+
 async function loadDraft(draft) {
   loadingDraft.value = true
   try {

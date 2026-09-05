@@ -249,6 +249,17 @@ php artisan test
 
 ## Frontend Development
 
+### LUMAC Electron POS
+
+The desktop shell loads the live app URL and silently routes printing to separate POS, KOT, and barcode printers. Settings are saved per Windows user, so each installation can be configured without rebuilding.
+
+1. Run `npm run electron`.
+2. On first launch, enter the deployed application URL and select the POS, KOT, and barcode printers from the installed-printer lists.
+3. To change them later, open `LUMAC > Settings`.
+4. Optionally copy `electron/.env.example` to `electron/.env` to preconfigure a deployment. Leave a printer blank to use the system default.
+
+The Electron shell displays a LUMAC loading screen and uses silent printing for receipts, KOTs, and barcode labels.
+
 ```bash
 # Hot-reload dev server
 npm run dev

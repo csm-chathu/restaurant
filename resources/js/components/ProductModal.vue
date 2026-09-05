@@ -55,34 +55,34 @@
               placeholder="— Select category —"
             />
           </div>
-          <div v-if="!isFood">
+          <div v-if="showExtendedFields">
             <label class="form-label">Supplier</label>
             <select v-model="form.supplier_id" class="form-input">
               <option value="">— None —</option>
               <option v-for="s in suppliers" :key="s.id" :value="s.id">{{ s.name }}</option>
             </select>
           </div>
-          <div v-if="!isFood">
+          <div v-if="showExtendedFields">
             <label class="form-label">Brand</label>
             <input v-model="form.brand" class="form-input" placeholder="e.g. Heineken, Glenfiddich" />
           </div>
-          <div v-if="!isFood">
+          <div v-if="showExtendedFields">
             <label class="form-label">Unit Type</label>
             <select v-model="form.unit_type" class="form-input">
               <option value="">— Select —</option>
               <option v-for="u in unitTypes" :key="u" :value="u">{{ u }}</option>
             </select>
           </div>
-          <div v-if="!isFood">
+          <div v-if="showExtendedFields">
             <label class="form-label">Base Unit</label>
             <input v-model="form.base_unit" class="form-input" placeholder="e.g. 750ml, 24 bottles, 1 kg" />
           </div>
-          <div v-if="!isFood">
+          <div v-if="showExtendedFields">
             <label class="form-label">Selling Variants</label>
             <input v-model="form.selling_variants" class="form-input" placeholder="e.g. 30ml, 50ml, 750ml" />
           </div>
           <!-- Shot variants — for liquor categories or products that already have variants -->
-          <div v-if="isLiquor || form.shot_variants.length" class="col-span-2">
+          <div v-if="showExtendedFields && (isLiquor || form.shot_variants.length)" class="col-span-2">
             <div class="flex items-center justify-between mb-2">
               <label class="form-label mb-0">Shot Variants</label>
               <button type="button" @click="addShotVariant"
@@ -107,17 +107,17 @@
               <option v-for="tax in taxes" :key="tax.id" :value="tax.id">{{ tax.name }} ({{ tax.rate }}%)</option>
             </select>
           </div>
-          <div v-if="!isFood">
+          <div v-if="showExtendedFields">
             <label class="form-label">Purchase Price (LKR) *</label>
-            <input v-model="form.purchase_price" type="number" step="0.01" min="0" :required="!isFood" class="form-input" />
+            <input v-model="form.purchase_price" type="number" step="0.01" min="0" :required="!isFood && !product" class="form-input" />
           </div>
           <div>
             <label class="form-label">Selling Price (LKR) *</label>
             <input v-model="form.selling_price" type="number" step="0.01" min="0" required class="form-input" />
           </div>
-          <div v-if="!isFood">
+          <div>
             <label class="form-label">Stock Quantity *</label>
-            <input v-model="form.stock_quantity" type="number" min="0" :required="!isFood" class="form-input" />
+            <input v-model="form.stock_quantity" type="number" step="0.001" min="0" required class="form-input" />
           </div>
           <div>
             <label class="form-label">Min Stock Level</label>
@@ -139,11 +139,11 @@
             <input id="active" type="checkbox" v-model="form.is_active" class="rounded text-gold-600" />
             <label for="active" class="text-sm text-gray-700">Active</label>
           </div>
-          <div v-if="!isFood" class="col-span-2 flex items-center gap-2">
+          <div v-if="showExtendedFields" class="col-span-2 flex items-center gap-2">
             <input id="deposit" type="checkbox" v-model="form.bottle_deposit_required" class="rounded text-gold-600" />
             <label for="deposit" class="text-sm text-gray-700">Bottle deposit required</label>
           </div>
-          <div v-if="!isFood && form.bottle_deposit_required">
+          <div v-if="showExtendedFields && form.bottle_deposit_required">
             <label class="form-label">Empty Bottle Deposit Amount (LKR) *</label>
             <input v-model.number="form.bottle_deposit_amount" type="number" step="0.01" min="0" required class="form-input" placeholder="0.00" />
           </div>
@@ -178,6 +178,7 @@ const activeTab = ref(
 )
 
 const isFood = computed(() => activeTab.value === 'food')
+const showExtendedFields = computed(() => !props.product && !isFood.value)
 
 const filteredCategories = computed(() => props.categories ?? [])
 

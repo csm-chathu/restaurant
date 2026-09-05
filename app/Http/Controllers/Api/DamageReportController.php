@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Support\AccountingService;
 use App\Support\StockLedger;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DamageReportController extends Controller
 {
@@ -51,7 +52,12 @@ class DamageReportController extends Controller
 
         $damage = DamageReport::create([
             'branch_id' => $request->user()->branch_id,
-            'reference_number' => 'DMG-' . now()->format('Ymd') . '-' . str_pad(DamageReport::whereDate('created_at', today())->count() + 1, 4, '0', STR_PAD_LEFT),
+            'reference_number' => (function () {
+                $prefix = 'DMG-' . now()->format('Ymd') . '-';
+                $max = DamageReport::where('reference_number', 'like', $prefix . '%')
+                    ->max(DB::raw("CAST(SUBSTRING_INDEX(reference_number, '-', -1) AS UNSIGNED)")) ?? 0;
+                return $prefix . str_pad((int) $max + 1, 4, '0', STR_PAD_LEFT);
+            })(),
             'product_id' => $product->id,
             'quantity' => $data['quantity'],
             'reason' => $data['reason'],

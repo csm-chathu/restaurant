@@ -27,7 +27,7 @@ class ProductController extends Controller
             ->when(request('category_id'), fn($q, $c) => $q->where('category_id', $c))
             ->when(request('product_type'), fn($q, $type) => $q->where('product_type', $type))
             ->when(request('low_stock'), fn($q) => $q->whereColumn('stock_quantity', '<=', 'min_stock_level'))
-            ->latest()
+            ->orderBy('name')
             ->paginate(request('per_page', 20));
         return response()->json($products);
     }
@@ -46,7 +46,7 @@ class ProductController extends Controller
             'shot_variants'           => 'nullable|string',
             'purchase_price'          => 'required|numeric|min:0',
             'selling_price'           => 'required|numeric|min:0',
-            'stock_quantity'          => 'required|integer|min:0',
+            'stock_quantity'          => 'required|numeric|min:0',
             'min_stock_level'         => 'required|integer|min:0',
             'is_active'               => 'boolean',
             'bottle_deposit_required' => 'boolean',
@@ -95,7 +95,7 @@ class ProductController extends Controller
             'shot_variants'           => 'nullable|string',
             'purchase_price'          => 'required|numeric|min:0',
             'selling_price'           => 'required|numeric|min:0',
-            'stock_quantity'          => 'required|integer|min:0',
+            'stock_quantity'          => 'required|numeric|min:0',
             'min_stock_level'         => 'required|integer|min:0',
             'is_active'               => 'boolean',
             'bottle_deposit_required' => 'boolean',

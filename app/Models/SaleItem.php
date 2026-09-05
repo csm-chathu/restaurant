@@ -11,6 +11,7 @@ class SaleItem extends Model
     ];
 
     protected $casts = [
+        'quantity'    => 'float',
         'unit_price' => 'float',
         'discount'   => 'float',
         'serving_ml' => 'float',

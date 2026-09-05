@@ -23,6 +23,7 @@ class RestaurantSettingController extends Controller
             'logo_url'              => $branch->logo_url,
             'shop_type'             => $branch->shop_type ?? 'restaurant',
             'enabled_product_types' => $branch->enabled_product_types ?? ['food', 'other'],
+            'show_kot'              => $branch->show_kot ?? true,
         ]);
     }
 
@@ -42,6 +43,7 @@ class RestaurantSettingController extends Controller
             'shop_type'             => 'nullable|in:restaurant,hotel,retail,cycle',
             'enabled_product_types' => 'nullable|array|min:1',
             'enabled_product_types.*' => 'in:food,other',
+            'show_kot'              => 'nullable|boolean',
         ]);
 
         if ($request->hasFile('logo')) {
@@ -67,6 +69,7 @@ class RestaurantSettingController extends Controller
                 'logo_url' => $branch->logo_url,
                 'shop_type'             => $branch->shop_type ?? 'restaurant',
                 'enabled_product_types' => $branch->enabled_product_types ?? ['food', 'other'],
+                'show_kot'              => $branch->show_kot ?? true,
             ],
         ]);
     }

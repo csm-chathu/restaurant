@@ -38,12 +38,21 @@
               <td class="table-td text-gray-500 text-xs">{{ new Date(p.purchased_at).toLocaleDateString() }}</td>
               <td class="table-td text-right font-semibold">LKR {{ Number(p.total).toLocaleString() }}</td>
               <td class="table-td">
-                <span :class="statusClass(p.status)" class="badge capitalize">{{ p.status }}</span>
+                <span :class="statusClass(p.status)" class="badge capitalize">{{ statusLabel(p.status) }}</span>
               </td>
               <td class="table-td" @click.stop>
-                <button @click="del(p)" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200">
-                  <TrashIcon class="w-3.5 h-3.5" /> Delete
-                </button>
+                <div class="flex items-center gap-2">
+                  <button
+                    v-if="!['received','completed','cancelled'].includes(p.status)"
+                    @click="openStatusModal(p)"
+                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-amber-100 text-amber-700 hover:bg-amber-200 transition-colors"
+                  >
+                    <AdjustmentsHorizontalIcon class="w-3.5 h-3.5" /> Update Status
+                  </button>
+                  <button @click="del(p)" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200">
+                    <TrashIcon class="w-3.5 h-3.5" /> Delete
+                  </button>
+                </div>
               </td>
             </tr>
 
@@ -98,14 +107,63 @@
       </div>
     </div>
 
+    <!-- Status Modal -->
+    <Teleport to="body">
+      <Transition name="fade">
+        <div v-if="statusModal.show" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" @click.self="statusModal.show = false">
+          <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+            <!-- Header -->
+            <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+              <div>
+                <h3 class="text-base font-bold text-gray-900">Update Status</h3>
+                <p class="text-xs text-gray-400 mt-0.5 font-mono">{{ statusModal.purchase?.purchase_number }}</p>
+              </div>
+              <button @click="statusModal.show = false" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg text-xl leading-none">✕</button>
+            </div>
+
+            <!-- Status tiles -->
+            <div class="p-5 grid grid-cols-2 gap-3">
+              <button
+                v-for="tile in statusTiles"
+                :key="tile.value"
+                @click="confirmStatusChange(tile)"
+                :disabled="statusModal.saving || tile.value === statusModal.purchase?.status"
+                class="flex flex-col items-start gap-2 p-4 rounded-xl border-2 text-left transition-all disabled:cursor-not-allowed"
+                :class="tile.value === statusModal.purchase?.status
+                  ? tile.activeClass + ' ring-2 ring-offset-1 ' + tile.ringClass
+                  : tile.value === statusModal.saving
+                    ? 'opacity-50'
+                    : tile.hoverClass + ' border-gray-200'"
+              >
+                <div class="flex items-center gap-2 w-full">
+                  <span class="text-xl">{{ tile.icon }}</span>
+                  <span class="font-bold text-sm flex-1">{{ tile.label }}</span>
+                  <CheckCircleIcon v-if="tile.value === statusModal.purchase?.status" class="w-4 h-4 shrink-0" :class="tile.checkClass" />
+                </div>
+                <p class="text-xs leading-tight" :class="tile.descClass">{{ tile.desc }}</p>
+                <span v-if="tile.value === 'received'" class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-green-100 text-green-700">
+                  ↑ Updates Stock
+                </span>
+              </button>
+            </div>
+
+            <div v-if="statusModal.error" class="px-5 pb-4 text-xs text-red-600 bg-red-50 mx-5 rounded-lg py-2">{{ statusModal.error }}</div>
+            <div v-if="statusModal.saving" class="px-5 pb-4 flex items-center gap-2 text-xs text-gray-500">
+              <ArrowPathIcon class="w-3.5 h-3.5 animate-spin" /> Updating…
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
     <ConfirmModal :show="!!confirmDelete" :message="confirmMessage" @confirm="doDelete" @cancel="confirmDelete = null" />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import axios from 'axios'
-import { PlusIcon, TrashIcon, ChevronRightIcon, ArrowPathIcon } from '@heroicons/vue/24/outline'
+import { PlusIcon, TrashIcon, ChevronRightIcon, ArrowPathIcon, AdjustmentsHorizontalIcon, CheckCircleIcon } from '@heroicons/vue/24/outline'
 import ConfirmModal from '@/components/ConfirmModal.vue'
 
 const purchases      = ref({ data: [] })
@@ -118,6 +176,82 @@ const loadingItems   = ref(false)
 const confirmDelete  = ref(null)
 const confirmMessage = ref('')
 
+const statusModal = reactive({
+  show: false,
+  purchase: null,
+  saving: false,
+  error: '',
+})
+
+const statusTiles = [
+  {
+    value: 'draft',
+    label: 'Draft',
+    icon: '📝',
+    desc: 'Order created, not yet approved.',
+    activeClass: 'border-gray-400 bg-gray-50 text-gray-700',
+    hoverClass: 'hover:border-gray-400 hover:bg-gray-50',
+    ringClass: 'ring-gray-300',
+    checkClass: 'text-gray-500',
+    descClass: 'text-gray-400',
+  },
+  {
+    value: 'approved',
+    label: 'Approved',
+    icon: '✅',
+    desc: 'Order approved internally.',
+    activeClass: 'border-blue-400 bg-blue-50 text-blue-700',
+    hoverClass: 'hover:border-blue-300 hover:bg-blue-50',
+    ringClass: 'ring-blue-300',
+    checkClass: 'text-blue-500',
+    descClass: 'text-blue-400',
+  },
+  {
+    value: 'sent',
+    label: 'Sent to Supplier',
+    icon: '🚚',
+    desc: 'Order sent, awaiting delivery.',
+    activeClass: 'border-purple-400 bg-purple-50 text-purple-700',
+    hoverClass: 'hover:border-purple-300 hover:bg-purple-50',
+    ringClass: 'ring-purple-300',
+    checkClass: 'text-purple-500',
+    descClass: 'text-purple-400',
+  },
+  {
+    value: 'partial_received',
+    label: 'Partial Received',
+    icon: '📦',
+    desc: 'Some items received.',
+    activeClass: 'border-orange-400 bg-orange-50 text-orange-700',
+    hoverClass: 'hover:border-orange-300 hover:bg-orange-50',
+    ringClass: 'ring-orange-300',
+    checkClass: 'text-orange-500',
+    descClass: 'text-orange-400',
+  },
+  {
+    value: 'received',
+    label: 'Received',
+    icon: '🏭',
+    desc: 'All items received. Stock will be updated.',
+    activeClass: 'border-green-400 bg-green-50 text-green-700',
+    hoverClass: 'hover:border-green-300 hover:bg-green-50',
+    ringClass: 'ring-green-300',
+    checkClass: 'text-green-500',
+    descClass: 'text-green-400',
+  },
+  {
+    value: 'cancelled',
+    label: 'Cancelled',
+    icon: '❌',
+    desc: 'Order cancelled.',
+    activeClass: 'border-red-400 bg-red-50 text-red-700',
+    hoverClass: 'hover:border-red-300 hover:bg-red-50',
+    ringClass: 'ring-red-300',
+    checkClass: 'text-red-500',
+    descClass: 'text-red-400',
+  },
+]
+
 let timer = null
 function debouncedFetch() { clearTimeout(timer); timer = setTimeout(() => { page.value=1; fetch() }, 400) }
 
@@ -127,19 +261,14 @@ async function fetch() {
 }
 
 async function toggleExpand(p) {
-  if (expandedId.value === p.id) {
-    expandedId.value = null
-    return
-  }
+  if (expandedId.value === p.id) { expandedId.value = null; return }
   expandedId.value = p.id
   if (!expandedItems.value[p.id]) {
     loadingItems.value = true
     try {
       const { data } = await axios.get(`/api/purchases/${p.id}`)
       expandedItems.value[p.id] = data.items ?? []
-    } finally {
-      loadingItems.value = false
-    }
+    } finally { loadingItems.value = false }
   }
 }
 
@@ -147,11 +276,37 @@ function statusClass(s) {
   return {
     received:         'bg-green-100 text-green-700',
     completed:        'bg-green-100 text-green-700',
-    pending:          'bg-yellow-100 text-yellow-700',
-    partial:          'bg-blue-100 text-blue-700',
-    partial_received: 'bg-blue-100 text-blue-700',
+    approved:         'bg-blue-100 text-blue-700',
+    sent:             'bg-purple-100 text-purple-700',
+    partial_received: 'bg-orange-100 text-orange-700',
     cancelled:        'bg-red-100 text-red-700',
   }[s] ?? 'bg-gray-100 text-gray-700'
+}
+
+function statusLabel(s) {
+  return { partial_received: 'Partial Received', sent: 'Sent' }[s] ?? s
+}
+
+function openStatusModal(p) {
+  statusModal.purchase = p
+  statusModal.saving   = false
+  statusModal.error    = ''
+  statusModal.show     = true
+}
+
+async function confirmStatusChange(tile) {
+  if (tile.value === statusModal.purchase?.status) return
+  statusModal.saving = true
+  statusModal.error  = ''
+  try {
+    await axios.patch(`/api/purchases/${statusModal.purchase.id}/status`, { status: tile.value })
+    statusModal.show = false
+    fetch()
+  } catch (e) {
+    statusModal.error = e.response?.data?.message ?? 'Failed to update status.'
+  } finally {
+    statusModal.saving = false
+  }
 }
 
 function del(p) {
@@ -174,3 +329,8 @@ onMounted(async () => {
   fetch()
 })
 </script>
+
+<style scoped>
+.fade-enter-active, .fade-leave-active { transition: opacity 0.15s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+</style>

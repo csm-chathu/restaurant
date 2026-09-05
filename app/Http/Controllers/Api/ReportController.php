@@ -207,10 +207,18 @@ class ReportController extends Controller
             ')
             ->first();
 
+        $invoices = Sale::query()
+            ->when(!$user->isAdmin(), fn($q) => $q->where('branch_id', $user->branch_id))
+            ->whereBetween(DB::raw('DATE(created_at)'), [$from, $to])
+            ->with('customer:id,name')
+            ->orderByDesc('created_at')
+            ->get(['id', 'invoice_number', 'customer_id', 'total', 'discount', 'tax', 'payment_status', 'status', 'created_at']);
+
         return response()->json([
             'from'   => $from,
             'to'     => $to,
             'totals' => $sales,
+            'invoices' => $invoices,
         ]);
     }
 

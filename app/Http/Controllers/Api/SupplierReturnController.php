@@ -46,7 +46,12 @@ class SupplierReturnController extends Controller
 
             $supplierReturn = SupplierReturn::create([
                 'branch_id' => $request->user()->branch_id,
-                'return_number' => 'SR-' . now()->format('Ymd') . '-' . str_pad(SupplierReturn::whereDate('created_at', today())->count() + 1, 4, '0', STR_PAD_LEFT),
+                'return_number' => (function () {
+                    $prefix = 'SR-' . now()->format('Ymd') . '-';
+                    $max = SupplierReturn::where('return_number', 'like', $prefix . '%')
+                        ->max(DB::raw("CAST(SUBSTRING_INDEX(return_number, '-', -1) AS UNSIGNED)")) ?? 0;
+                    return $prefix . str_pad((int) $max + 1, 4, '0', STR_PAD_LEFT);
+                })(),
                 'supplier_id' => $data['supplier_id'],
                 'grn_id' => $data['grn_id'] ?? null,
                 'status' => $data['status'],

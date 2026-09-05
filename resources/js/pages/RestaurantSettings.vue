@@ -39,6 +39,24 @@
 
       <div class="flex items-center justify-between py-3 border-t border-gray-100">
         <div>
+          <p class="text-sm font-medium text-gray-800">Kitchen Order Tickets</p>
+          <p class="text-xs text-gray-500 mt-0.5">Show the KOT printing button on completed bill receipts.</p>
+        </div>
+        <button
+          type="button"
+          @click="form.show_kot = !form.show_kot"
+          class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus:outline-none"
+          :class="form.show_kot ? 'bg-amber-500' : 'bg-gray-300'"
+          :aria-checked="form.show_kot"
+          role="switch"
+        >
+          <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform"
+            :class="form.show_kot ? 'translate-x-6' : 'translate-x-1'" />
+        </button>
+      </div>
+
+      <div class="flex items-center justify-between py-3 border-t border-gray-100">
+        <div>
           <p class="text-sm font-medium text-gray-800">Keyboard Shortcuts</p>
           <p class="text-xs text-gray-500 mt-0.5">
             Enable F-keys and hotkeys on the New Bill page (F1 search, F2 barcode, F3 amount, F9 draft, F10 complete, +/− qty, Alt combos).
@@ -175,6 +193,7 @@ const form = reactive({
   country: '',
   shop_type: 'restaurant',
   enabled_product_types: ['food', 'other'],
+  show_kot: true,
 })
 
 const branches = ref([])
@@ -229,6 +248,7 @@ async function load() {
   form.country = data.country ?? ''
   form.shop_type = data.shop_type ?? 'restaurant'
   form.enabled_product_types = data.enabled_product_types ?? ['food', 'other']
+  form.show_kot = data.show_kot ?? true
   branchCode.value = data.code ?? ''
   currentLogo.value = data.logo_url ?? ''
   previewLogo.value = ''
@@ -257,6 +277,7 @@ async function save() {
     payload.append('country', form.country || '')
     payload.append('shop_type', form.shop_type || 'restaurant')
     form.enabled_product_types.forEach(t => payload.append('enabled_product_types[]', t))
+    payload.append('show_kot', form.show_kot ? '1' : '0')
     if (canSelectBranch.value && selectedBranchId.value) payload.append('branch_id', selectedBranchId.value)
     if (logoFile.value) payload.append('logo', logoFile.value)
 

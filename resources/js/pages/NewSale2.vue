@@ -20,8 +20,14 @@
       </div>
 
       <!-- Draft tabs -->
-      <div v-if="draftBills.length" class="flex items-center gap-1.5 ml-2 flex-wrap">
+      <div class="flex items-center gap-1.5 ml-2 flex-wrap">
         <span class="text-xs text-gray-400 font-medium shrink-0">Drafts:</span>
+        <button @click="refreshDrafts" :disabled="refreshingDrafts" title="Refresh drafts"
+          class="p-0.5 rounded text-gray-400 hover:text-amber-600 transition-colors disabled:opacity-40">
+          <svg :class="refreshingDrafts ? 'animate-spin' : ''" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+        </button>
         <button
           v-for="draft in draftBills"
           :key="draft.id"
@@ -372,9 +378,21 @@
                         :disabled="!!item.open_bottle_id"
                         class="w-9 h-9 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center font-bold text-xl leading-none transition-colors disabled:opacity-30 disabled:cursor-not-allowed border border-red-100"
                       >−</button>
-                      <span class="w-8 text-center text-base font-bold text-gray-900">{{ item.quantity }}</span>
+                      <input
+                        v-model="item.quantity"
+                        type="number"
+                        min="0.001"
+                        step="0.001"
+                        :disabled="!!item.open_bottle_id"
+                        class="w-20 h-10 rounded-lg border border-gray-200 text-center text-base font-bold text-gray-900 focus:outline-none focus:border-amber-400 disabled:bg-gray-50 disabled:text-gray-400"
+                        @input="recalcItem(item)"
+                        @blur="updateItemQuantity(item)"
+                        @click="$event.target.select()"
+                        @keydown.enter.prevent="focusProductSearch"
+                        @wheel.prevent
+                      />
                       <button
-                        @click="item.quantity++; recalcItem(item)"
+                        @click="incrementItem(item)"
                         :disabled="!!item.open_bottle_id || maxShotsFromOpenBottle(item) !== null && item.quantity >= maxShotsFromOpenBottle(item)"
                         class="w-9 h-9 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-xl leading-none transition-colors disabled:opacity-30 disabled:cursor-not-allowed border border-amber-200"
                       >+</button>
@@ -692,15 +710,19 @@
             <button
               v-for="t in availableTables"
               :key="t.id"
-              @click="form.table_number = t.table_number; showTablePicker = false"
+              @click="!occupiedTables.has(String(t.table_number)) && (form.table_number = t.table_number, showTablePicker = false)"
               type="button"
+              :disabled="occupiedTables.has(String(t.table_number))"
               class="flex flex-col items-center justify-center gap-1 aspect-square rounded-2xl border-2 font-bold transition-all"
               :class="form.table_number == t.table_number
                 ? 'border-amber-500 bg-amber-500 text-white shadow-lg shadow-amber-200'
-                : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-amber-400 hover:bg-amber-50'"
+                : occupiedTables.has(String(t.table_number))
+                  ? 'border-red-200 bg-red-50 text-red-400 cursor-not-allowed opacity-70'
+                  : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-amber-400 hover:bg-amber-50'"
             >
               <span class="text-2xl leading-none">🪑</span>
               <span class="text-sm">{{ t.table_number }}</span>
+              <span v-if="occupiedTables.has(String(t.table_number))" class="text-[10px] font-semibold text-red-400 leading-none">Busy</span>
             </button>
           </div>
 
@@ -854,8 +876,17 @@ const taxes             = ref([])
 const draftBills        = ref([])
 const loadingProducts   = ref(true)
 const loadingDraft      = ref(false)
+const refreshingDrafts  = ref(false)
 const activeDraftId   = ref(null)
 const draftSaved      = ref(false)
+
+const occupiedTables = computed(() =>
+  new Set(
+    draftBills.value
+      .filter(d => d.id !== activeDraftId.value && d.table_number)
+      .map(d => String(d.table_number))
+  )
+)
 
 const activeCategory    = ref('All')
 const productGridSearch = ref('')
@@ -863,7 +894,7 @@ const gridFocusIndex    = ref(-1)
 
 const form = reactive({
   customer_id: '', payment_method: 'cash', payment_status: 'paid',
-  discount: 0, tax: 0, tax_rate: 0, amount_paid: 0, notes: '',
+  discount: 0, tax: 0, tax_rate: 0, amount_paid: '', notes: '',
   table_number: '', status: 'completed', card_reference: '',
   items: [],
 })
@@ -1097,6 +1128,7 @@ function addProductFromGrid(product) {
     if (existing) {
       existing.quantity++
       recalcItem(existing)
+      productGridSearch.value = ''
       return
     }
   }
@@ -1108,11 +1140,12 @@ function addProductFromGrid(product) {
   item.bottle_deposit_amount = Number(product.bottle_deposit_amount || 0)
   form.items.push(item)
   recalcItem(item)
+  productGridSearch.value = ''
 }
 
 function decrementItem(item, index) {
-  if (item.quantity > 1) {
-    item.quantity--
+  if (item.quantity > 0.001) {
+    item.quantity = Math.round((Number(item.quantity) - 0.001) * 1000) / 1000
     recalcItem(item)
   } else {
     removeItem(index)
@@ -1139,6 +1172,20 @@ function recalcItem(item) {
     : 0
   item._lineTotal = (effectiveUnitPrice * item.quantity) - (item.discount || 0) + depositAdd
   recalc()
+}
+
+function updateItemQuantity(item) {
+  const max = maxShotsFromOpenBottle(item)
+  const quantity = Math.max(0.001, Math.round((Number(item.quantity) || 0.001) * 1000) / 1000)
+  item.quantity = max !== null ? Math.min(quantity, max) : quantity
+  recalcItem(item)
+}
+
+function incrementItem(item) {
+  const max = maxShotsFromOpenBottle(item)
+  if (max !== null && item.quantity >= max) return
+  item.quantity = Math.round((Number(item.quantity) + 0.001) * 1000) / 1000
+  recalcItem(item)
 }
 
 function getEffectiveUnitPrice(item) {
@@ -1214,7 +1261,7 @@ function resetForm() {
   form.discount          = 0
   form.tax               = 0
   form.tax_rate          = 0
-  form.amount_paid       = 0
+  form.amount_paid       = ''
   form.notes             = ''
   form.table_number      = ''
   form.status            = 'completed'
@@ -1234,6 +1281,16 @@ function resetForm() {
 }
 
 // ── Draft loading ──────────────────────────────────────
+async function refreshDrafts() {
+  refreshingDrafts.value = true
+  try {
+    const { data } = await axios.get('/api/sales', { params: { status: 'draft', per_page: 50 } })
+    draftBills.value = data.data
+  } finally {
+    refreshingDrafts.value = false
+  }
+}
+
 async function loadDraft(draft) {
   loadingDraft.value = true
   try {
@@ -1247,7 +1304,7 @@ async function loadDraft(draft) {
     discountInput.value   = data.discount || 0
     form.tax              = data.tax || 0
     form.tax_rate         = data.tax_rate || 0
-    form.amount_paid      = 0
+    form.amount_paid      = ''
     form.notes            = data.notes || ''
     form.table_number     = data.table_number || ''
     form.items = (data.items || []).map(si => {
@@ -1351,6 +1408,11 @@ function onSearchInput() {
   if (productGridSearch.value) activeCategory.value = 'All'
 }
 
+function focusProductSearch() {
+  searchInputRef.value?.focus()
+  searchInputRef.value?.select()
+}
+
 function scanBarcode() { processBarcode(barcodeInput.value) }
 
 async function openScanner() {
@@ -1409,6 +1471,10 @@ async function submit(billStatus) {
       { payment_method: 'card', amount: Number(splitCard.value || 0), card_reference: splitCardReference.value || null },
     ].filter(p => p.amount > 0) : null
 
+    form.items.forEach(item => {
+      if (item.product_id) updateItemQuantity(item)
+    })
+
     const payload = {
       customer_id:    form.customer_id || null,
       payment_method: isSplit ? 'other' : form.payment_method,
@@ -1424,7 +1490,7 @@ async function submit(billStatus) {
       ...(splitPayments ? { payments: splitPayments } : {}),
       items: form.items.filter(i => i.product_id).map(i => ({
         product_id:            i.product_id,
-        quantity:              i.quantity,
+        quantity:              Number(i.quantity),
         unit_price:            getEffectiveUnitPrice(i),
         discount:              i.discount,
         empty_bottle_returned: i.empty_bottle_returned,
@@ -1451,8 +1517,7 @@ async function submit(billStatus) {
     } else {
       // Stay on POS — update draft state so further saves update the same draft
       activeDraftId.value = saleId
-      const today = new Date().toISOString().slice(0, 10)
-      const { data: draftsData } = await axios.get('/api/sales', { params: { status: 'draft', per_page: 50, date_from: today, date_to: today } })
+      const { data: draftsData } = await axios.get('/api/sales', { params: { status: 'draft', per_page: 50 } })
       draftBills.value = draftsData.data
       draftSaved.value = true
       setTimeout(() => { draftSaved.value = false }, 2000)
@@ -1569,9 +1634,11 @@ onMounted(async () => {
     axios.get('/api/customers/all'),
     axios.get('/api/tax-settings'),
     axios.get('/api/tables/all'),
-    axios.get('/api/sales', { params: { status: 'draft', per_page: 50, date_from: new Date().toISOString().slice(0, 10), date_to: new Date().toISOString().slice(0, 10) } }),
+    axios.get('/api/sales', { params: { status: 'draft', per_page: 50 } }),
   ])
-  products.value        = p.data.data
+  products.value        = [...p.data.data].sort((a, b) =>
+    String(a.name || '').localeCompare(String(b.name || ''), undefined, { sensitivity: 'base' })
+  )
   customers.value       = c.data
   taxes.value           = t.data.filter(x => x.is_active)
   availableTables.value = tb.data

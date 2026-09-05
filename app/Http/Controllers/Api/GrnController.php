@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Grn;
 use App\Models\GrnItem;
+use App\Models\JournalEntry;
 use App\Models\Product;
 use App\Models\Purchase;
 use App\Support\AccountingService;
@@ -62,7 +63,12 @@ class GrnController extends Controller
 
             $grn = Grn::create([
                 'branch_id' => $request->user()->branch_id,
-                'grn_number' => 'GRN-' . now()->format('Ymd') . '-' . str_pad(Grn::whereDate('created_at', today())->count() + 1, 4, '0', STR_PAD_LEFT),
+                'grn_number' => (function () {
+                    $prefix = 'GRN-' . now()->format('Ymd') . '-';
+                    $max = Grn::where('grn_number', 'like', $prefix . '%')
+                        ->max(DB::raw("CAST(SUBSTRING_INDEX(grn_number, '-', -1) AS UNSIGNED)")) ?? 0;
+                    return $prefix . str_pad((int) $max + 1, 4, '0', STR_PAD_LEFT);
+                })(),
                 'purchase_id' => $purchase->id,
                 'supplier_id' => $purchase->supplier_id,
                 'supplier_invoice_number' => $data['supplier_invoice_number'] ?? null,
@@ -136,6 +142,71 @@ class GrnController extends Controller
 
             DB::commit();
             return response()->json($grn->load('items.product', 'supplier', 'purchase', 'user'), 201);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+    }
+
+    public function destroy(Request $request, Grn $grn)
+    {
+        if (!$request->user()->isAdmin() && $grn->branch_id !== $request->user()->branch_id) {
+            abort(403, 'Forbidden for this branch.');
+        }
+
+        DB::beginTransaction();
+        try {
+            $grn->load('items.product');
+
+            // Reverse stock for each item received
+            foreach ($grn->items as $item) {
+                $product = $item->product;
+                $qty = (float) $item->quantity_received + (float) $item->free_quantity;
+
+                $product->decrement('stock_quantity', $qty);
+                $product->refresh();
+
+                StockLedger::record(
+                    $product,
+                    'OUT',
+                    $qty,
+                    $request->user()->id,
+                    $request->user()->branch_id,
+                    'GRN_REVERSAL',
+                    $grn->id,
+                    'Stock reversed — GRN ' . $grn->grn_number . ' deleted',
+                );
+            }
+
+            // Reverse the accounting journal entry
+            JournalEntry::where('source_type', 'GRN')
+                ->where('source_id', $grn->id)
+                ->delete();
+
+            // Reset purchase status
+            $purchase = $grn->purchase;
+            if ($purchase) {
+                $remainingReceived = GrnItem::whereIn(
+                    'grn_id',
+                    Grn::where('purchase_id', $purchase->id)
+                        ->where('id', '!=', $grn->id)
+                        ->pluck('id')
+                )->sum(DB::raw('quantity_received + free_quantity'));
+
+                $expected = $purchase->items()->sum('quantity');
+
+                if ($remainingReceived <= 0) {
+                    $purchase->status = 'approved';
+                } elseif ($remainingReceived < $expected) {
+                    $purchase->status = 'partial_received';
+                }
+                $purchase->save();
+            }
+
+            $grn->delete();
+
+            DB::commit();
+            return response()->json(['message' => 'GRN deleted and stock reversed.']);
         } catch (\Throwable $e) {
             DB::rollBack();
             return response()->json(['message' => $e->getMessage()], 422);

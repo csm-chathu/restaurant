@@ -25,6 +25,7 @@ class Product extends Model
         'bottle_deposit_amount'   => 'float',
         'purchase_price'          => 'float',
         'selling_price'           => 'float',
+        'stock_quantity'          => 'float',
         'shot_variants'           => 'array',
     ];
 

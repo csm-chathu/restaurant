@@ -82,6 +82,41 @@
           <p class="text-2xl font-bold text-red-600 mt-1">LKR {{ lkr(summary.totals.total_tax) }}</p>
         </div>
       </div>
+      <div v-if="summary" class="card p-0 overflow-hidden">
+        <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+          <h3 class="text-sm font-semibold text-gray-800">Invoices</h3>
+          <span class="text-xs text-gray-400">{{ summary.invoices.length }} invoices</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[760px]">
+            <thead class="bg-gray-50 border-b">
+              <tr>
+                <th class="table-th">Invoice</th>
+                <th class="table-th">Date</th>
+                <th class="table-th">Customer</th>
+                <th class="table-th">Status</th>
+                <th class="table-th text-right">Discount</th>
+                <th class="table-th text-right">Tax</th>
+                <th class="table-th text-right">Total</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              <tr v-for="invoice in summary.invoices" :key="invoice.id" class="hover:bg-amber-50">
+                <td class="table-td font-mono text-xs font-semibold">{{ invoice.invoice_number }}</td>
+                <td class="table-td text-gray-500 whitespace-nowrap">{{ new Date(invoice.created_at).toLocaleDateString() }}</td>
+                <td class="table-td">{{ invoice.customer?.name || 'Walk-in' }}</td>
+                <td class="table-td"><span class="capitalize">{{ invoice.payment_status || invoice.status }}</span></td>
+                <td class="table-td text-right text-orange-600">LKR {{ lkr(invoice.discount) }}</td>
+                <td class="table-td text-right text-red-600">LKR {{ lkr(invoice.tax) }}</td>
+                <td class="table-td text-right font-semibold text-green-700">LKR {{ lkr(invoice.total) }}</td>
+              </tr>
+              <tr v-if="!summary.invoices.length">
+                <td colspan="7" class="table-td text-center text-gray-400 py-8">No invoices for this period</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
       <div v-else class="card text-center text-gray-400 py-12">Loading…</div>
     </div>
 
@@ -677,8 +712,18 @@ const tabsWithDates = ['summary','daily','products','categories','tables','payme
 const showDateFilter = computed(() => tabsWithDates.includes(activeTab.value))
 
 const activeTab = ref('summary')
-const dateFrom  = ref(new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0])
-const dateTo    = ref(new Date().toISOString().split('T')[0])
+function localDateString(date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+const today = new Date()
+const yesterday = new Date(today)
+yesterday.setDate(today.getDate() - 1)
+const dateFrom  = ref(localDateString(yesterday))
+const dateTo    = ref(localDateString(today))
 const restaurant = ref({ name: '', address: '', city: '', country: '', logo_url: '' })
 
 function lkr(val) {

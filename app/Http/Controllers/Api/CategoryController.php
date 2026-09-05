@@ -20,7 +20,7 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name'            => 'required|string|max:100|unique:categories',
+            'name'            => 'required|string|max:100|unique:categories,name,NULL,id,deleted_at,NULL',
             'description'     => 'nullable|string',
             'is_active'       => 'boolean',
             'enable_variants' => 'boolean',

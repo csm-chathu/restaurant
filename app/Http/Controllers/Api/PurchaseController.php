@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Grn;
+use App\Models\GrnItem;
+use App\Models\JournalEntry;
 use App\Models\Product;
 use App\Models\Purchase;
 use App\Models\PurchaseItem;
@@ -45,7 +48,12 @@ class PurchaseController extends Controller
 
             $purchase = Purchase::create([
                 'branch_id'       => $request->user()->branch_id,
-                'purchase_number' => 'PO-' . now()->format('Ymd') . '-' . str_pad(Purchase::whereDate('created_at', today())->count() + 1, 4, '0', STR_PAD_LEFT),
+                'purchase_number' => (function () {
+                    $prefix = 'PO-' . now()->format('Ymd') . '-';
+                    $max = Purchase::withTrashed()->where('purchase_number', 'like', $prefix . '%')
+                        ->max(DB::raw("CAST(SUBSTRING_INDEX(purchase_number, '-', -1) AS UNSIGNED)")) ?? 0;
+                    return $prefix . str_pad((int) $max + 1, 4, '0', STR_PAD_LEFT);
+                })(),
                 'supplier_id'     => $data['supplier_id'],
                 'user_id'         => $request->user()->id,
                 'subtotal'        => $subtotal,
@@ -99,11 +107,98 @@ class PurchaseController extends Controller
         return response()->json($purchase->load(['items.product', 'supplier', 'user']));
     }
 
-    public function destroy(Purchase $purchase)
+    public function updateStatus(Request $request, Purchase $purchase)
     {
         $this->authorizeBranch($purchase->branch_id);
-        $purchase->delete();
-        return response()->json(['message' => 'Purchase deleted']);
+        $data = $request->validate([
+            'status' => 'required|in:draft,approved,sent,partial_received,completed,cancelled,received',
+        ]);
+
+        $newStatus = $data['status'];
+
+        // When marking as received directly (no GRN), increment stock for each item
+        if ($newStatus === 'received' && $purchase->status !== 'received') {
+            $hasGrns = Grn::where('purchase_id', $purchase->id)->exists();
+
+            if (!$hasGrns) {
+                DB::beginTransaction();
+                try {
+                    $purchase->load('items.product');
+                    foreach ($purchase->items as $item) {
+                        $product = $item->product;
+                        if (!$product) continue;
+
+                        $product->increment('stock_quantity', $item->quantity);
+                        $product->refresh();
+
+                        StockLedger::record(
+                            $product,
+                            'IN',
+                            (float) $item->quantity,
+                            $request->user()->id,
+                            $purchase->branch_id,
+                            'PURCHASE',
+                            $purchase->id,
+                            'Stock received — PO ' . $purchase->purchase_number,
+                        );
+                    }
+                    $purchase->update(['status' => $newStatus]);
+                    DB::commit();
+                } catch (\Throwable $e) {
+                    DB::rollBack();
+                    return response()->json(['message' => $e->getMessage()], 422);
+                }
+
+                return response()->json($purchase->fresh());
+            }
+        }
+
+        $purchase->update(['status' => $newStatus]);
+        return response()->json($purchase);
+    }
+
+    public function destroy(Request $request, Purchase $purchase)
+    {
+        $this->authorizeBranch($purchase->branch_id);
+
+        DB::beginTransaction();
+        try {
+            // Reverse stock for every GRN linked to this purchase
+            $grns = Grn::where('purchase_id', $purchase->id)->with('items.product')->get();
+
+            foreach ($grns as $grn) {
+                foreach ($grn->items as $item) {
+                    $product = $item->product;
+                    $qty = (float) $item->quantity_received + (float) $item->free_quantity;
+
+                    $product->decrement('stock_quantity', $qty);
+                    $product->refresh();
+
+                    StockLedger::record(
+                        $product,
+                        'OUT',
+                        $qty,
+                        $request->user()->id,
+                        $purchase->branch_id,
+                        'GRN_REVERSAL',
+                        $grn->id,
+                        'Stock reversed — PO ' . $purchase->purchase_number . ' / GRN ' . $grn->grn_number . ' deleted',
+                    );
+                }
+
+                // Reverse accounting journal for each GRN
+                JournalEntry::where('source_type', 'GRN')
+                    ->where('source_id', $grn->id)
+                    ->delete();
+            }
+
+            $purchase->delete(); // cascades to grns → grn_items via DB
+            DB::commit();
+            return response()->json(['message' => 'Purchase deleted and stock reversed.']);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
     }
 
     private function authorizeBranch(?int $branchId): void

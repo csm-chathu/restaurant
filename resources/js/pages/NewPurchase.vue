@@ -141,7 +141,7 @@ function onBlur(i) {
 
 function selectProduct(i, p) {
   form.items[i].product_id = p.id
-  form.items[i].unit_cost  = p.purchase_price ?? 0
+  form.items[i].unit_cost  = p.purchase_price || p.selling_price || 0
   productSearches.value[i] = p.name
   showDropdown.value[i]    = false
   recalc()

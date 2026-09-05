@@ -252,14 +252,14 @@ function buildBarcodeLabelHtml(product) {
 </html>`
 }
 
-function printProductBarcode(product) {
+async function printProductBarcode(product) {
   if (!product?.sku) return
 
   const html = buildBarcodeLabelHtml(product)
 
   // Electron: silent print directly to barcode printer via IPC
   if (window.electronAPI?.printBarcode) {
-    window.electronAPI.printBarcode(html)
+    await window.electronAPI.printBarcode(html)
     return
   }
 
@@ -273,10 +273,13 @@ function printProductBarcode(product) {
   popup.document.close()
 }
 
-function reprintBarcode(product) {
+async function reprintBarcode(product) {
   printingId.value = product.id
-  printProductBarcode(product)
-  setTimeout(() => { printingId.value = null }, 3000)
+  try {
+    await printProductBarcode(product)
+  } finally {
+    printingId.value = null
+  }
 }
 
 function deleteProduct(p) {

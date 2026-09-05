@@ -10,11 +10,12 @@ class Branch extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name', 'code', 'address', 'city', 'country', 'logo_path', 'logo_public_id', 'is_active', 'shop_type', 'enabled_product_types',
+        'name', 'code', 'address', 'city', 'country', 'logo_path', 'logo_public_id', 'is_active', 'shop_type', 'enabled_product_types', 'show_kot',
     ];
 
     protected $casts = [
         'is_active'             => 'boolean',
+        'show_kot'              => 'boolean',
         'enabled_product_types' => 'array',
     ];
 

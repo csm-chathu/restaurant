@@ -95,7 +95,7 @@ class SaleController extends Controller
             'customer_id'              => 'nullable|exists:customers,id',
             'items'                    => 'required|array|min:1',
             'items.*.product_id'       => 'required|exists:products,id',
-            'items.*.quantity'         => 'required|integer|min:1',
+            'items.*.quantity'         => 'required|numeric|min:0.001',
             'items.*.unit_price'       => 'required|numeric|min:0',
             'items.*.discount'         => 'nullable|numeric|min:0',
             'items.*.empty_bottle_returned' => 'nullable|boolean',
@@ -119,6 +119,11 @@ class SaleController extends Controller
             'sold_at'                  => 'nullable|date',
         ]);
 
+        $data['items'] = array_map(fn($item) => [
+            ...$item,
+            'quantity' => (float) $item['quantity'],
+        ], $data['items']);
+
         $isDraft = ($data['status'] ?? 'completed') === 'draft';
 
         DB::beginTransaction();
@@ -137,7 +142,7 @@ class SaleController extends Controller
                     throw new \Exception("Insufficient stock for: {$product->name}");
                 }
 
-                $qty         = $item['quantity'];
+                $qty         = (float) $item['quantity'];
                 $unitPrice   = $item['unit_price'];
                 $itemDisc    = $item['discount'] ?? 0;
 
@@ -244,7 +249,7 @@ class SaleController extends Controller
                 SaleItem::create([
                     'sale_id'         => $sale->id,
                     'product_id'      => $i['product']->id,
-                    'quantity'        => $i['qty'],
+                    'quantity'        => (float) $i['qty'],
                     'unit_price'      => $i['unitPrice'],
                     'discount'        => $i['itemDisc'],
                     'serving_ml'      => (float) ($i['item']['serving_ml'] ?? 0),
@@ -490,7 +495,7 @@ class SaleController extends Controller
             'customer_id'              => 'nullable|exists:customers,id',
             'items'                    => 'required|array|min:1',
             'items.*.product_id'       => 'required|exists:products,id',
-            'items.*.quantity'         => 'required|integer|min:1',
+            'items.*.quantity'         => 'required|numeric|min:0.001',
             'items.*.unit_price'       => 'required|numeric|min:0',
             'items.*.discount'         => 'nullable|numeric|min:0',
             'items.*.empty_bottle_returned' => 'nullable|boolean',
@@ -513,6 +518,11 @@ class SaleController extends Controller
             'payments.*.notes'         => 'nullable|string|max:255',
         ]);
 
+        $data['items'] = array_map(fn($item) => [
+            ...$item,
+            'quantity' => (float) $item['quantity'],
+        ], $data['items']);
+
         $isCompleting = ($data['status'] ?? 'draft') === 'completed';
 
         DB::beginTransaction();
@@ -530,7 +540,7 @@ class SaleController extends Controller
                     throw new \Exception("Insufficient stock for: {$product->name}");
                 }
 
-                $qty       = $item['quantity'];
+                $qty       = (float) $item['quantity'];
                 $unitPrice = $item['unit_price'];
                 $itemDisc  = $item['discount'] ?? 0;
                 $lineTotal = ($unitPrice * $qty) - $itemDisc;
@@ -588,7 +598,7 @@ class SaleController extends Controller
                 SaleItem::create([
                     'sale_id'        => $sale->id,
                     'product_id'     => $i['product']->id,
-                    'quantity'       => $i['qty'],
+                    'quantity'       => (float) $i['qty'],
                     'unit_price'     => $i['unitPrice'],
                     'discount'       => $i['itemDisc'],
                     'serving_ml'     => (float) ($i['item']['serving_ml'] ?? 0),

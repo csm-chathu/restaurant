@@ -92,6 +92,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/sales/{sale}',          [SaleController::class, 'update']); // Draft bill updates
     Route::patch('/sales/{sale}/payment',[SaleController::class, 'updatePayment']); // Change payment method post-completion
     Route::apiResource('purchases',  PurchaseController::class)->except(['update']);
+    Route::patch('/purchases/{purchase}/status', [PurchaseController::class, 'updateStatus']);
 
     // Gold rates
     Route::get('/gold-rates',           [GoldRateController::class, 'index']);
@@ -155,6 +156,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // GRN and supplier returns
     Route::get('/grns', [GrnController::class, 'index']);
     Route::post('/grns', [GrnController::class, 'store']);
+    Route::delete('/grns/{grn}', [GrnController::class, 'destroy']);
     Route::get('/supplier-returns', [SupplierReturnController::class, 'index']);
     Route::post('/supplier-returns', [SupplierReturnController::class, 'store']);
 

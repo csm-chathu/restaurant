@@ -29,6 +29,11 @@
           <PrinterIcon v-else class="w-4 h-4" />
           {{ printing ? 'Printing…' : 'Print Receipt' }}
         </button>
+        <button v-if="restaurant.show_kot !== false" @click="printKotThenInvoice" :disabled="loading || !sale || printing"
+          class="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50 disabled:opacity-60 text-gray-700 border border-gray-300 rounded-lg font-medium text-sm shadow-sm transition-colors">
+          <PrinterIcon class="w-4 h-4" />
+          {{ printing ? 'Printing…' : 'Print KOT + Invoice' }}
+        </button>
       </div>
     </div>
 
@@ -101,7 +106,27 @@
     </div>
 
     <!-- Receipt (76mm thermal preview) -->
-    <div v-else-if="sale" id="receipt-wrapper">
+    <div v-else-if="sale" :class="{ 'kot-print-mode': printMode === 'kot' }">
+      <div id="kot-wrapper" class="kot-paper">
+        <div class="kot-header">KITCHEN ORDER TICKET</div>
+        <div class="kot-rule"></div>
+        <div class="kot-meta"><span>Order</span><strong>{{ sale.invoice_number }}</strong></div>
+        <div class="kot-meta"><span>Date</span><strong>{{ formatDate(sale.sold_at) }}</strong></div>
+        <div v-if="sale.table_number" class="kot-meta"><span>Table</span><strong>{{ sale.table_number }}</strong></div>
+        <div class="kot-rule"></div>
+        <div v-for="(item, idx) in sale.items" :key="item.id" class="kot-item">
+          <div class="kot-item-main"><strong>{{ idx + 1 }}. {{ item.product?.name ?? 'Unknown' }}</strong><strong>× {{ item.quantity }}</strong></div>
+          <div v-if="item.serving_ml > 0 || item.item_notes" class="kot-item-detail">
+            <span v-if="item.serving_ml > 0">{{ item.serving_ml }}ml</span>
+            <span v-if="item.item_notes">{{ item.item_notes }}</span>
+          </div>
+        </div>
+        <div v-if="sale.notes" class="kot-notes"><strong>Notes:</strong> {{ sale.notes }}</div>
+        <div class="kot-rule"></div>
+        <div class="kot-footer">KITCHEN COPY</div>
+      </div>
+
+      <div id="receipt-wrapper">
       <div id="receipt" class="receipt-paper">
 
         <!-- ── HEADER ── -->
@@ -113,10 +138,10 @@
           <div style="font-size:15px; font-weight:bold; letter-spacing:1px; text-transform:uppercase;">
             {{ receiptCompanyName }}
           </div>
-          <div v-if="receiptAddress" style="font-size:10px; margin-top:2px; line-height:1.35; white-space:pre-line; font-weight:600;">
+          <div v-if="receiptAddress" style="font-size:11px; margin-top:2px; line-height:1.35; white-space:pre-line; font-weight:600;">
             {{ receiptAddress }}
           </div>
-          <div style="font-size:10px; margin-top:2px;">Bill Receipt</div>
+          <div style="font-size:11px; margin-top:2px;">Bill Receipt</div>
         </div>
 
         <hr class="receipt-divider-double" />
@@ -149,7 +174,7 @@
         <hr class="receipt-divider" />
 
         <!-- ── CUSTOMER ── -->
-        <div style="font-size:10px; margin-bottom:4px;">
+        <div style="font-size:11px; margin-bottom:4px;">
           <div><strong>Customer:</strong> {{ sale.customer?.name ?? 'Walk-in' }}</div>
           <div v-if="sale.customer?.phone">Phone: {{ sale.customer.phone }}</div>
         </div>
@@ -157,7 +182,7 @@
         <hr class="receipt-divider" />
 
         <!-- ── ITEMS ── -->
-        <div style="font-size:10px;">
+        <div style="font-size:11px;">
           <!-- Column headers -->
           <div style="display:flex; font-weight:bold; border-bottom:1px solid #333; padding-bottom:3px; margin-bottom:3px;">
             <span style="width:16px;">#</span>
@@ -179,7 +204,7 @@
               <span style="width:58px; text-align:right; font-weight:bold;">{{ lkr(item.total) }}</span>
             </div>
             <!-- Sub-detail line -->
-            <div style="color:#222; font-size:10px; padding-left:2px; line-height:1.35;">
+            <div style="color:#222; font-size:11px; padding-left:2px; line-height:1.35;">
               <span v-if="item.open_bottle_id" style="font-style:italic;">[Opened bottle]  </span>
               <span v-if="Number(item.serving_ml) > 0">{{ item.serving_ml }}ml/shot  </span>
               <span v-if="item.product?.sku">SKU:{{ item.product.sku }}  </span>
@@ -188,13 +213,13 @@
             </div>
             <!-- Value breakdown -->
             <div v-if="Number(item.gold_value) > 0 || Number(item.making_charge) > 0 || Number(item.wastage_amount) > 0 || Number(item.gemstone_value) > 0"
-              style="font-size:10px; color:#222; padding-left:2px;">
+              style="font-size:11px; color:#222; padding-left:2px;">
               <span v-if="Number(item.gold_value) > 0">Gold:{{ lkr(item.gold_value) }}  </span>
               <span v-if="Number(item.gemstone_value) > 0">Gem:{{ lkr(item.gemstone_value) }}  </span>
               <span v-if="Number(item.making_charge) > 0">MC:{{ lkr(item.making_charge) }}  </span>
               <span v-if="Number(item.wastage_amount) > 0">Wst:{{ lkr(item.wastage_amount) }}</span>
             </div>
-            <div v-if="Number(item.discount) > 0" style="font-size:10px; color:#222; padding-left:2px;">
+            <div v-if="Number(item.discount) > 0" style="font-size:11px; color:#222; padding-left:2px;">
               Item Disc: -{{ lkr(item.discount) }}
             </div>
           </div>
@@ -258,7 +283,7 @@
         </div>
 
         <!-- ── NOTES ── -->
-        <div v-if="sale.notes" style="margin-top:6px; font-size:10px; color:#222;">
+        <div v-if="sale.notes" style="margin-top:6px; font-size:11px; color:#222;">
           <hr class="receipt-divider" />
           Note: {{ sale.notes }}
         </div>
@@ -266,12 +291,13 @@
         <hr class="receipt-divider" />
 
         <!-- ── FOOTER ── -->
-        <div style="text-align:center; font-size:10px; line-height:1.6;">
+        <div style="text-align:center; font-size:11px; line-height:1.6;">
           <div style="font-weight:bold;">*** Thank You! Come Again ***</div>
-          <div style="font-size:10px; color:#222;">{{ formatDate(sale.sold_at) }}</div>
-          <div style="font-size:10px; font-weight:600; margin-top:3px; letter-spacing:0.5px;">www.lumac.lk</div>
+          <div style="font-size:11px; color:#222;">{{ formatDate(sale.sold_at) }}</div>
+          <div style="font-size:11px; font-weight:600; margin-top:3px; letter-spacing:0.5px;">www.lumac.lk</div>
         </div>
 
+      </div>
       </div>
     </div>
 
@@ -294,6 +320,7 @@ const router         = useRouter()
 const sale           = ref(null)
 const loading        = ref(true)
 const printing       = ref(false)
+const printMode      = ref('invoice')
 
 // Change-payment modal
 const showPaymentModal  = ref(false)
@@ -419,17 +446,45 @@ function formatTime(d) {
   return new Date(d).toLocaleTimeString('en-LK', { hour: '2-digit', minute: '2-digit' })
 }
 
-
 async function printReceipt(autoRedirect = false) {
+  printMode.value = 'invoice'
   printing.value = true
   try {
-    // Use window.print() only — electronAPI.printReceipt + kiosk-printing causes double print
-    window.print()
-    await new Promise(r => setTimeout(r, 600))
+    if (window.electronAPI?.printReceipt) {
+      await window.electronAPI.printReceipt()
+    } else {
+      window.print()
+      await new Promise(r => setTimeout(r, 600))
+    }
   } finally {
     printing.value = false
   }
   if (autoRedirect) router.push('/sales/new')
+}
+
+async function printKotThenInvoice() {
+  printing.value = true
+  try {
+    printMode.value = 'kot'
+    await nextTick()
+    if (window.electronAPI?.printKot) {
+      await window.electronAPI.printKot()
+    } else {
+      window.print()
+      await new Promise(r => setTimeout(r, 600))
+    }
+    printMode.value = 'invoice'
+    await nextTick()
+    if (window.electronAPI?.printReceipt) {
+      await window.electronAPI.printReceipt()
+    } else {
+      window.print()
+      await new Promise(r => setTimeout(r, 600))
+    }
+  } finally {
+    printMode.value = 'invoice'
+    printing.value = false
+  }
 }
 
 
@@ -465,7 +520,7 @@ onMounted(async () => {
   box-shadow: 0 0 0 1px #e5e7eb, 0 4px 24px rgba(0,0,0,0.08);
   border-radius: 4px;
   font-family: 'Courier New', Courier, monospace;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.45;
   font-weight: 500;
   color: #111;
@@ -474,6 +529,7 @@ onMounted(async () => {
 .receipt-divider        { border: none; border-top: 1px dashed #666; margin: 6px 0; }
 .receipt-divider-solid  { border: none; border-top: 1px solid #555; margin: 6px 0; }
 .receipt-divider-double { border: none; border-top: 3px double #333; margin: 6px 0; }
+.kot-paper { display: none; }
 
 /* ── 76mm Thermal print ──────────────────────────────────── */
 @media print {
@@ -510,7 +566,8 @@ onMounted(async () => {
     position: static !important;
     width: 75mm !important;
     padding: 0 !important;
-    margin: 0 auto !important;
+    margin: 0 !important;
+    margin-left: 0 !important;
     overflow: visible !important;
     page-break-before: auto;
     page-break-after: auto;
@@ -523,13 +580,85 @@ onMounted(async () => {
     padding: 4mm 7mm 4mm 3mm !important;
     box-shadow: none !important;
     border-radius: 0 !important;
-    font-size: 11pt !important;
+    font-size: 12pt !important;
     font-weight: 500 !important;
     font-family: 'Courier New', Courier, monospace !important;
     color: #000 !important;
     background: #fff !important;
     break-inside: auto;
     page-break-inside: auto;
+  }
+
+  #kot-wrapper {
+    display: none;
+  }
+
+  .kot-print-mode #receipt-wrapper {
+    display: none !important;
+  }
+
+  .kot-print-mode #kot-wrapper {
+    display: block !important;
+    width: 75mm;
+    box-sizing: border-box;
+    padding: 1mm 7mm 1mm 3mm;
+    margin: 0 !important;
+    margin-left: 0 !important;
+    overflow: hidden;
+    color: #000;
+    background: #fff;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 9pt;
+    line-height: 1.15;
+  }
+
+  .kot-header,
+  .kot-footer {
+    text-align: center;
+    font-weight: bold;
+  }
+
+  .kot-header {
+    font-size: 11pt;
+    margin-bottom: 1mm;
+  }
+
+  .kot-rule {
+    border-top: 1px dashed #000;
+    margin: 1.5mm 0;
+  }
+
+  .kot-meta,
+  .kot-item-main {
+    display: flex;
+    justify-content: space-between;
+    gap: 4mm;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .kot-item-main strong:first-child {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .kot-item-main strong:last-child {
+    flex-shrink: 0;
+  }
+
+  .kot-item {
+    margin-bottom: 1mm;
+  }
+
+  .kot-item-detail,
+  .kot-notes {
+    margin-top: 0.5mm;
+    padding-left: 3mm;
+  }
+
+  .kot-item-detail {
+    display: flex;
+    flex-direction: column;
   }
 
   /* Force black — thermal has no colour ink */
