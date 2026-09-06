@@ -135,21 +135,21 @@
             <img :src="restaurant.logo_url" alt="Logo" class="receipt-logo"
               style="max-width:160px; max-height:90px; width:auto; height:auto; display:inline-block; object-fit:contain;" />
           </div>
-          <div style="font-size:15px; font-weight:bold; letter-spacing:1px; text-transform:uppercase;">
+          <div style="font-size:17px; font-weight:800; letter-spacing:1px; text-transform:uppercase;">
             {{ receiptCompanyName }}
           </div>
-          <div v-if="receiptAddress" style="font-size:11px; margin-top:2px; line-height:1.35; white-space:pre-line; font-weight:600;">
+          <div v-if="receiptAddress" style="font-size:12px; margin-top:2px; line-height:1.35; white-space:pre-line; font-weight:800;">
             {{ receiptAddress }}
           </div>
-          <div style="font-size:11px; margin-top:2px;">Bill Receipt</div>
+          <div style="font-size:12px; margin-top:2px; font-weight:800;">Bill Receipt</div>
         </div>
 
         <hr class="receipt-divider-double" />
 
         <!-- ── INVOICE META ── -->
-        <div style="font-size:11px; font-weight:600; line-height:1.5; margin-bottom:4px; color:#000;">
+        <div style="font-size:12px; font-weight:800; line-height:1.5; margin-bottom:4px; color:#000;">
           <div class="flex-row">
-            <span>Invoice :</span><span style="font-weight:bold; float:right;">{{ sale.invoice_number }}</span>
+            <span>Invoice :</span><span style="font-weight:800; float:right;">{{ sale.invoice_number }}</span>
           </div>
           <div class="flex-row">
             <span>Date    :</span><span style="float:right;">{{ formatDate(sale.sold_at) }}</span>
@@ -165,7 +165,7 @@
           </div>
           <div class="flex-row">
             <span>Status  :</span>
-            <span style="float:right; font-weight:bold; text-transform:capitalize;">
+            <span style="float:right; font-weight:800; text-transform:capitalize;">
               {{ (sale.payment_status || sale.status || 'completed').toUpperCase() }}
             </span>
           </div>
@@ -174,7 +174,7 @@
         <hr class="receipt-divider" />
 
         <!-- ── CUSTOMER ── -->
-        <div style="font-size:11px; margin-bottom:4px;">
+        <div style="font-size:12px; margin-bottom:4px;">
           <div><strong>Customer:</strong> {{ sale.customer?.name ?? 'Walk-in' }}</div>
           <div v-if="sale.customer?.phone">Phone: {{ sale.customer.phone }}</div>
         </div>
@@ -182,9 +182,9 @@
         <hr class="receipt-divider" />
 
         <!-- ── ITEMS ── -->
-        <div style="font-size:11px;">
+        <div style="font-size:12px;">
           <!-- Column headers -->
-          <div style="display:flex; font-weight:bold; border-bottom:1px solid #333; padding-bottom:3px; margin-bottom:3px;">
+          <div style="display:flex; font-weight:800; border-bottom:1px solid #333; padding-bottom:3px; margin-bottom:3px;">
             <span style="width:16px;">#</span>
             <span style="flex:1;">Item</span>
             <span style="width:28px; text-align:center;">Qty</span>
@@ -196,30 +196,29 @@
           <div v-for="(item, idx) in sale.items" :key="item.id" style="margin-bottom:5px;">
             <div style="display:flex; align-items:baseline;">
               <span style="width:16px; color:#555;">{{ idx + 1 }}.</span>
-              <span style="flex:1; font-weight:bold; word-break:break-word; padding-right:4px;">
+              <span style="flex:1; font-weight:800; word-break:break-word; padding-right:4px;">
                 {{ item.product?.name ?? 'Unknown' }}
               </span>
               <span style="width:28px; text-align:center;">{{ item.quantity }}</span>
               <span style="width:54px; text-align:right;">{{ lkr(item.unit_price) }}</span>
-              <span style="width:58px; text-align:right; font-weight:bold;">{{ lkr(item.total) }}</span>
+              <span style="width:58px; text-align:right; font-weight:800;">{{ lkr(item.total) }}</span>
             </div>
             <!-- Sub-detail line -->
-            <div style="color:#222; font-size:11px; padding-left:2px; line-height:1.35;">
+            <div style="color:#222; font-size:12px; padding-left:2px; line-height:1.35;">
               <span v-if="item.open_bottle_id" style="font-style:italic;">[Opened bottle]  </span>
               <span v-if="Number(item.serving_ml) > 0">{{ item.serving_ml }}ml/shot  </span>
-              <span v-if="item.product?.sku">SKU:{{ item.product.sku }}  </span>
               <span v-if="item.product?.karat">{{ item.product.karat }}</span>
               <span v-if="item.product?.weight"> {{ item.product.weight }}g</span>
             </div>
             <!-- Value breakdown -->
             <div v-if="Number(item.gold_value) > 0 || Number(item.making_charge) > 0 || Number(item.wastage_amount) > 0 || Number(item.gemstone_value) > 0"
-              style="font-size:11px; color:#222; padding-left:2px;">
+              style="font-size:12px; color:#222; padding-left:2px;">
               <span v-if="Number(item.gold_value) > 0">Gold:{{ lkr(item.gold_value) }}  </span>
               <span v-if="Number(item.gemstone_value) > 0">Gem:{{ lkr(item.gemstone_value) }}  </span>
               <span v-if="Number(item.making_charge) > 0">MC:{{ lkr(item.making_charge) }}  </span>
               <span v-if="Number(item.wastage_amount) > 0">Wst:{{ lkr(item.wastage_amount) }}</span>
             </div>
-            <div v-if="Number(item.discount) > 0" style="font-size:11px; color:#222; padding-left:2px;">
+            <div v-if="Number(item.discount) > 0" style="font-size:12px; color:#222; padding-left:2px;">
               Item Disc: -{{ lkr(item.discount) }}
             </div>
           </div>
@@ -228,7 +227,7 @@
         <hr class="receipt-divider-solid" />
 
         <!-- ── TOTALS ── -->
-        <div style="font-size:11px;">
+        <div style="font-size:12px;">
           <div v-if="Number(sale.subtotal) !== Number(sale.total)" style="display:flex; justify-content:space-between; margin-bottom:2px;">
             <span>Subtotal</span><span>LKR {{ lkr(sale.subtotal) }}</span>
           </div>
@@ -242,21 +241,21 @@
 
         <hr class="receipt-divider-double" />
 
-        <div style="display:flex; justify-content:space-between; font-size:14px; font-weight:bold; margin:4px 0;">
+        <div style="display:flex; justify-content:space-between; font-size:15px; font-weight:800; margin:4px 0;">
           <span>TOTAL</span><span>LKR {{ lkr(sale.total) }}</span>
         </div>
 
         <hr class="receipt-divider" />
 
-        <div style="font-size:11px;">
+        <div style="font-size:12px;">
           <!-- Split / multi-payment breakdown -->
           <template v-if="sale.payments && sale.payments.length > 1">
             <div v-for="(payment, index) in sale.payments" :key="payment.id ?? index"
-              style="display:flex; justify-content:space-between; margin-bottom:2px; font-weight:600;">
+              style="display:flex; justify-content:space-between; margin-bottom:2px; font-weight:800;">
               <span style="text-transform:capitalize;">{{ payment.payment_method?.replace(/_/g, ' ') }}</span>
               <span>LKR {{ lkr(payment.amount) }}</span>
             </div>
-            <div style="display:flex; justify-content:space-between; margin-bottom:2px; border-top:1px dashed #999; padding-top:2px; font-weight:bold;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:2px; border-top:1px dashed #999; padding-top:2px; font-weight:800;">
               <span>Total Paid</span><span>LKR {{ lkr(sale.amount_paid) }}</span>
             </div>
           </template>
@@ -273,17 +272,17 @@
           </template>
           <!-- Change / balance due -->
           <div v-if="Number(sale.amount_paid) > Number(sale.total)"
-            style="display:flex; justify-content:space-between; font-weight:bold;">
+            style="display:flex; justify-content:space-between; font-weight:800;">
             <span>Change</span><span>LKR {{ lkr(Number(sale.amount_paid) - Number(sale.total)) }}</span>
           </div>
           <div v-if="Number(sale.amount_paid) < Number(sale.total)"
-            style="display:flex; justify-content:space-between; font-weight:bold;">
+            style="display:flex; justify-content:space-between; font-weight:800;">
             <span>Balance Due</span><span>LKR {{ lkr(Number(sale.total) - Number(sale.amount_paid)) }}</span>
           </div>
         </div>
 
         <!-- ── NOTES ── -->
-        <div v-if="sale.notes" style="margin-top:6px; font-size:11px; color:#222;">
+        <div v-if="sale.notes" style="margin-top:6px; font-size:12px; color:#222;">
           <hr class="receipt-divider" />
           Note: {{ sale.notes }}
         </div>
@@ -291,10 +290,10 @@
         <hr class="receipt-divider" />
 
         <!-- ── FOOTER ── -->
-        <div style="text-align:center; font-size:11px; line-height:1.6;">
-          <div style="font-weight:bold;">*** Thank You! Come Again ***</div>
-          <div style="font-size:11px; color:#222;">{{ formatDate(sale.sold_at) }}</div>
-          <div style="font-size:11px; font-weight:600; margin-top:3px; letter-spacing:0.5px;">www.lumac.lk</div>
+        <div style="text-align:center; font-size:12px; line-height:1.6;">
+          <div style="font-weight:800;">*** Thank You! Come Again ***</div>
+          <div style="font-size:12px; color:#222;">{{ formatDate(sale.sold_at) }}</div>
+          <div style="font-size:12px; font-weight:800; margin-top:3px; letter-spacing:0.5px;">www.lumac.lk</div>
         </div>
 
       </div>
@@ -520,9 +519,9 @@ onMounted(async () => {
   box-shadow: 0 0 0 1px #e5e7eb, 0 4px 24px rgba(0,0,0,0.08);
   border-radius: 4px;
   font-family: 'Courier New', Courier, monospace;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.45;
-  font-weight: 500;
+  font-weight: 800;
   color: #111;
 }
 
@@ -580,8 +579,8 @@ onMounted(async () => {
     padding: 4mm 7mm 4mm 3mm !important;
     box-shadow: none !important;
     border-radius: 0 !important;
-    font-size: 12pt !important;
-    font-weight: 500 !important;
+    font-size: 13pt !important;
+    font-weight: 800 !important;
     font-family: 'Courier New', Courier, monospace !important;
     color: #000 !important;
     background: #fff !important;
