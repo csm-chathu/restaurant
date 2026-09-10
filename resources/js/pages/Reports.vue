@@ -681,6 +681,87 @@
       <div v-if="!bsData" class="card text-center text-gray-400 py-12">Loading…</div>
     </div>
 
+    <!-- ─── KOT LOG ─── -->
+    <div v-if="activeTab === 'kot'" class="space-y-4">
+      <div v-if="kotData">
+        <!-- Summary cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+          <div class="card text-center">
+            <p class="text-xs text-gray-500 uppercase tracking-wide">Total KOTs</p>
+            <p class="text-3xl font-bold text-gray-800 mt-1">{{ kotData.total_kots }}</p>
+          </div>
+          <div class="card text-center">
+            <p class="text-xs text-gray-500 uppercase tracking-wide">Completed</p>
+            <p class="text-3xl font-bold text-green-700 mt-1">{{ kotData.completed_kots }}</p>
+          </div>
+          <div class="card text-center">
+            <p class="text-xs text-gray-500 uppercase tracking-wide">Drafts</p>
+            <p class="text-3xl font-bold text-amber-600 mt-1">{{ kotData.draft_kots }}</p>
+          </div>
+          <div class="card text-center">
+            <p class="text-xs text-gray-500 uppercase tracking-wide">Total Revenue</p>
+            <p class="text-xl font-bold text-emerald-700 mt-1">LKR {{ lkr(kotData.total_revenue) }}</p>
+          </div>
+        </div>
+
+        <!-- KOT table -->
+        <div class="card p-0 overflow-hidden">
+          <table class="w-full min-w-[700px]">
+            <thead class="bg-gray-50 border-b">
+              <tr>
+                <th class="table-th w-20">KOT #</th>
+                <th class="table-th w-28">Date</th>
+                <th class="table-th w-20">Time</th>
+                <th class="table-th w-20">Table</th>
+                <th class="table-th w-32">Cashier</th>
+                <th class="table-th w-16 text-center">Items</th>
+                <th class="table-th w-32 text-right">Total</th>
+                <th class="table-th w-24">Status</th>
+                <th class="table-th w-24">Payment</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              <template v-for="k in kotData.rows" :key="k.id">
+                <tr class="hover:bg-amber-50/40 cursor-pointer" @click="k._expanded = !k._expanded">
+                  <td class="table-td font-mono font-bold text-amber-700">#{{ k.kot_number }}</td>
+                  <td class="table-td text-xs text-gray-600">{{ new Date(k.sold_at).toLocaleDateString('en-LK', { day:'2-digit', month:'short', year:'numeric' }) }}</td>
+                  <td class="table-td text-xs text-gray-500">{{ new Date(k.sold_at).toLocaleTimeString('en-LK', { hour:'2-digit', minute:'2-digit' }) }}</td>
+                  <td class="table-td text-sm font-medium">{{ k.table }}</td>
+                  <td class="table-td text-sm text-gray-600">{{ k.cashier }}</td>
+                  <td class="table-td text-center text-sm font-semibold text-gray-700">{{ k.item_count }}</td>
+                  <td class="table-td text-right font-bold text-amber-700">LKR {{ lkr(k.total) }}</td>
+                  <td class="table-td">
+                    <span :class="k.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'" class="badge capitalize">{{ k.status }}</span>
+                  </td>
+                  <td class="table-td">
+                    <span :class="{
+                      'bg-green-100 text-green-700': k.payment_status === 'paid',
+                      'bg-yellow-100 text-yellow-700': k.payment_status === 'pending',
+                      'bg-blue-100 text-blue-700': k.payment_status === 'partial',
+                      'bg-gray-100 text-gray-500': !['paid','pending','partial'].includes(k.payment_status),
+                    }" class="badge capitalize">{{ k.payment_status }}</span>
+                  </td>
+                </tr>
+                <!-- Expanded item rows -->
+                <tr v-if="k._expanded" v-for="item in k.items" :key="item.name" class="bg-amber-50/60">
+                  <td></td>
+                  <td colspan="4" class="table-td py-1 text-xs text-gray-600 pl-6">↳ {{ item.name }}</td>
+                  <td class="table-td py-1 text-xs text-center text-gray-500">{{ item.qty }}</td>
+                  <td class="table-td py-1 text-xs text-right text-gray-600">LKR {{ lkr(item.total) }}</td>
+                  <td colspan="2"></td>
+                </tr>
+              </template>
+              <tr v-if="!kotData.rows.length">
+                <td colspan="9" class="table-td text-center py-12 text-gray-400">No KOTs found for this period.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="text-xs text-gray-400 no-print">Click any row to expand items.</p>
+      </div>
+      <div v-else class="card text-center text-gray-400 py-12">Click Generate to load KOT log.</div>
+    </div>
+
     <ConfirmModal :show="!!confirmDelete" :message="confirmMessage" @confirm="doDelete" @cancel="confirmDelete = null" />
   </div>
 </template>
@@ -699,6 +780,7 @@ const tabLabels = {
   tables:     'Table Performance',
   payments:   'Payment Methods',
   cashier:    'Staff Performance',
+  kot:        'KOT Log',
   pending:    'Pending Bills',
   stock:      'Stock Levels',
   journal:    'Journal Entries',
@@ -708,7 +790,7 @@ const tabLabels = {
   tax:        'Tax Settings',
 }
 
-const tabsWithDates = ['summary','daily','products','categories','tables','payments','cashier','journal','trial','pl','bs']
+const tabsWithDates = ['summary','daily','products','categories','tables','payments','cashier','kot','journal','trial','pl','bs']
 const showDateFilter = computed(() => tabsWithDates.includes(activeTab.value))
 
 const activeTab = ref('summary')
@@ -739,6 +821,7 @@ const tablePerf         = ref(null)
 const paymentData       = ref(null)
 const cashierData       = ref(null)
 const pendingData       = ref(null)
+const kotData           = ref(null)
 const stockData         = ref(null)
 const journalData       = ref(null)
 const trialData         = ref(null)
@@ -771,6 +854,7 @@ async function loadCategories() { const {data} = await axios.get('/api/reports/c
 async function loadTables()     { const {data} = await axios.get('/api/reports/table-performance',    {params: params()}); tablePerf.value = data }
 async function loadPayments()   { const {data} = await axios.get('/api/reports/payment-methods',      {params: params()}); paymentData.value = data }
 async function loadCashier()    { const {data} = await axios.get('/api/reports/cashier-performance',  {params: params()}); cashierData.value = data }
+async function loadKot()        { const {data} = await axios.get('/api/reports/kot-log',               {params: params()}); kotData.value = data }
 async function loadPending()    { const {data} = await axios.get('/api/reports/pending-bills');        pendingData.value = data }
 async function loadStock()      { const {data} = await axios.get('/api/reports/stock-summary');        stockData.value = data }
 async function loadJournal()    { const {data} = await axios.get('/api/accounting/journal-entries',    {params: params()}); journalData.value = data }
@@ -783,7 +867,7 @@ async function loadRestaurant() { const {data} = await axios.get('/api/settings/
 const loaders = {
   summary: loadSummary, daily: loadDaily, products: loadTopProducts,
   categories: loadCategories, tables: loadTables, payments: loadPayments,
-  cashier: loadCashier, pending: loadPending, stock: loadStock,
+  cashier: loadCashier, kot: loadKot, pending: loadPending, stock: loadStock,
   journal: loadJournal, trial: loadTrial, pl: loadProfitLoss, bs: loadBalanceSheet,
   tax: loadTaxes,
 }

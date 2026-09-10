@@ -140,6 +140,7 @@ class DashboardController extends Controller
 
             // ── Recent bills ────────────────────────────────────────
             'recent_sales' => (clone $salesQuery)
+                ->when($user->role === 'cashier', fn($q) => $q->where('user_id', $user->id))
                 ->with('customer:id,name')
                 ->latest('sold_at')
                 ->take(6)

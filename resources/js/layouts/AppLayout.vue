@@ -99,7 +99,7 @@
             <ArrowPathIcon class="w-4 h-4" />
           </button>
           <span>{{ currentDate }}</span>
-          <button @click="openShiftModal"
+          <button v-if="auth.user?.role === 'cashier'" @click="openShiftModal"
             :class="currentShift
               ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100'
               : 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100'"
@@ -110,7 +110,7 @@
             </span>
             <span v-else>No Shift — Start Now</span>
           </button>
-          <button v-if="currentShift" @click="showCashOutModal = true"
+          <button v-if="currentShift && auth.user?.role === 'cashier'" @click="showCashOutModal = true"
             class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange-50 text-orange-700 border border-orange-200 hover:bg-orange-100 text-xs font-semibold transition-colors">
             <BanknotesIcon class="w-3.5 h-3.5" />
             Cash Out
@@ -180,7 +180,7 @@ const shiftRequired   = ref(false)
 const shiftStale      = ref(false)
 const showCashOutModal = ref(false)
 const currentShift    = ref(null)
-const restaurant = ref({ name: 'Liquor Shop + Bar', logo_url: '', address: '' })
+const restaurant = ref({ name: 'Liquor Shop + Bar', logo_url: '', address: '', enabled_product_types: ['food', 'other'] })
 
 const collapsed = ref(localStorage.getItem('sidebar_collapsed') === 'true')
 const sidebarHidden = ref(false)
@@ -245,6 +245,7 @@ const allAdminNavItems = [
 function hasFeature(feature) {
   const user = auth.user
   if (!user) return false
+  if (feature === 'open_bottles' && !restaurant.value.enabled_product_types?.includes('other')) return false
   if (user.is_super_admin) return true
   const allowed = user.allowed_features ?? []
   return allowed.includes(feature)
@@ -308,6 +309,7 @@ async function loadRestaurant() {
       name: data.name || 'Liquor Shop + Bar',
       logo_url: data.logo_url || '',
       address: data.address || '',
+      enabled_product_types: data.enabled_product_types ?? ['food', 'other'],
     }
   } catch {
     // Keep fallbacks if settings are unavailable.

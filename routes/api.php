@@ -130,6 +130,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/reports/stock-summary',       [ReportController::class, 'stockSummary']);
     Route::get('/reports/daily-revenue',       [ReportController::class, 'dailyRevenue']);
     Route::get('/reports/daily-pos',           [ReportController::class, 'dailyPosReport']);
+    Route::get('/reports/kot-log',             [ReportController::class, 'kotLog']);
     Route::post('/reports/export/pdf',         [ReportExportController::class, 'pdf']);
 
     // Accounting / GL reports

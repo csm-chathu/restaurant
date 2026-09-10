@@ -135,6 +135,7 @@
             <tr>
               <th class="table-th w-32">Table</th>
               <th class="table-th w-28">Date</th>
+              <th v-if="!isCashier" class="table-th w-28">Cashier</th>
               <th class="table-th w-36 text-right">Total</th>
               <th class="table-th w-32">Payment</th>
               <th class="table-th w-24">Status</th>
@@ -143,7 +144,7 @@
           </thead>
           <tbody class="divide-y divide-gray-100">
             <tr v-if="loading">
-              <td colspan="6" class="table-td text-center py-10 text-gray-400">
+              <td :colspan="isCashier ? 6 : 7" class="table-td text-center py-10 text-gray-400">
                 <div class="flex items-center justify-center gap-2">
                   <ArrowPathIcon class="w-4 h-4 animate-spin" /> Loading…
                 </div>
@@ -160,6 +161,7 @@
                   <div>{{ formatDate(s.sold_at) }}</div>
                   <div class="text-gray-400">{{ formatTime(s.sold_at) }}</div>
                 </td>
+                <td v-if="!isCashier" class="table-td text-xs text-gray-600">{{ s.user?.name ?? '—' }}</td>
                 <td class="table-td text-right">
                   <span class="font-bold text-amber-700">LKR {{ Number(s.total).toLocaleString() }}</span>
                 </td>
@@ -191,7 +193,7 @@
                 </td>
               </tr>
               <tr v-if="!sales.data?.length">
-                <td colspan="6" class="table-td text-center py-12">
+                <td :colspan="isCashier ? 6 : 7" class="table-td text-center py-12">
                   <div class="flex flex-col items-center gap-2 text-gray-400">
                     <ReceiptPercentIcon class="w-10 h-10 opacity-30" />
                     <span>No sales found</span>
@@ -392,5 +394,5 @@ async function doDelete() {
   fetchData()
 }
 
-onMounted(() => { if (!isCashier.value) setQuick('today') })
+onMounted(() => { isCashier.value ? fetchData() : setQuick('today') })
 </script>

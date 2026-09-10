@@ -491,4 +491,53 @@ class ReportController extends Controller
             'cashiers' => $cashiers,
         ]);
     }
+
+    public function kotLog(Request $request)
+    {
+        $user     = $request->user();
+        $dateFrom = $request->date_from ?? now()->toDateString();
+        $dateTo   = $request->date_to   ?? now()->toDateString();
+
+        $rows = Sale::query()
+            ->with(['user:id,name', 'items.product:id,name,product_type'])
+            ->when(!$user->isAdmin(), fn($q) => $q->where('branch_id', $user->branch_id))
+            ->whereDate('sold_at', '>=', $dateFrom)
+            ->whereDate('sold_at', '<=', $dateTo)
+            ->orderBy('sold_at', 'desc')
+            ->get(['id', 'invoice_number', 'table_number', 'sold_at', 'status', 'payment_status', 'total', 'discount', 'user_id'])
+            ->map(function ($sale) {
+                $kotNum = $sale->invoice_number;
+                if (preg_match('/(\d+)$/', $kotNum, $m)) {
+                    $kotNum = (int) $m[1];
+                }
+                return [
+                    'id'             => $sale->id,
+                    'kot_number'     => $kotNum,
+                    'invoice_number' => $sale->invoice_number,
+                    'table'          => $sale->table_number ?? '—',
+                    'sold_at'        => $sale->sold_at,
+                    'status'         => $sale->status,
+                    'payment_status' => $sale->payment_status,
+                    'total'          => $sale->total,
+                    'discount'       => $sale->discount,
+                    'item_count'     => $sale->items->count(),
+                    'cashier'        => $sale->user?->name ?? '—',
+                    'items'          => $sale->items->map(fn($i) => [
+                        'name'     => $i->product?->name ?? '(deleted)',
+                        'qty'      => $i->quantity,
+                        'total'    => $i->total,
+                    ]),
+                ];
+            });
+
+        return response()->json([
+            'date_from' => $dateFrom,
+            'date_to'   => $dateTo,
+            'total_kots'     => $rows->count(),
+            'completed_kots' => $rows->where('status', 'completed')->count(),
+            'draft_kots'     => $rows->where('status', 'draft')->count(),
+            'total_revenue'  => $rows->where('status', 'completed')->sum('total'),
+            'rows'           => $rows->values(),
+        ]);
+    }
 }

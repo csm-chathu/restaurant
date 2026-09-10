@@ -57,7 +57,7 @@
 
         <!-- Search + barcode -->
         <div class="flex gap-2 px-3 py-2.5 border-b border-gray-100 shrink-0">
-          <div class="relative flex-1">
+          <div class="relative" style="flex: 0 1 55%;">
             <MagnifyingGlassIcon class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
             <input
               ref="searchInputRef"
@@ -68,14 +68,14 @@
               @input="onSearchInput"
             />
           </div>
-          <div class="relative">
+          <div class="relative flex-1">
             <QrCodeIcon class="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
             <input
               ref="barcodeInputRef"
               v-model="barcodeInput"
               type="text"
               :placeholder="kbShortcutsEnabled ? 'Barcode (F2)' : 'Barcode'"
-              class="pl-8 pr-3 py-2.5 rounded-xl text-sm bg-gray-50 border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-amber-500 w-28"
+              class="w-full pl-8 pr-3 py-2.5 rounded-xl text-sm bg-gray-50 border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-amber-500"
               @keyup.enter="scanBarcode"
             />
           </div>
@@ -538,7 +538,7 @@
                   <button
                     v-for="opt in paymentOptions"
                     :key="opt.value"
-                    @click="form.payment_method = opt.value"
+                    @click="selectPaymentMethod(opt.value)"
                     class="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl font-bold text-sm transition-all border-2"
                     :class="form.payment_method === opt.value
                       ? 'bg-gray-900 text-white border-gray-900 shadow-lg'
@@ -575,8 +575,9 @@
 
             <!-- Card reference -->
             <div v-if="!splitPayment && form.payment_method === 'card'" class="px-3 pb-2">
-              <input v-model="form.card_reference" type="text" placeholder="Card receipt reference…"
-                class="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-amber-500 text-gray-700" />
+              <input ref="cardRefInputRef" v-model="form.card_reference" type="text" placeholder="Card receipt reference… (Enter to complete)"
+                class="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-amber-500 text-gray-700"
+                @keydown.enter.prevent="submit('completed')" />
             </div>
 
             <!-- Split payment inputs -->
@@ -613,8 +614,8 @@
               </div>
             </div>
 
-            <!-- Amount + Exact + Change on one line (single payment) -->
-            <div v-if="!splitPayment" class="px-3 pb-2">
+            <!-- Amount + Exact + Change on one line (single payment, cash only) -->
+            <div v-if="!splitPayment && form.payment_method !== 'card'" class="px-3 pb-2">
               <div class="flex items-center gap-2">
                 <input
                   ref="amountInputRef"
@@ -910,6 +911,16 @@ const amountManuallySet   = ref(false)
 
 const searchInputRef   = ref(null)
 const barcodeInputRef  = ref(null)
+const cardRefInputRef  = ref(null)
+
+function selectPaymentMethod(method) {
+  form.payment_method = method
+  if (method === 'card') {
+    form.amount_paid = total.value
+    amountManuallySet.value = false
+    nextTick(() => cardRefInputRef.value?.focus())
+  }
+}
 const amountInputRef   = ref(null)
 const amountShake      = ref(false)
 const showKbHelp       = ref(false)
@@ -1144,8 +1155,9 @@ function addProductFromGrid(product) {
 }
 
 function decrementItem(item, index) {
-  if (item.quantity > 0.001) {
-    item.quantity = Math.round((Number(item.quantity) - 0.001) * 1000) / 1000
+  const next = Math.round((Number(item.quantity) - 1) * 1000) / 1000
+  if (next > 0) {
+    item.quantity = next
     recalcItem(item)
   } else {
     removeItem(index)
@@ -1184,7 +1196,7 @@ function updateItemQuantity(item) {
 function incrementItem(item) {
   const max = maxShotsFromOpenBottle(item)
   if (max !== null && item.quantity >= max) return
-  item.quantity = Math.round((Number(item.quantity) + 0.001) * 1000) / 1000
+  item.quantity = Math.round((Number(item.quantity) + 1) * 1000) / 1000
   recalcItem(item)
 }
 
@@ -1457,11 +1469,14 @@ function closeScanner() {
 
 // ── Submit ─────────────────────────────────────────────
 async function submit(billStatus) {
-  if (billStatus === 'completed' && !splitPayment.value && Number(form.amount_paid || 0) === 0) {
+  if (billStatus === 'completed' && !splitPayment.value && form.payment_method !== 'card' && Number(form.amount_paid || 0) === 0) {
     amountShake.value = true
     amountInputRef.value?.focus()
     setTimeout(() => { amountShake.value = false }, 500)
     return
+  }
+  if (billStatus === 'completed' && form.payment_method === 'card') {
+    form.amount_paid = total.value
   }
   saving.value = true; error.value = ''
   try {
@@ -1660,6 +1675,9 @@ onMounted(async () => {
 
   kbShortcutsEnabled.value = localStorage.getItem('pos_keyboard_shortcuts') !== 'false'
   document.addEventListener('keydown', handleKeydown)
+
+  await nextTick()
+  barcodeInputRef.value?.focus()
 })
 
 onBeforeUnmount(() => {

@@ -59,9 +59,13 @@ const router = createRouter({
 
 router.beforeEach((to) => {
     NProgress.start()
-    const auth = useAuthStore()
-    if (to.meta.requiresAuth && !auth.token) return '/login'
-    if (to.meta.guest && auth.token) return '/'
+    try {
+        const auth = useAuthStore()
+        if (to.meta.requiresAuth && !auth.token) return '/login'
+        if (to.meta.guest && auth.token) return '/'
+    } catch {
+        return true
+    }
 })
 
 router.afterEach(() => { NProgress.done() })

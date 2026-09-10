@@ -11,7 +11,7 @@
           <p class="text-xs opacity-75">Start a new bill</p>
         </div>
       </router-link>
-      <router-link to="/open-bottles"
+      <router-link v-if="showOpenBottles" to="/open-bottles"
         class="flex items-center gap-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-4 py-2.5 shadow-sm transition-colors">
         <SparklesIcon class="w-5 h-5 shrink-0" />
         <div>
@@ -22,16 +22,23 @@
     </div>
 
     <!-- KPI cards -->
-    <div v-if="!isCashier" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
-      <div v-for="card in kpiCards" :key="card.label"
-        class="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-3 flex flex-col gap-1">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-medium text-gray-400 uppercase tracking-wide">{{ card.label }}</span>
-          <span class="text-lg">{{ card.icon }}</span>
+    <div v-if="!isCashier" class="flex items-center gap-3">
+      <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 flex-1">
+        <div v-for="card in kpiCards" :key="card.label"
+          class="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-3 flex flex-col gap-1">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-medium text-gray-400 uppercase tracking-wide">{{ card.label }}</span>
+            <span class="text-lg">{{ card.icon }}</span>
+          </div>
+          <p class="text-xl font-bold" :class="card.color">{{ card.value }}</p>
+          <p v-if="card.sub" class="text-xs text-gray-400">{{ card.sub }}</p>
         </div>
-        <p class="text-xl font-bold" :class="card.color">{{ card.value }}</p>
-        <p v-if="card.sub" class="text-xs text-gray-400">{{ card.sub }}</p>
       </div>
+      <router-link to="/sales/new"
+        class="flex flex-col items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl px-7 shadow-sm transition-colors shrink-0 font-bold text-base whitespace-nowrap self-stretch">
+        <ShoppingCartIcon class="w-8 h-8" />
+        New Bill
+      </router-link>
     </div>
 
     <!-- Row 2: Revenue trend + Monthly bar -->
@@ -255,6 +262,8 @@ const isCashier = computed(() => auth.user?.role === 'cashier')
 // ── Data ──────────────────────────────────────────────
 const data   = ref({})
 const loaded = ref(false)
+const enabledProductTypes = ref(['food', 'other'])
+const showOpenBottles = computed(() => enabledProductTypes.value.includes('other'))
 
 // ── Color palettes ────────────────────────────────────
 const donutColors    = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444', '#06b6d4']
@@ -445,8 +454,14 @@ function statusClass(s) {
 
 onMounted(async () => {
   try {
-    const { data: d } = await axios.get('/api/dashboard')
+    const [{ data: d }, { data: settings }] = await Promise.all([
+      axios.get('/api/dashboard'),
+      axios.get('/api/settings/restaurant').catch(() => ({ data: {} })),
+    ])
     data.value = d
+    if (settings.enabled_product_types) {
+      enabledProductTypes.value = settings.enabled_product_types
+    }
   } finally {
     loaded.value = true
   }

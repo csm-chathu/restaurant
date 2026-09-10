@@ -11,17 +11,6 @@ if (token) {
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
 }
 
-axios.interceptors.response.use(
-    response => response,
-    error => {
-        if (error.response?.status === 401) {
-            localStorage.removeItem('token')
-            router.push('/login')
-        }
-        return Promise.reject(error)
-    }
-)
-
 // Keep PHP session alive while the tab is visible (every 4 min)
 setInterval(() => {
     if (localStorage.getItem('token') && document.visibilityState === 'visible') {
