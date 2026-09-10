@@ -44,7 +44,7 @@ class RoleFeature extends Model
         'manager' => [
             'dashboard', 'pos_billing', 'products', 'menu_categories',
             'guests', 'tables', 'suppliers', 'open_bottles', 'reports', 'daily_report',
-            'purchases', 'shift_summary', 'damages',
+            'purchases', 'shift_summary', 'damages', 'settings',
         ],
         'cashier' => [
             'dashboard', 'pos_billing', 'open_bottles', 'my_shift',

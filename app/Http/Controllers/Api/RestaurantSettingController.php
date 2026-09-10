@@ -76,8 +76,9 @@ class RestaurantSettingController extends Controller
 
     private function requireAdmin(Request $request): void
     {
-        if (!$request->user()->isAdmin()) {
-            abort(403, 'Admin access required');
+        $user = $request->user();
+        if (!$user->isAdmin() && $user->role !== 'manager') {
+            abort(403, 'Admin or manager access required');
         }
     }
 

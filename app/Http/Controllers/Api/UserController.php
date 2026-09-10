@@ -38,8 +38,8 @@ class UserController extends Controller
 
         $data = $request->validate([
             'name'                   => 'required|string|max:255',
-            'email'                  => 'required|email|unique:users,email',
-            'password'               => 'required|string|min:6',
+            'email'                  => 'required|string|max:255|unique:users,email',
+            'password'               => 'required|string|min:3',
             'role'                   => 'required|in:' . implode(',', self::ROLE_OPTIONS),
             'branch_id'              => 'nullable|exists:branches,id',
             'can_override_gold_rate' => 'boolean',
@@ -75,14 +75,14 @@ class UserController extends Controller
             // Managers can only update name / email / password
             $data = $request->validate([
                 'name'     => 'sometimes|string|max:255',
-                'email'    => "sometimes|email|unique:users,email,{$user->id}",
-                'password' => 'nullable|string|min:6',
+                'email'    => "sometimes|string|max:255|unique:users,email,{$user->id}",
+                'password' => 'nullable|string|min:3',
             ]);
         } else {
             $data = $request->validate([
                 'name'                   => 'sometimes|string|max:255',
-                'email'                  => "sometimes|email|unique:users,email,{$user->id}",
-                'password'               => 'nullable|string|min:6',
+                'email'                  => "sometimes|string|max:255|unique:users,email,{$user->id}",
+                'password'               => 'nullable|string|min:3',
                 'role'                   => 'sometimes|in:' . implode(',', self::ROLE_OPTIONS),
                 'branch_id'              => 'nullable|exists:branches,id',
                 'can_override_gold_rate' => 'boolean',

@@ -16,7 +16,7 @@
         <form @submit.prevent="submit" class="space-y-5">
           <div>
             <label class="form-label">Email</label>
-            <input v-model="form.email" type="email" required class="form-input" placeholder="admin@store.local" />
+            <input v-model="form.email" type="text" required class="form-input" placeholder="admin@store.local" />
           </div>
           <div>
             <label class="form-label">Password</label>

@@ -28,11 +28,11 @@
         </div>
         <div>
           <label class="form-label">Email *</label>
-          <input v-model="profile.email" type="email" required class="form-input" />
+          <input v-model="profile.email" type="text" required class="form-input" />
         </div>
         <div>
           <label class="form-label">New Password <span class="text-gray-400 font-normal">(blank = keep)</span></label>
-          <input v-model="profile.password" type="password" minlength="6" class="form-input" placeholder="Min 6 chars" />
+          <input v-model="profile.password" type="password" minlength="3" class="form-input" placeholder="Min 3 chars" />
         </div>
         <div class="sm:col-span-3 flex items-center gap-3">
           <button type="submit" :disabled="profileSaving" class="btn-primary px-5">
@@ -132,11 +132,11 @@
             </div>
             <div class="col-span-2">
               <label class="form-label">Email *</label>
-              <input v-model="form.email" type="email" required class="form-input" />
+              <input v-model="form.email" type="text" required class="form-input" />
             </div>
             <div class="col-span-2">
               <label class="form-label">{{ editing ? 'New Password (leave blank to keep)' : 'Password *' }}</label>
-              <input v-model="form.password" type="password" :required="!editing" minlength="6" class="form-input" />
+              <input v-model="form.password" type="password" :required="!editing" minlength="3" class="form-input" />
             </div>
             <div>
               <label class="form-label">Role *</label>

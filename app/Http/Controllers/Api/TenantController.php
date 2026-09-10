@@ -21,7 +21,7 @@ class TenantController extends Controller
         $data = $request->validate([
             'domain'   => 'required|string',
             'database' => 'required|string|regex:/^[a-zA-Z0-9_]+$/',
-            'password' => 'nullable|string|min:6',
+            'password' => 'nullable|string|min:3',
         ]);
 
         $domain   = $data['domain'];
