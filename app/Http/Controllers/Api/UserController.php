@@ -15,9 +15,11 @@ class UserController extends Controller
 
     public function index(Request $request)
     {
-        if (!$request->user()->isAdmin()) abort(403, 'Admin access required');
+        $user = $request->user();
+        if (!$user->isAdmin() && $user->role !== 'manager') abort(403, 'Access required');
 
         $users = User::with('branch:id,name,code')
+            ->when(!$user->isAdmin(), fn($q) => $q->where('branch_id', $user->branch_id))
             ->when($request->search, fn($q, $s) => $q->where(function($inner) use ($s) {
                 $inner->where('name', 'like', "%$s%")->orWhere('email', 'like', "%$s%");
             }))
@@ -32,6 +34,7 @@ class UserController extends Controller
     public function store(Request $request)
     {
         if (!$request->user()->isAdmin()) abort(403, 'Admin access required');
+
 
         $data = $request->validate([
             'name'                   => 'required|string|max:255',
@@ -62,24 +65,36 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
-        if (!$request->user()->isAdmin()) abort(403, 'Admin access required');
+        $actor = $request->user();
+        $isManager = !$actor->isAdmin() && $actor->role === 'manager';
 
-        $data = $request->validate([
-            'name'                   => 'sometimes|string|max:255',
-            'email'                  => "sometimes|email|unique:users,email,{$user->id}",
-            'password'               => 'nullable|string|min:6',
-            'role'                   => 'sometimes|in:' . implode(',', self::ROLE_OPTIONS),
-            'branch_id'              => 'nullable|exists:branches,id',
-            'can_override_gold_rate' => 'boolean',
-            'can_delete_transactions'=> 'boolean',
-            'is_active'              => 'boolean',
-            'is_super_admin'         => 'boolean',
-        ]);
-        if (isset($data['is_super_admin']) && !$request->user()->isSuperAdmin()) {
-            unset($data['is_super_admin']);
+        if (!$actor->isAdmin() && !$isManager) abort(403, 'Access required');
+        if ($isManager && $user->branch_id !== $actor->branch_id) abort(403, 'Cannot edit users outside your branch');
+
+        if ($isManager) {
+            // Managers can only update name / email / password
+            $data = $request->validate([
+                'name'     => 'sometimes|string|max:255',
+                'email'    => "sometimes|email|unique:users,email,{$user->id}",
+                'password' => 'nullable|string|min:6',
+            ]);
+        } else {
+            $data = $request->validate([
+                'name'                   => 'sometimes|string|max:255',
+                'email'                  => "sometimes|email|unique:users,email,{$user->id}",
+                'password'               => 'nullable|string|min:6',
+                'role'                   => 'sometimes|in:' . implode(',', self::ROLE_OPTIONS),
+                'branch_id'              => 'nullable|exists:branches,id',
+                'can_override_gold_rate' => 'boolean',
+                'can_delete_transactions'=> 'boolean',
+                'is_active'              => 'boolean',
+                'is_super_admin'         => 'boolean',
+            ]);
+            if (isset($data['is_super_admin']) && !$actor->isSuperAdmin()) {
+                unset($data['is_super_admin']);
+            }
+            $data = $this->normalizePermissions($data);
         }
-
-        $data = $this->normalizePermissions($data);
 
         $old = $user->only(['name','email','role','branch_id','can_override_gold_rate','can_delete_transactions','is_active']);
 

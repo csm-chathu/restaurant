@@ -10,6 +10,40 @@
       </button>
     </div>
 
+    <!-- My Profile -->
+    <div class="card">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center text-lg font-bold text-white shrink-0">
+          {{ authUser?.name?.charAt(0)?.toUpperCase() }}
+        </div>
+        <div>
+          <p class="text-sm font-semibold text-gray-800">My Profile</p>
+          <p class="text-xs text-gray-400">{{ authUser?.email }} · {{ authUser?.role }}</p>
+        </div>
+      </div>
+      <form @submit.prevent="saveProfile" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div>
+          <label class="form-label">Full Name *</label>
+          <input v-model="profile.name" required class="form-input" />
+        </div>
+        <div>
+          <label class="form-label">Email *</label>
+          <input v-model="profile.email" type="email" required class="form-input" />
+        </div>
+        <div>
+          <label class="form-label">New Password <span class="text-gray-400 font-normal">(blank = keep)</span></label>
+          <input v-model="profile.password" type="password" minlength="6" class="form-input" placeholder="Min 6 chars" />
+        </div>
+        <div class="sm:col-span-3 flex items-center gap-3">
+          <button type="submit" :disabled="profileSaving" class="btn-primary px-5">
+            {{ profileSaving ? 'Saving…' : 'Update My Profile' }}
+          </button>
+          <span v-if="profileSuccess" class="text-sm text-green-600">{{ profileSuccess }}</span>
+          <span v-if="profileError" class="text-sm text-red-600">{{ profileError }}</span>
+        </div>
+      </form>
+    </div>
+
     <!-- Filters -->
     <div class="card flex gap-3 flex-wrap">
       <input v-model="search" placeholder="Search name or email…" class="form-input flex-1 min-w-48" @input="load" />
@@ -178,6 +212,26 @@ import axios from 'axios'
 
 const auth     = useAuthStore()
 const authUser = auth.user
+
+// ── My Profile ────────────────────────────────────────────
+const profile = reactive({ name: authUser?.name ?? '', email: authUser?.email ?? '', password: '' })
+const profileSaving = ref(false)
+const profileError  = ref('')
+const profileSuccess = ref('')
+
+async function saveProfile() {
+  profileSaving.value = true; profileError.value = ''; profileSuccess.value = ''
+  try {
+    const { data } = await axios.put('/api/profile', profile)
+    auth.user = data
+    profile.password = ''
+    profileSuccess.value = 'Profile updated.'
+    setTimeout(() => { profileSuccess.value = '' }, 3000)
+  } catch (e) {
+    profileError.value = e.response?.data?.message
+      ?? Object.values(e.response?.data?.errors ?? {}).flat().join(', ')
+  } finally { profileSaving.value = false }
+}
 
 const users       = ref([])
 const branches    = ref([])

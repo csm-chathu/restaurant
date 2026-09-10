@@ -46,6 +46,7 @@ const routes = [
             { path: 'supplier-returns', name: 'supplier-returns', component: () => import('@/pages/SupplierReturns.vue') },
             { path: 'open-bottles',    name: 'open-bottles',    component: () => import('@/pages/OpenBottles.vue') },
             { path: 'opening-balance', name: 'opening-balance', component: () => import('@/pages/OpeningBalance.vue') },
+            { path: 'profile',         name: 'profile',         component: () => import('@/pages/Profile.vue') },
         ],
     },
     { path: '/:pathMatch(.*)*', redirect: '/' },

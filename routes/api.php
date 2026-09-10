@@ -56,6 +56,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/role-features',          [RoleFeaturesController::class, 'index']);
     Route::put('/role-features/{role}',   [RoleFeaturesController::class, 'update']);
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::put('/profile',  [AuthController::class, 'updateProfile']);
 
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index']);

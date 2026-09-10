@@ -38,4 +38,29 @@ class AuthController extends Controller
         $request->user()->currentAccessToken()->delete();
         return response()->json(['message' => 'Logged out']);
     }
+
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+
+        $data = $request->validate([
+            'name'     => 'required|string|max:255',
+            'email'    => "required|email|unique:users,email,{$user->id}",
+            'password' => 'nullable|string|min:6',
+        ]);
+
+        if (!empty($data['password'])) {
+            $data['password'] = \Illuminate\Support\Facades\Hash::make($data['password']);
+        } else {
+            unset($data['password']);
+        }
+
+        $user->update($data);
+
+        $user->allowed_features = $user->isSuperAdmin()
+            ? \App\Models\RoleFeature::ALL_FEATURES
+            : \App\Models\RoleFeature::featuresForRole($user->role);
+
+        return response()->json($user->load('branch:id,name,code'));
+    }
 }
