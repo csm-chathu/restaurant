@@ -16,8 +16,9 @@
 */
 
 return [
-    'localhost' => 'rahula',
+    'localhost' => 'yummy_restaurant',
     'cafe1-restaurant.lumac.cc' => 'cafe1',
     'daily-restaurant.lumac.cc' => 'daily_dose',
     'rahula-restaurant.lumac.cc' => 'rahula_bakery',
+    'yummy-restaurant.lumac.cc' => 'yummy_restaurant',
 ];
