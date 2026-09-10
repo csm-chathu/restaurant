@@ -1475,6 +1475,13 @@ async function submit(billStatus) {
     setTimeout(() => { amountShake.value = false }, 500)
     return
   }
+  if (billStatus === 'completed' && !splitPayment.value && form.payment_method === 'cash' && Number(form.amount_paid || 0) < total.value) {
+    error.value = `Cash amount (LKR ${Number(form.amount_paid).toLocaleString()}) is less than total (LKR ${total.value.toLocaleString()}). Collect full amount or use Split payment.`
+    amountShake.value = true
+    amountInputRef.value?.focus()
+    setTimeout(() => { amountShake.value = false }, 500)
+    return
+  }
   if (billStatus === 'completed' && form.payment_method === 'card') {
     form.amount_paid = total.value
   }
