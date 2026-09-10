@@ -109,6 +109,7 @@
     <div v-else-if="sale" :class="{ 'kot-print-mode': printMode === 'kot' }">
       <div id="kot-wrapper" class="kot-paper">
         <div class="kot-header">KITCHEN ORDER TICKET</div>
+        <div class="kot-header" style="font-size:18pt; letter-spacing:2px;">KOT #{{ kotNumber }}</div>
         <div class="kot-rule"></div>
         <div class="kot-meta"><span>Order</span><strong>{{ sale.invoice_number }}</strong></div>
         <div class="kot-meta"><span>Date</span><strong>{{ formatDate(sale.sold_at) }}</strong></div>
@@ -410,6 +411,12 @@ async function savePaymentChange() {
     savingPayment.value = false
   }
 }
+const kotNumber = computed(() => {
+  const inv = sale.value?.invoice_number ?? ''
+  const match = inv.match(/(\d+)$/)
+  return match ? String(parseInt(match[1])) : sale.value?.id ?? ''
+})
+
 const appName        = import.meta.env.VITE_APP_NAME ?? 'Liquor Shop POS'
 const restaurant     = ref({ name: '', address: '', city: '', country: '' })
 
