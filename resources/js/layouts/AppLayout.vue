@@ -224,6 +224,7 @@ const allNavItems = [
   { to: '/open-bottles',     label: 'Open Bottles',    icon: SparklesIcon,                feature: 'open_bottles' },
   { to: '/my-shift-summary', label: 'My Shift',        icon: ChartBarIcon,                feature: 'my_shift' },
   { to: '/reports',          label: 'Reports',         icon: ChartBarIcon,                feature: 'reports' },
+  { to: '/daily-report',     label: 'Daily Report',    icon: ChartBarIcon,                feature: 'daily_report' },
   { to: '/purchases',        label: 'Purchase Orders', icon: ArchiveBoxIcon,              feature: 'purchases' },
 ]
 
@@ -281,6 +282,7 @@ const pageTitles = {
   'users':         'Users & Roles',
   'settings':      'Restaurant Settings',
   'reports':        'Reports & Analytics',
+  'daily-report':   'Daily POS Report',
   'shift-summary':    'Shift Summary Report',
   'my-shift-summary': 'My Shift Summary',
   'finance':        'Finance Management',

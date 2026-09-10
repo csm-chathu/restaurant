@@ -423,4 +423,72 @@ class ReportController extends Controller
 
         return response()->json(['from' => $from, 'to' => $to, 'days' => $rows]);
     }
+
+    /** Daily POS summary report for thermal print */
+    public function dailyPosReport(Request $request)
+    {
+        $user = $request->user();
+        $date = $request->date ?? now()->toDateString();
+
+        $baseQuery = fn() => Sale::query()
+            ->when(!$user->isAdmin(), fn($q) => $q->where('branch_id', $user->branch_id))
+            ->where(DB::raw('DATE(created_at)'), $date)
+            ->where('status', 'completed');
+
+        // Totals
+        $totals = $baseQuery()->selectRaw('
+            COUNT(*) as bill_count,
+            SUM(subtotal) as subtotal,
+            SUM(discount) as total_discount,
+            SUM(tax) as total_tax,
+            SUM(total) as total_revenue,
+            SUM(amount_paid) as total_collected
+        ')->first();
+
+        // Payment breakdown (from sale_payments for accuracy)
+        $payments = DB::table('sale_payments')
+            ->join('sales', 'sales.id', '=', 'sale_payments.sale_id')
+            ->when(!$user->isAdmin(), fn($q) => $q->where('sales.branch_id', $user->branch_id))
+            ->where(DB::raw('DATE(sales.created_at)'), $date)
+            ->where('sales.status', 'completed')
+            ->whereNull('sales.deleted_at')
+            ->select('sale_payments.payment_method', DB::raw('SUM(sale_payments.amount) as amount'), DB::raw('COUNT(DISTINCT sale_payments.sale_id) as bill_count'))
+            ->groupBy('sale_payments.payment_method')
+            ->orderByDesc('amount')
+            ->get();
+
+        // Top 10 items
+        $topItems = DB::table('sale_items')
+            ->join('sales', 'sales.id', '=', 'sale_items.sale_id')
+            ->join('products', 'products.id', '=', 'sale_items.product_id')
+            ->when(!$user->isAdmin(), fn($q) => $q->where('sales.branch_id', $user->branch_id))
+            ->where(DB::raw('DATE(sales.created_at)'), $date)
+            ->where('sales.status', 'completed')
+            ->whereNull('sales.deleted_at')
+            ->select('products.name', DB::raw('SUM(sale_items.quantity) as qty'), DB::raw('SUM(sale_items.total) as revenue'))
+            ->groupBy('products.id', 'products.name')
+            ->orderByDesc('qty')
+            ->limit(10)
+            ->get();
+
+        // Cashier breakdown
+        $cashiers = DB::table('sales')
+            ->join('users', 'users.id', '=', 'sales.user_id')
+            ->when(!$user->isAdmin(), fn($q) => $q->where('sales.branch_id', $user->branch_id))
+            ->where(DB::raw('DATE(sales.created_at)'), $date)
+            ->where('sales.status', 'completed')
+            ->whereNull('sales.deleted_at')
+            ->select('users.name', DB::raw('COUNT(*) as bill_count'), DB::raw('SUM(sales.total) as revenue'))
+            ->groupBy('users.id', 'users.name')
+            ->orderByDesc('revenue')
+            ->get();
+
+        return response()->json([
+            'date'     => $date,
+            'totals'   => $totals,
+            'payments' => $payments,
+            'top_items'=> $topItems,
+            'cashiers' => $cashiers,
+        ]);
+    }
 }

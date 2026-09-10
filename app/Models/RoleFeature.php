@@ -22,6 +22,7 @@ class RoleFeature extends Model
         'open_bottles',
         'my_shift',
         'reports',
+        'daily_report',
         'purchases',
         'price_matrix',
         'opening_balance',
@@ -42,7 +43,7 @@ class RoleFeature extends Model
         'owner' => self::ALL_FEATURES,
         'manager' => [
             'dashboard', 'pos_billing', 'products', 'menu_categories',
-            'guests', 'tables', 'suppliers', 'open_bottles', 'reports',
+            'guests', 'tables', 'suppliers', 'open_bottles', 'reports', 'daily_report',
             'purchases', 'shift_summary', 'damages',
         ],
         'cashier' => [

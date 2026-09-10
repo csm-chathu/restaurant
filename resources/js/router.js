@@ -36,6 +36,7 @@ const routes = [
             { path: 'role-features', name: 'role-features', component: () => import('@/pages/RoleFeatures.vue') },
             { path: 'settings',      name: 'settings',      component: () => import('@/pages/RestaurantSettings.vue') },
             { path: 'reports',       name: 'reports',       component: () => import('@/pages/Reports.vue') },
+            { path: 'daily-report',  name: 'daily-report',  component: () => import('@/pages/DailyReport.vue') },
             { path: 'shift-summary',    name: 'shift-summary',    component: () => import('@/pages/ShiftSummary.vue') },
             { path: 'my-shift-summary', name: 'my-shift-summary', component: () => import('@/pages/MyShiftSummary.vue') },
             { path: 'day-end',       name: 'day-end',       component: () => import('@/pages/DayEnd.vue') },
