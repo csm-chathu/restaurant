@@ -467,7 +467,6 @@ class ReportController extends Controller
             ->select('products.name', DB::raw('AVG(sale_items.unit_price) as unit_price'), DB::raw('SUM(sale_items.quantity) as qty'), DB::raw('SUM(sale_items.total) as revenue'))
             ->groupBy('products.id', 'products.name')
             ->orderByDesc('qty')
-            ->limit(10)
             ->get();
 
         // Cashier breakdown

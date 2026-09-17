@@ -133,6 +133,7 @@
         <table class="w-full min-w-[700px]">
           <thead class="bg-gray-50 border-b border-gray-200">
             <tr>
+              <th class="table-th w-36">Invoice</th>
               <th class="table-th w-32">Table</th>
               <th class="table-th w-28">Date</th>
               <th v-if="!isCashier" class="table-th w-28">Cashier</th>
@@ -144,7 +145,7 @@
           </thead>
           <tbody class="divide-y divide-gray-100">
             <tr v-if="loading">
-              <td :colspan="isCashier ? 6 : 7" class="table-td text-center py-10 text-gray-400">
+              <td :colspan="isCashier ? 7 : 8" class="table-td text-center py-10 text-gray-400">
                 <div class="flex items-center justify-center gap-2">
                   <ArrowPathIcon class="w-4 h-4 animate-spin" /> Loading…
                 </div>
@@ -153,6 +154,7 @@
             <template v-else>
               <tr v-for="s in sales.data" :key="s.id"
                 class="hover:bg-amber-50/40 transition-colors cursor-default group">
+                <td class="table-td font-mono text-xs text-gray-700">{{ s.invoice_number }}</td>
                 <td class="table-td">
                   <span v-if="s.table_number" class="text-sm font-medium text-gray-800">{{ s.table_number }}</span>
                   <span v-else class="text-xs text-gray-400">—</span>
@@ -193,7 +195,7 @@
                 </td>
               </tr>
               <tr v-if="!sales.data?.length">
-                <td :colspan="isCashier ? 6 : 7" class="table-td text-center py-12">
+                <td :colspan="isCashier ? 7 : 8" class="table-td text-center py-12">
                   <div class="flex flex-col items-center gap-2 text-gray-400">
                     <ReceiptPercentIcon class="w-10 h-10 opacity-30" />
                     <span>No sales found</span>

@@ -77,7 +77,7 @@
         <hr class="rpt-divider" />
 
         <!-- Top items -->
-        <div style="font-size:11px; font-weight:800; margin-bottom:3px;">TOP ITEMS</div>
+        <div style="font-size:11px; font-weight:800; margin-bottom:3px;">ALL ITEMS</div>
         <div class="rpt-section">
           <div v-for="(item, idx) in report.top_items" :key="idx" style="margin-bottom:3px;">
             <div class="rpt-row">
