@@ -194,7 +194,7 @@ class ReportController extends Controller
 
         $sales = Sale::query()
             ->when(!$user->isAdmin(), fn($q) => $q->where('branch_id', $user->branch_id))
-            ->whereBetween(DB::raw('DATE(created_at)'), [$from, $to])
+            ->whereBetween(DB::raw('DATE(sold_at)'), [$from, $to])
             ->selectRaw('
                 COUNT(*) as count,
                 SUM(total) as total_revenue,
@@ -209,10 +209,10 @@ class ReportController extends Controller
 
         $invoices = Sale::query()
             ->when(!$user->isAdmin(), fn($q) => $q->where('branch_id', $user->branch_id))
-            ->whereBetween(DB::raw('DATE(created_at)'), [$from, $to])
+            ->whereBetween(DB::raw('DATE(sold_at)'), [$from, $to])
             ->with('customer:id,name')
-            ->orderByDesc('created_at')
-            ->get(['id', 'invoice_number', 'customer_id', 'total', 'discount', 'tax', 'payment_status', 'status', 'created_at']);
+            ->orderByDesc('sold_at')
+            ->get(['id', 'invoice_number', 'customer_id', 'total', 'discount', 'tax', 'payment_status', 'status', 'sold_at']);
 
         return response()->json([
             'from'   => $from,
@@ -234,7 +234,7 @@ class ReportController extends Controller
             ->join('products', 'products.id', '=', 'sale_items.product_id')
             ->leftJoin('categories', 'categories.id', '=', 'products.category_id')
             ->when(!$user->isAdmin(), fn($q) => $q->where('sales.branch_id', $user->branch_id))
-            ->whereBetween(DB::raw('DATE(sales.created_at)'), [$from, $to])
+            ->whereBetween(DB::raw('DATE(sales.sold_at)'), [$from, $to])
             ->where('sales.status', 'completed')
             ->whereNull('sales.deleted_at')
             ->select(
@@ -265,7 +265,7 @@ class ReportController extends Controller
             ->join('products', 'products.id', '=', 'sale_items.product_id')
             ->leftJoin('categories', 'categories.id', '=', 'products.category_id')
             ->when(!$user->isAdmin(), fn($q) => $q->where('sales.branch_id', $user->branch_id))
-            ->whereBetween(DB::raw('DATE(sales.created_at)'), [$from, $to])
+            ->whereBetween(DB::raw('DATE(sales.sold_at)'), [$from, $to])
             ->where('sales.status', 'completed')
             ->whereNull('sales.deleted_at')
             ->select(
@@ -290,7 +290,7 @@ class ReportController extends Controller
 
         $rows = Sale::query()
             ->when(!$user->isAdmin(), fn($q) => $q->where('branch_id', $user->branch_id))
-            ->whereBetween(DB::raw('DATE(created_at)'), [$from, $to])
+            ->whereBetween(DB::raw('DATE(sold_at)'), [$from, $to])
             ->where('status', 'completed')
             ->selectRaw('
                 COALESCE(table_number, "Walk-in") as table_label,
@@ -315,7 +315,7 @@ class ReportController extends Controller
 
         $rows = Sale::query()
             ->when(!$user->isAdmin(), fn($q) => $q->where('branch_id', $user->branch_id))
-            ->whereBetween(DB::raw('DATE(created_at)'), [$from, $to])
+            ->whereBetween(DB::raw('DATE(sold_at)'), [$from, $to])
             ->where('status', 'completed')
             ->selectRaw('
                 payment_method,
@@ -343,7 +343,7 @@ class ReportController extends Controller
         $rows = DB::table('sales')
             ->join('users', 'users.id', '=', 'sales.user_id')
             ->when(!$user->isAdmin(), fn($q) => $q->where('sales.branch_id', $user->branch_id))
-            ->whereBetween(DB::raw('DATE(sales.created_at)'), [$from, $to])
+            ->whereBetween(DB::raw('DATE(sales.sold_at)'), [$from, $to])
             ->where('sales.status', 'completed')
             ->whereNull('sales.deleted_at')
             ->select(
@@ -414,9 +414,9 @@ class ReportController extends Controller
 
         $rows = Sale::query()
             ->when(!$user->isAdmin(), fn($q) => $q->where('branch_id', $user->branch_id))
-            ->whereBetween(DB::raw('DATE(created_at)'), [$from, $to])
+            ->whereBetween(DB::raw('DATE(sold_at)'), [$from, $to])
             ->where('status', 'completed')
-            ->selectRaw('DATE(created_at) as date, COUNT(*) as bill_count, SUM(total) as revenue, SUM(discount) as discount')
+            ->selectRaw('DATE(sold_at) as date, COUNT(*) as bill_count, SUM(total) as revenue, SUM(discount) as discount')
             ->groupBy('date')
             ->orderBy('date')
             ->get();
@@ -432,7 +432,7 @@ class ReportController extends Controller
 
         $baseQuery = fn() => Sale::query()
             ->when(!$user->isAdmin(), fn($q) => $q->where('branch_id', $user->branch_id))
-            ->where(DB::raw('DATE(created_at)'), $date)
+            ->where(DB::raw('DATE(sold_at)'), $date)
             ->where('status', 'completed');
 
         // Totals
@@ -448,7 +448,7 @@ class ReportController extends Controller
         // Payment breakdown by bill total (not cash tendered, to avoid over-payment inflation)
         $payments = DB::table('sales')
             ->when(!$user->isAdmin(), fn($q) => $q->where('branch_id', $user->branch_id))
-            ->where(DB::raw('DATE(created_at)'), $date)
+            ->where(DB::raw('DATE(sold_at)'), $date)
             ->where('status', 'completed')
             ->whereNull('deleted_at')
             ->select('payment_method', DB::raw('SUM(total) as amount'), DB::raw('COUNT(*) as bill_count'))
@@ -461,7 +461,7 @@ class ReportController extends Controller
             ->join('sales', 'sales.id', '=', 'sale_items.sale_id')
             ->join('products', 'products.id', '=', 'sale_items.product_id')
             ->when(!$user->isAdmin(), fn($q) => $q->where('sales.branch_id', $user->branch_id))
-            ->where(DB::raw('DATE(sales.created_at)'), $date)
+            ->where(DB::raw('DATE(sales.sold_at)'), $date)
             ->where('sales.status', 'completed')
             ->whereNull('sales.deleted_at')
             ->select('products.name', DB::raw('AVG(sale_items.unit_price) as unit_price'), DB::raw('SUM(sale_items.quantity) as qty'), DB::raw('SUM(sale_items.total) as revenue'))
@@ -474,7 +474,7 @@ class ReportController extends Controller
         $cashiers = DB::table('sales')
             ->join('users', 'users.id', '=', 'sales.user_id')
             ->when(!$user->isAdmin(), fn($q) => $q->where('sales.branch_id', $user->branch_id))
-            ->where(DB::raw('DATE(sales.created_at)'), $date)
+            ->where(DB::raw('DATE(sales.sold_at)'), $date)
             ->where('sales.status', 'completed')
             ->whereNull('sales.deleted_at')
             ->select('users.name', DB::raw('COUNT(*) as bill_count'), DB::raw('SUM(sales.total) as revenue'))

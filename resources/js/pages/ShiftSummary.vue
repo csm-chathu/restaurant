@@ -339,11 +339,17 @@ function toggleShift(id) {
 
 function invPayment(inv, method) {
   const p = inv.payments?.find(p => p.method === method)
-  return p ? p.amount : 0
+  if (!p) return 0
+  // For single-payment bills use the bill total (avoids cash-tendered inflation)
+  if (inv.payments.length === 1) return inv.total
+  return p.amount
 }
 
 function invOther(inv) {
-  return inv.payments?.filter(p => p.method !== 'cash' && p.method !== 'card').reduce((s, p) => s + p.amount, 0) ?? 0
+  const others = inv.payments?.filter(p => p.method !== 'cash' && p.method !== 'card') ?? []
+  if (!others.length) return 0
+  if (inv.payments.length === 1) return inv.total
+  return others.reduce((s, p) => s + p.amount, 0)
 }
 
 function openInvoiceModal(shift) {
