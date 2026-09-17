@@ -25,7 +25,7 @@
     <div v-if="!isCashier" class="flex items-center gap-3">
       <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 flex-1">
         <div v-for="card in kpiCards" :key="card.label"
-          class="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-3 flex flex-col gap-1">
+          class="bg-white rounded-2xl border border-gray-300 shadow-md px-4 py-3 flex flex-col gap-1">
           <div class="flex items-center justify-between">
             <span class="text-xs font-medium text-gray-400 uppercase tracking-wide">{{ card.label }}</span>
             <span class="text-lg">{{ card.icon }}</span>
@@ -45,7 +45,7 @@
     <div v-if="!isCashier" class="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
       <!-- Revenue trend (30 days) -->
-      <div class="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+      <div class="lg:col-span-2 bg-white rounded-2xl border border-gray-300 shadow-md p-4">
         <div class="flex items-center justify-between mb-3">
           <div>
             <h3 class="font-semibold text-gray-700 text-sm">Revenue Trend</h3>
@@ -60,7 +60,7 @@
       </div>
 
       <!-- Fast moving items -->
-      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex flex-col">
+      <div class="bg-white rounded-2xl border border-gray-300 shadow-md p-4 flex flex-col">
         <div class="mb-3">
           <h3 class="font-semibold text-gray-700 text-sm">Fast Moving Items</h3>
           <p class="text-xs text-gray-400">This month · sorted by qty sold</p>
@@ -99,7 +99,7 @@
     <div v-if="!isCashier" class="grid grid-cols-1 md:grid-cols-3 gap-4">
 
       <!-- Payment methods donut -->
-      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+      <div class="bg-white rounded-2xl border border-gray-300 shadow-md p-4">
         <h3 class="font-semibold text-gray-700 text-sm mb-0.5">Payment Methods</h3>
         <p class="text-xs text-gray-400 mb-3">This month by revenue</p>
         <div class="h-48">
@@ -119,7 +119,7 @@
       </div>
 
       <!-- Category breakdown donut -->
-      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+      <div class="bg-white rounded-2xl border border-gray-300 shadow-md p-4">
         <h3 class="font-semibold text-gray-700 text-sm mb-0.5">Category Sales</h3>
         <p class="text-xs text-gray-400 mb-3">This month by revenue</p>
         <div class="h-48">
@@ -138,7 +138,7 @@
       </div>
 
       <!-- Hourly pattern bar -->
-      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+      <div class="bg-white rounded-2xl border border-gray-300 shadow-md p-4">
         <h3 class="font-semibold text-gray-700 text-sm mb-0.5">Busiest Hours</h3>
         <p class="text-xs text-gray-400 mb-3">Bill count by hour — last 7 days</p>
         <div class="h-48">
@@ -153,7 +153,7 @@
     </div>
 
     <!-- Row 4: Recent bills (full width) -->
-    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+    <div class="bg-white rounded-2xl border border-gray-300 shadow-md p-4">
       <h3 class="font-semibold text-gray-700 text-sm mb-3">Recent Bills</h3>
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
@@ -185,7 +185,7 @@
     </div>
 
     <!-- Row 5: Low stock -->
-    <div v-if="data.low_stock?.length" class="bg-white rounded-2xl border border-red-100 shadow-sm p-4">
+    <div v-if="data.low_stock?.length" class="bg-white rounded-2xl border border-red-300 shadow-md p-4">
       <h3 class="font-semibold text-gray-700 text-sm mb-3 flex items-center gap-2">
         <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
         Low Stock Alerts ({{ data.low_stock.length }})

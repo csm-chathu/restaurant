@@ -2,7 +2,7 @@
   <div class="flex flex-col overflow-hidden bg-gray-100" style="height: calc(100vh - 60px)">
 
     <!-- Top bar -->
-    <div class="flex items-center gap-2 px-4 py-2 bg-white border-b border-gray-200 shrink-0 flex-wrap">
+    <div class="flex items-center gap-2 px-4 py-2 bg-gray-100 border-b border-gray-400 shrink-0 flex-wrap">
       <router-link to="/sales" class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-800 shrink-0">
         <ArrowLeftIcon class="w-4 h-4" /> Bills
       </router-link>
@@ -53,10 +53,10 @@
     <div class="flex flex-1 overflow-hidden">
 
       <!-- ── LEFT: Product browser (collapsible) ── -->
-      <div v-show="showProductPanel" class="flex flex-col flex-1 overflow-hidden bg-white border-r border-gray-200">
+      <div v-show="showProductPanel" class="flex flex-col flex-1 overflow-hidden bg-white border-r border-gray-400">
 
         <!-- Search + barcode -->
-        <div class="flex gap-2 px-3 py-2.5 border-b border-gray-100 shrink-0">
+        <div class="flex gap-2 px-3 py-2.5 border-b border-gray-300 shrink-0">
           <div class="relative" style="flex: 0 1 55%;">
             <MagnifyingGlassIcon class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
             <input
@@ -126,7 +126,7 @@
               @click="addProductFromGrid(product)"
               :disabled="isStockTracked(product) && product.stock_quantity < 1 && !(product.open_bottles_remaining_ml > 0)"
               type="button"
-              class="relative flex flex-col rounded-xl border-2 text-left transition-all select-none overflow-hidden group bg-white"
+              class="relative flex flex-col rounded-xl border-2 text-left transition-all select-none overflow-hidden group bg-white shadow-sm"
               :class="isStockTracked(product) && product.stock_quantity < 1 && !(product.open_bottles_remaining_ml > 0)
                 ? 'border-gray-100 opacity-40 cursor-not-allowed'
                 : gridFocusIndex === idx
@@ -180,7 +180,7 @@
               @click="addProductFromGrid(product)"
               :disabled="isStockTracked(product) && product.stock_quantity < 1 && !(product.open_bottles_remaining_ml > 0)"
               type="button"
-              class="relative flex items-center gap-2.5 w-full rounded-xl border-2 text-left transition-all select-none px-2.5 py-2 bg-white"
+              class="relative flex items-center gap-2.5 w-full rounded-xl border-2 text-left transition-all select-none px-2.5 py-2 bg-white shadow-sm"
               :class="isStockTracked(product) && product.stock_quantity < 1 && !(product.open_bottles_remaining_ml > 0)
                 ? 'border-gray-100 opacity-40 cursor-not-allowed'
                 : gridFocusIndex === idx
@@ -235,19 +235,18 @@
       </div>
 
       <!-- ── Category sidebar (between grid and cart) ── -->
-      <div class="flex flex-col w-[11rem] bg-white border-l border-r border-gray-200 overflow-y-auto shrink-0">
+      <div class="flex flex-col w-[11rem] bg-gray-100 border-l border-r border-gray-400 overflow-y-auto shrink-0 shadow-md">
         <!-- Category buttons — 2 per row -->
         <div class="grid grid-cols-2">
           <button
             v-for="(cat, idx) in categoryTabs"
             :key="cat"
             @click="activeCategory = cat; showProductPanel = true"
-            class="flex flex-col items-center justify-center gap-1 px-1 py-3 text-center transition-all border-b border-r border-gray-100 relative"
+            class="flex flex-col items-center justify-center gap-1 px-1 py-3 text-center transition-all border-b border-r border-gray-300 relative"
             :class="activeCategory === cat
-              ? 'bg-amber-50 text-amber-700'
-              : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'"
+              ? 'bg-amber-500 text-white'
+              : 'text-gray-600 hover:bg-gray-200 hover:text-gray-900'"
           >
-            <span v-if="activeCategory === cat" class="absolute inset-0 border-2 border-amber-400 rounded pointer-events-none"></span>
             <span class="text-2xl leading-none">{{ getCategoryEmoji(cat) }}</span>
             <span class="text-[11px] font-semibold leading-tight w-full text-center line-clamp-2 px-0.5">{{ cat }}</span>
           </button>
@@ -258,7 +257,7 @@
       <div class="flex flex-col w-[50%] shrink-0 overflow-hidden bg-gray-50">
 
         <!-- Table + Customer -->
-        <div class="px-3 pt-3 pb-2 bg-white border-b border-gray-200 shrink-0 space-y-2">
+        <div class="px-3 pt-3 pb-2 bg-white border-b border-gray-400 shrink-0 space-y-2">
           <!-- Table picker button -->
           <div class="flex gap-2">
             <button
@@ -470,7 +469,7 @@
         </div>
 
         <!-- ── Totals + Payment (pinned) ── -->
-        <div class="shrink-0 bg-white border-t-2 border-gray-200">
+        <div class="shrink-0 bg-white border-t-2 border-gray-400">
 
             <!-- Order summary / Total -->
             <div class="px-4 py-3 bg-amber-50 border-t border-amber-100">

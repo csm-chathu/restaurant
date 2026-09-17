@@ -19,7 +19,7 @@
     }
 
     .card {
-        @apply bg-white rounded-xl shadow-sm border border-gray-200 p-6;
+        @apply bg-white rounded-xl shadow-md border border-gray-200 p-6;
     }
 
     .form-input {
