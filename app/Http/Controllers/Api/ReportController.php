@@ -445,15 +445,14 @@ class ReportController extends Controller
             SUM(amount_paid) as total_collected
         ')->first();
 
-        // Payment breakdown (from sale_payments for accuracy)
-        $payments = DB::table('sale_payments')
-            ->join('sales', 'sales.id', '=', 'sale_payments.sale_id')
-            ->when(!$user->isAdmin(), fn($q) => $q->where('sales.branch_id', $user->branch_id))
-            ->where(DB::raw('DATE(sales.created_at)'), $date)
-            ->where('sales.status', 'completed')
-            ->whereNull('sales.deleted_at')
-            ->select('sale_payments.payment_method', DB::raw('SUM(sale_payments.amount) as amount'), DB::raw('COUNT(DISTINCT sale_payments.sale_id) as bill_count'))
-            ->groupBy('sale_payments.payment_method')
+        // Payment breakdown by bill total (not cash tendered, to avoid over-payment inflation)
+        $payments = DB::table('sales')
+            ->when(!$user->isAdmin(), fn($q) => $q->where('branch_id', $user->branch_id))
+            ->where(DB::raw('DATE(created_at)'), $date)
+            ->where('status', 'completed')
+            ->whereNull('deleted_at')
+            ->select('payment_method', DB::raw('SUM(total) as amount'), DB::raw('COUNT(*) as bill_count'))
+            ->groupBy('payment_method')
             ->orderByDesc('amount')
             ->get();
 
@@ -465,7 +464,7 @@ class ReportController extends Controller
             ->where(DB::raw('DATE(sales.created_at)'), $date)
             ->where('sales.status', 'completed')
             ->whereNull('sales.deleted_at')
-            ->select('products.name', DB::raw('SUM(sale_items.quantity) as qty'), DB::raw('SUM(sale_items.total) as revenue'))
+            ->select('products.name', DB::raw('AVG(sale_items.unit_price) as unit_price'), DB::raw('SUM(sale_items.quantity) as qty'), DB::raw('SUM(sale_items.total) as revenue'))
             ->groupBy('products.id', 'products.name')
             ->orderByDesc('qty')
             ->limit(10)

@@ -79,9 +79,15 @@
         <!-- Top items -->
         <div style="font-size:11px; font-weight:800; margin-bottom:3px;">TOP ITEMS</div>
         <div class="rpt-section">
-          <div v-for="(item, idx) in report.top_items" :key="idx" class="rpt-row">
-            <span style="flex:1; padding-right:4px; word-break:break-word;">{{ idx + 1 }}. {{ item.name }}</span>
-            <span style="white-space:nowrap;">×{{ formatQty(item.qty) }}</span>
+          <div v-for="(item, idx) in report.top_items" :key="idx" style="margin-bottom:3px;">
+            <div class="rpt-row">
+              <span style="flex:1; padding-right:4px; word-break:break-word;">{{ idx + 1 }}. {{ item.name }}</span>
+              <span style="white-space:nowrap;">×{{ formatQty(item.qty) }}</span>
+            </div>
+            <div class="rpt-row" style="font-size:10px; color:#555;">
+              <span>@ LKR {{ Number(item.unit_price).toLocaleString('en-LK', { minimumFractionDigits:2, maximumFractionDigits:2 }) }}</span>
+              <span>LKR {{ Number(item.revenue).toLocaleString('en-LK', { minimumFractionDigits:2, maximumFractionDigits:2 }) }}</span>
+            </div>
           </div>
           <div v-if="report.top_items.length === 0" style="font-size:11px; color:#555;">No items</div>
         </div>

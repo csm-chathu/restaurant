@@ -66,14 +66,11 @@ class SaleController extends Controller
             ->get()
             ->keyBy('payment_status');
 
-        // Cash / card breakdown for the Paid tile — sum from sale_payments so split bills are split correctly
-        $paidSaleIds = (clone $base)
+        // Cash / card breakdown — use bill totals grouped by payment_method (not cash tendered)
+        $paymentBreakdown = (clone $base)
             ->where('status', 'completed')
             ->where('payment_status', 'paid')
-            ->pluck('id');
-
-        $paymentBreakdown = \App\Models\SalePayment::whereIn('sale_id', $paidSaleIds)
-            ->selectRaw('payment_method, SUM(amount) as total')
+            ->selectRaw('payment_method, SUM(total) as total')
             ->groupBy('payment_method')
             ->pluck('total', 'payment_method');
 
