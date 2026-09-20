@@ -101,6 +101,9 @@ const FEATURE_LABELS = {
   stock_ledger:     'Stock Ledger',
   users_roles:      'Users & Roles',
   settings:         'Settings',
+  hotel_rooms:      'Hotel — Rooms',
+  hotel_bookings:   'Hotel — Bookings',
+  hotel_reports:    'Hotel — Reports',
 }
 
 const ROLE_LABELS = {

@@ -26,6 +26,22 @@
           <span v-if="!collapsed">{{ item.label }}</span>
         </router-link>
 
+        <!-- Hotel section -->
+        <template v-if="hotelNavItems.length > 0">
+          <div v-if="!collapsed" class="px-4 mt-4 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Hotel</div>
+          <div v-else class="my-3 mx-3 border-t border-gray-700"></div>
+          <router-link v-for="item in hotelNavItems" :key="item.to" :to="item.to"
+            :title="collapsed ? item.label : ''"
+            :class="[
+              'flex items-center py-2.5 mx-2 rounded-lg text-sm transition-colors',
+              collapsed ? 'justify-center px-0' : 'gap-3 px-4',
+              isNavActive(item.to) ? 'bg-teal-600 text-white hover:bg-teal-700' : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+            ]">
+            <component :is="item.icon" class="w-5 h-5 shrink-0" />
+            <span v-if="!collapsed">{{ item.label }}</span>
+          </router-link>
+        </template>
+
         <!-- Admin / feature section -->
         <template v-if="adminNavItems.length > 0">
           <div v-if="!collapsed" class="px-4 mt-4 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Admin</div>
@@ -165,6 +181,7 @@ import {
   ClipboardDocumentListIcon, CurrencyDollarIcon, FireIcon, TableCellsIcon, ChartBarIcon, Cog6ToothIcon, BanknotesIcon,
   ChevronDoubleLeftIcon, ChevronDoubleRightIcon,
   ArrowsPointingOutIcon, ArrowsPointingInIcon, ArrowPathIcon,
+  BuildingOfficeIcon, CalendarDaysIcon,
 } from '@heroicons/vue/24/outline'
 
 const auth      = useAuthStore()
@@ -263,6 +280,16 @@ const adminNavItems = computed(() => {
   return items
 })
 
+const allHotelNavItems = [
+  { to: '/hotel/rooms',    label: 'Rooms',    icon: BuildingOfficeIcon, feature: 'hotel_rooms' },
+  { to: '/hotel/bookings', label: 'Bookings', icon: CalendarDaysIcon,   feature: 'hotel_bookings' },
+  { to: '/hotel/reports',  label: 'Reports',  icon: ChartBarIcon,       feature: 'hotel_reports' },
+]
+
+const hotelNavItems = computed(() =>
+  allHotelNavItems.filter(item => hasFeature(item.feature))
+)
+
 const pageTitles = {
   dashboard:     'Dashboard',
   products:      'Products',
@@ -292,6 +319,12 @@ const pageTitles = {
   'bottle-deposits':      'Bottle Deposits',
   'damages':         'Damages & Waste',
   'opening-balance': 'Opening Balances',
+  'hotel.rooms':     'Hotel — Rooms',
+  'hotel.bookings':  'Hotel — Bookings',
+  'hotel.reports':   'Hotel — Reports',
+  'hotel.bookings.new': 'Hotel — New Booking',
+  'hotel.booking':         'Hotel — Booking Detail',
+  'hotel.booking.receipt': 'Hotel — Invoice',
 }
 
 const pageTitle  = computed(() => pageTitles[route.name] ?? 'Liquor Shop POS')

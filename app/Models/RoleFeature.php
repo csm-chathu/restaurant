@@ -35,6 +35,9 @@ class RoleFeature extends Model
         'stock_ledger',
         'users_roles',
         'settings',
+        'hotel_rooms',
+        'hotel_bookings',
+        'hotel_reports',
     ];
 
     // Default features per role (mirrors current hardcoded sidebar behaviour)
@@ -45,6 +48,7 @@ class RoleFeature extends Model
             'dashboard', 'pos_billing', 'products', 'menu_categories',
             'guests', 'tables', 'suppliers', 'open_bottles', 'reports', 'daily_report',
             'purchases', 'shift_summary', 'damages', 'settings',
+            'hotel_rooms', 'hotel_bookings', 'hotel_reports',
         ],
         'cashier' => [
             'dashboard', 'pos_billing', 'open_bottles', 'my_shift',

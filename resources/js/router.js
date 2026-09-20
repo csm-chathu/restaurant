@@ -47,6 +47,14 @@ const routes = [
             { path: 'open-bottles',    name: 'open-bottles',    component: () => import('@/pages/OpenBottles.vue') },
             { path: 'opening-balance', name: 'opening-balance', component: () => import('@/pages/OpeningBalance.vue') },
             { path: 'profile',         name: 'profile',         component: () => import('@/pages/Profile.vue') },
+
+            // Hotel module
+            { path: 'hotel/rooms',           name: 'hotel.rooms',      component: () => import('@/pages/hotel/Rooms.vue') },
+            { path: 'hotel/bookings',        name: 'hotel.bookings',   component: () => import('@/pages/hotel/Bookings.vue') },
+            { path: 'hotel/bookings/new',    name: 'hotel.bookings.new', component: () => import('@/pages/hotel/NewBooking.vue') },
+            { path: 'hotel/bookings/:id',         name: 'hotel.booking',         component: () => import('@/pages/hotel/BookingDetail.vue') },
+            { path: 'hotel/bookings/:id/receipt', name: 'hotel.booking.receipt', component: () => import('@/pages/hotel/BookingReceipt.vue') },
+            { path: 'hotel/reports', name: 'hotel.reports', component: () => import('@/pages/hotel/Reports.vue') },
         ],
     },
     { path: '/:pathMatch(.*)*', redirect: '/' },

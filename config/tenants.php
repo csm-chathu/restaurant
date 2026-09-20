@@ -21,4 +21,5 @@ return [
     'daily-restaurant.lumac.cc' => 'daily_dose',
     // 'rahula-restaurant.lumac.cc' => 'rahula_bakery',
     'yummy-restaurant.lumac.cc' => 'yummy_restaurant',
+    'harambathenna-restaurant.lumac.cc' => 'harambathenna',
 ];

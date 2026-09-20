@@ -194,4 +194,22 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/scrap-items/convert-product',         [ScrapItemController::class, 'convertProduct']);
     Route::put('/scrap-items/{scrapItem}',              [ScrapItemController::class, 'update']);
     Route::delete('/scrap-items/{scrapItem}',           [ScrapItemController::class, 'destroy']);
+
+    // Hotel / Room rental (separate from POS)
+    Route::prefix('hotel')->group(function () {
+        Route::apiResource('rooms', \App\Http\Controllers\Api\RoomController::class);
+
+        Route::get('/reports', [\App\Http\Controllers\Api\HotelReportController::class, 'index']);
+
+        Route::get('/bookings/guest-lookup',                           [\App\Http\Controllers\Api\RoomBookingController::class, 'guestLookup']);
+        Route::get('/bookings',                                        [\App\Http\Controllers\Api\RoomBookingController::class, 'index']);
+        Route::post('/bookings',                                       [\App\Http\Controllers\Api\RoomBookingController::class, 'store']);
+        Route::get('/bookings/{roomBooking}',                          [\App\Http\Controllers\Api\RoomBookingController::class, 'show']);
+        Route::put('/bookings/{roomBooking}',                          [\App\Http\Controllers\Api\RoomBookingController::class, 'update']);
+        Route::post('/bookings/{roomBooking}/check-in',                [\App\Http\Controllers\Api\RoomBookingController::class, 'checkIn']);
+        Route::post('/bookings/{roomBooking}/checkout',                [\App\Http\Controllers\Api\RoomBookingController::class, 'checkout']);
+        Route::post('/bookings/{roomBooking}/cancel',                  [\App\Http\Controllers\Api\RoomBookingController::class, 'cancel']);
+        Route::post('/bookings/{roomBooking}/charges',                 [\App\Http\Controllers\Api\RoomBookingController::class, 'addCharge']);
+        Route::delete('/bookings/{roomBooking}/charges/{charge}',      [\App\Http\Controllers\Api\RoomBookingController::class, 'removeCharge']);
+    });
 });
