@@ -121,9 +121,22 @@ class CashierShiftController extends Controller
 
             $saleIds = $salesInShift->pluck('id');
 
+            // Cap single-payment cash bills at the sale total so cash-tendered
+            // (change given) does not inflate cash_sales.
             $payments = SalePayment::whereIn('sale_id', $saleIds)
-                ->select('payment_method', DB::raw('SUM(amount) as total'))
-                ->groupBy('payment_method')
+                ->join('sales', 'sale_payments.sale_id', '=', 'sales.id')
+                ->select(
+                    'sale_payments.payment_method',
+                    DB::raw('SUM(
+                        CASE
+                            WHEN sale_payments.payment_method = \'cash\'
+                             AND (SELECT COUNT(*) FROM sale_payments sp2 WHERE sp2.sale_id = sale_payments.sale_id) = 1
+                            THEN sales.total
+                            ELSE sale_payments.amount
+                        END
+                    ) as total')
+                )
+                ->groupBy('sale_payments.payment_method')
                 ->get()->keyBy('payment_method')
                 ->map(fn($r) => (float) $r->total);
 
@@ -276,8 +289,19 @@ class CashierShiftController extends Controller
             ->pluck('id');
 
         $paymentBreakdown = SalePayment::whereIn('sale_id', $saleIds)
-            ->select('payment_method', DB::raw('SUM(amount) as total'))
-            ->groupBy('payment_method')
+            ->join('sales', 'sale_payments.sale_id', '=', 'sales.id')
+            ->select(
+                'sale_payments.payment_method',
+                DB::raw('SUM(
+                    CASE
+                        WHEN sale_payments.payment_method = \'cash\'
+                         AND (SELECT COUNT(*) FROM sale_payments sp2 WHERE sp2.sale_id = sale_payments.sale_id) = 1
+                        THEN sales.total
+                        ELSE sale_payments.amount
+                    END
+                ) as total')
+            )
+            ->groupBy('sale_payments.payment_method')
             ->get()->keyBy('payment_method')
             ->map(fn($r) => (float) $r->total);
 
@@ -362,10 +386,22 @@ class CashierShiftController extends Controller
 
         $totalRevenue = Sale::whereIn('id', $saleIds)->sum('total');
 
-        // Payment method breakdown from SalePayment
+        // Payment method breakdown from SalePayment — cap single-payment cash
+        // bills at sale total so cash-tendered does not inflate cash_sales.
         $paymentBreakdown = SalePayment::whereIn('sale_id', $saleIds)
-            ->select('payment_method', DB::raw('SUM(amount) as total'))
-            ->groupBy('payment_method')
+            ->join('sales', 'sale_payments.sale_id', '=', 'sales.id')
+            ->select(
+                'sale_payments.payment_method',
+                DB::raw('SUM(
+                    CASE
+                        WHEN sale_payments.payment_method = \'cash\'
+                         AND (SELECT COUNT(*) FROM sale_payments sp2 WHERE sp2.sale_id = sale_payments.sale_id) = 1
+                        THEN sales.total
+                        ELSE sale_payments.amount
+                    END
+                ) as total')
+            )
+            ->groupBy('sale_payments.payment_method')
             ->get()
             ->keyBy('payment_method')
             ->map(fn($r) => (float) $r->total);
