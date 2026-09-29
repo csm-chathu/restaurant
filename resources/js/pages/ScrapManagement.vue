@@ -69,10 +69,10 @@
             <td class="table-td text-xs text-gray-500">{{ s.refinery_name ?? '—' }}</td>
             <td class="table-td">
               <div class="flex gap-1.5">
-                <button @click="openEdit(s)" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-700 hover:bg-blue-200">
+                <button @click="openEdit(s)" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-500 text-white hover:bg-blue-600">
                   <PencilSquareIcon class="w-3.5 h-3.5" /> Update
                 </button>
-                <button @click="del(s)" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200">
+                <button @click="del(s)" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-500 text-white hover:bg-red-600">
                   <TrashIcon class="w-3.5 h-3.5" /> Delete
                 </button>
               </div>

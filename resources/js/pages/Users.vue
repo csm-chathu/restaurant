@@ -100,11 +100,11 @@
             <td class="table-td text-right">
               <div class="flex justify-end gap-1.5">
                 <button @click="openModal(u)"
-                  class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-700 hover:bg-blue-200">
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-500 text-white hover:bg-blue-600">
                   <PencilSquareIcon class="w-3.5 h-3.5" /> Edit
                 </button>
                 <button v-if="u.id !== authUser?.id" @click="deleteUser(u)"
-                  class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200">
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-500 text-white hover:bg-red-600">
                   <TrashIcon class="w-3.5 h-3.5" /> Delete
                 </button>
               </div>

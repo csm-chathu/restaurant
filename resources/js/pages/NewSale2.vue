@@ -1,13 +1,14 @@
 <template>
-  <div class="flex flex-col overflow-hidden bg-gray-100" style="height: calc(100vh - 60px)">
+  <div class="flex flex-col overflow-hidden" style="height: calc(100vh - 60px); background:#f1f5f9">
 
     <!-- Top bar -->
-    <div class="flex items-center gap-2 px-4 py-2 bg-gray-100 border-b border-gray-400 shrink-0 flex-wrap">
+    <div class="flex items-center gap-2 px-4 py-2 bg-white border-b-2 border-amber-200 shrink-0 flex-wrap shadow-sm">
       <router-link to="/sales" class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-800 shrink-0">
         <ArrowLeftIcon class="w-4 h-4" /> Bills
       </router-link>
       <span class="text-gray-300 shrink-0">/</span>
       <h2 class="text-sm font-semibold text-gray-800 shrink-0">New Bill</h2>
+
       <div class="ml-auto shrink-0 flex items-center gap-1.5">
         <router-link v-if="lastReceiptId" :to="`/sales/${lastReceiptId}`"
           class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors">
@@ -20,7 +21,7 @@
       </div>
 
       <!-- Draft tabs -->
-      <div class="flex items-center gap-1.5 ml-2 flex-wrap">
+      <div class="flex items-center gap-1.5 flex-wrap">
         <span class="text-xs text-gray-400 font-medium shrink-0">Drafts:</span>
         <button @click="refreshDrafts" :disabled="refreshingDrafts" title="Refresh drafts"
           class="p-0.5 rounded text-gray-400 hover:text-amber-600 transition-colors disabled:opacity-40">
@@ -53,10 +54,10 @@
     <div class="flex flex-1 overflow-hidden">
 
       <!-- ── LEFT: Product browser (collapsible) ── -->
-      <div v-show="showProductPanel" class="flex flex-col flex-1 overflow-hidden bg-white border-r border-gray-400">
+      <div v-show="showProductPanel" class="flex flex-col flex-1 overflow-hidden bg-white border-r border-gray-200">
 
         <!-- Search + barcode -->
-        <div class="flex gap-2 px-3 py-2.5 border-b border-gray-300 shrink-0">
+        <div class="flex gap-2 px-3 py-2.5 shrink-0 bg-white border-b border-gray-200">
           <div class="relative" style="flex: 0 1 55%;">
             <MagnifyingGlassIcon class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
             <input
@@ -235,17 +236,17 @@
       </div>
 
       <!-- ── Category sidebar (between grid and cart) ── -->
-      <div class="flex flex-col w-[11rem] bg-gray-100 border-l border-r border-gray-400 overflow-y-auto shrink-0 shadow-md">
+      <div class="flex flex-col w-[10rem] overflow-y-auto shrink-0 bg-white border-l border-r border-gray-200">
         <!-- Category buttons — 2 per row -->
         <div class="grid grid-cols-2">
           <button
             v-for="(cat, idx) in categoryTabs"
             :key="cat"
             @click="activeCategory = cat; showProductPanel = true"
-            class="flex flex-col items-center justify-center gap-1 px-1 py-3 text-center transition-all border-b border-r border-gray-300 relative"
+            class="flex flex-col items-center justify-center gap-1 px-1 py-3 text-center transition-all border-b border-r border-gray-200 relative"
             :class="activeCategory === cat
-              ? 'bg-amber-500 text-white'
-              : 'text-gray-600 hover:bg-gray-200 hover:text-gray-900'"
+              ? 'bg-amber-500 text-white shadow-inner'
+              : 'text-gray-600 hover:bg-amber-50 hover:text-amber-700'"
           >
             <span class="text-2xl leading-none">{{ getCategoryEmoji(cat) }}</span>
             <span class="text-[11px] font-semibold leading-tight w-full text-center line-clamp-2 px-0.5">{{ cat }}</span>
@@ -254,10 +255,19 @@
       </div>
 
       <!-- ── RIGHT: Order panel ── -->
-      <div class="flex flex-col w-[50%] shrink-0 overflow-hidden bg-gray-50">
+      <div class="flex flex-col w-[42%] shrink-0 overflow-hidden" style="background:#f8fafc">
+
+        <!-- Cart header strip -->
+        <div class="px-3 py-2 shrink-0 flex items-center justify-between bg-white border-b border-gray-200">
+          <div class="flex items-center gap-2">
+            <ShoppingCartIcon class="w-4 h-4 text-amber-500" />
+            <span class="text-sm font-bold text-gray-800">Order</span>
+          </div>
+          <span class="text-xs text-gray-400">{{ form.items.filter(i=>i.product_id).length }} items</span>
+        </div>
 
         <!-- Table + Customer -->
-        <div class="px-3 pt-3 pb-2 bg-white border-b border-gray-400 shrink-0 space-y-2">
+        <div class="px-3 pt-3 pb-2 bg-white border-b border-gray-200 shrink-0 space-y-2">
           <!-- Table picker button -->
           <div class="flex gap-2">
             <button
@@ -307,7 +317,7 @@
         </div>
 
         <!-- Bill items (scrollable) -->
-        <div class="flex-1 overflow-y-auto bg-white">
+        <div class="flex-1 overflow-y-auto" style="background:#fafbfc">
           <div v-if="!form.items.length" class="flex flex-col items-center justify-center py-16 text-gray-400">
             <ShoppingCartIcon class="w-14 h-14 opacity-15 mb-3" />
             <p class="text-base font-medium text-gray-400">Tap products to add</p>
@@ -469,24 +479,24 @@
         </div>
 
         <!-- ── Totals + Payment (pinned) ── -->
-        <div class="shrink-0 bg-white border-t-2 border-gray-400">
+        <div class="shrink-0 bg-white border-t-2 border-amber-400">
 
             <!-- Order summary / Total -->
-            <div class="px-4 py-3 bg-amber-50 border-t border-amber-100">
+            <div class="px-4 py-3 border-t border-gray-800" style="background:#111827">
               <button
                 @click="showPricingDetails = !showPricingDetails"
                 class="w-full flex items-center justify-between"
               >
                 <div class="flex flex-col items-start">
-                  <span class="text-xs font-semibold text-amber-700 uppercase tracking-wider">Total Amount</span>
+                  <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Amount</span>
                   <div class="flex items-center gap-2 mt-0.5">
                     <span v-if="form.discount > 0" class="text-xs text-red-600 bg-red-100 px-2 py-0.5 rounded-full">−{{ lkr(form.discount) }} off</span>
                     <span v-if="form.tax > 0" class="text-xs text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">+{{ form.tax_rate }}% tax</span>
                   </div>
                 </div>
                 <div class="flex items-center gap-2">
-                  <span class="text-3xl font-black text-amber-600">LKR {{ lkr(total) }}</span>
-                  <span class="text-amber-400 text-sm">{{ showPricingDetails ? '▲' : '▼' }}</span>
+                  <span class="text-3xl font-black" style="color:#16a34a">LKR {{ lkr(total) }}</span>
+                  <span class="text-gray-400 text-sm">{{ showPricingDetails ? '▲' : '▼' }}</span>
                 </div>
               </button>
 
@@ -534,40 +544,64 @@
             <div class="px-3 pt-2 pb-1.5">
               <div class="flex gap-1.5">
                 <template v-if="!splitPayment">
+                  <!-- Cash / Card / other payment options -->
                   <button
                     v-for="opt in paymentOptions"
                     :key="opt.value"
                     @click="selectPaymentMethod(opt.value)"
-                    class="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl font-bold text-sm transition-all border-2"
-                    :class="form.payment_method === opt.value
-                      ? 'bg-gray-900 text-white border-gray-900 shadow-lg'
-                      : 'bg-gray-50 text-gray-500 border-gray-200 hover:border-gray-400'"
+                    class="relative flex-1 flex flex-col items-center justify-center gap-1 py-5 rounded-lg font-bold text-sm transition-all border-2 text-white shadow-md"
+                    :style="opt.value === 'cash'
+                      ? form.payment_method === 'cash'
+                        ? 'background:#15803d; border-color:#14532d; box-shadow:0 0 0 3px rgba(21,128,61,0.3)'
+                        : 'background:#22c55e; border-color:#22c55e'
+                      : opt.value === 'card'
+                        ? form.payment_method === 'card'
+                          ? 'background:#1d4ed8; border-color:#1e3a8a; box-shadow:0 0 0 3px rgba(29,78,216,0.3)'
+                          : 'background:#3b82f6; border-color:#3b82f6'
+                        : form.payment_method === opt.value
+                          ? 'background:#1f2937; border-color:#111827'
+                          : 'background:#6b7280; border-color:#6b7280'"
                   >
-                    <span>{{ opt.icon }}</span>
-                    <span>{{ opt.label }}</span>
+                    <!-- Selected badge -->
+                    <span v-if="form.payment_method === opt.value"
+                      class="absolute top-1.5 right-1.5 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow"
+                      :style="opt.value === 'cash' ? 'color:#15803d' : opt.value === 'card' ? 'color:#1d4ed8' : 'color:#1f2937'"
+                    >
+                      <svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                    </span>
+                    <span class="text-xl leading-none">{{ opt.icon }}</span>
+                    <span class="text-xs">{{ opt.label }}</span>
                   </button>
                 </template>
+                <!-- Split -->
                 <button
                   @click="toggleSplit"
-                  class="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl font-bold text-sm transition-all border-2"
-                  :class="splitPayment
-                    ? 'bg-purple-600 text-white border-purple-600 shadow-lg'
-                    : 'bg-gray-50 text-gray-500 border-gray-200 hover:border-purple-400'"
+                  class="relative flex-1 flex flex-col items-center justify-center gap-1 py-5 rounded-lg font-bold text-sm transition-all border-2 shadow-md"
+                  :style="splitPayment
+                    ? 'background:#b45309; border-color:#92400e; color:#fff; box-shadow:0 0 0 3px rgba(180,83,9,0.3)'
+                    : 'background:#f59e0b; border-color:#f59e0b; color:#fff'"
                 >
-                  <span>✂️</span>
-                  <span>Split</span>
+                  <span v-if="splitPayment"
+                    class="absolute top-1.5 right-1.5 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow"
+                    style="color:#b45309"
+                  >
+                    <svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                  </span>
+                  <span class="text-xl leading-none">✂️</span>
+                  <span class="text-xs">Split</span>
                 </button>
+                <!-- Status -->
                 <button
                   @click="form.payment_status = form.payment_status === 'pending' ? 'paid' : form.payment_status === 'paid' ? 'partial' : 'pending'"
-                  class="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl font-bold text-sm transition-all border-2"
-                  :class="form.payment_status === 'pending'
-                    ? 'bg-yellow-50 text-yellow-700 border-yellow-300'
+                  class="flex-1 flex flex-col items-center justify-center gap-1 py-5 rounded-lg font-bold text-sm transition-all border-2 text-white shadow-md"
+                  :style="form.payment_status === 'pending'
+                    ? 'background:#eab308; border-color:#eab308'
                     : form.payment_status === 'partial'
-                      ? 'bg-orange-50 text-orange-700 border-orange-300'
-                      : 'bg-green-50 text-green-700 border-green-300'"
+                      ? 'background:#f97316; border-color:#f97316'
+                      : 'background:#22c55e; border-color:#22c55e'"
                 >
-                  <span>{{ form.payment_status === 'pending' ? '⏳' : form.payment_status === 'partial' ? '⚡' : '✅' }}</span>
-                  <span>{{ form.payment_status === 'pending' ? 'Pending' : form.payment_status === 'partial' ? 'Partial' : 'Paid' }}</span>
+                  <span class="text-xl leading-none">{{ form.payment_status === 'pending' ? '⏳' : form.payment_status === 'partial' ? '⚡' : '✅' }}</span>
+                  <span class="text-xs">{{ form.payment_status === 'pending' ? 'Pending' : form.payment_status === 'partial' ? 'Partial' : 'Paid' }}</span>
                 </button>
               </div>
             </div>
@@ -658,21 +692,21 @@
         </Transition>
 
         <!-- ── Action buttons (always pinned at bottom) ── -->
-        <div class="shrink-0 flex gap-2 px-3 pb-3 pt-2 bg-white border-t border-gray-200">
+        <div class="shrink-0 flex gap-2 px-3 pb-3 pt-2 bg-white border-t border-gray-100">
           <button
             @click="submit('draft')"
             :disabled="saving || !form.items.filter(i => i.product_id).length"
-            class="flex items-center justify-center gap-2 px-4 py-3.5 bg-gray-600 hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl font-bold text-sm transition-colors shrink-0"
+            class="w-[30%] flex flex-col items-center justify-center gap-0.5 py-3 bg-slate-600 hover:bg-slate-700 disabled:cursor-not-allowed text-white rounded-xl font-bold transition-colors"
           >
             <ArrowPathIcon v-if="saving" class="w-4 h-4 animate-spin" />
-            <span v-else>📋</span>
-            Draft
-            <span v-if="kbShortcutsEnabled" class="opacity-50 text-xs font-normal">F9</span>
+            <span v-else class="text-lg leading-none">📋</span>
+            <span class="text-xs">Draft <span v-if="kbShortcutsEnabled" class="opacity-50 font-normal">F9</span></span>
           </button>
           <button
             @click="submit('completed')"
             :disabled="saving || !form.items.filter(i => i.product_id).length"
-            class="flex-1 flex items-center justify-center gap-2 py-3.5 bg-green-600 hover:bg-green-700 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl font-black text-base shadow-lg shadow-green-500/30 transition-all active:scale-95"
+            class="w-[70%] flex items-center justify-center gap-2 py-3 disabled:cursor-not-allowed text-white rounded-xl font-black text-base shadow-lg transition-all active:scale-95"
+            style="background:linear-gradient(135deg,#f59e0b 0%,#f97316 50%,#c2410c 100%); box-shadow:0 4px 15px rgba(249,115,22,0.4)"
           >
             <ArrowPathIcon v-if="saving" class="w-5 h-5 animate-spin" />
             <span v-else class="text-xl">✓</span>
@@ -851,6 +885,25 @@
     </div>
 
   </div>
+
+  <!-- Order type toggle — teleported into the main navbar -->
+  <Teleport to="#navbar-center">
+    <div class="flex items-center gap-1 bg-gray-100 rounded-xl p-1 border border-gray-200">
+      <button
+        @click="form.order_type = 'dine_in'"
+        type="button"
+        class="flex items-center justify-center gap-2 px-16 py-2 rounded-lg text-sm font-bold transition-all"
+        :class="form.order_type === 'dine_in' ? 'bg-amber-500 text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'"
+      >🍽️ Dine-in</button>
+      <button
+        @click="form.order_type = 'takeaway'"
+        type="button"
+        class="flex items-center justify-center gap-2 px-16 py-2 rounded-lg text-sm font-bold transition-all"
+        :class="form.order_type === 'takeaway' ? 'bg-blue-500 text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'"
+      >🚶 Walk-in</button>
+    </div>
+  </Teleport>
+
 </template>
 
 <script setup>
@@ -896,6 +949,7 @@ const form = reactive({
   customer_id: '', payment_method: 'cash', payment_status: 'paid',
   discount: 0, tax: 0, tax_rate: 0, amount_paid: '', notes: '',
   table_number: '', status: 'completed', card_reference: '',
+  order_type: 'takeaway',
   items: [],
 })
 const selectedTaxId  = ref('')

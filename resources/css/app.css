@@ -19,7 +19,7 @@
     }
 
     .card {
-        @apply bg-white rounded-xl shadow-md border border-gray-200 p-6;
+        @apply bg-white rounded-xl shadow-lg border border-gray-200 p-6;
     }
 
     .form-input {
@@ -31,11 +31,36 @@
     }
 
     .table-th {
-        @apply px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-left;
+        @apply px-4 py-3 text-xs font-bold uppercase tracking-wider text-left text-white;
     }
 
     .table-td {
         @apply px-4 py-3 text-sm text-gray-700;
+    }
+
+    /* Apply to every thead in a standard table */
+    table thead {
+        background: linear-gradient(90deg, #1e3a5f, #1e4d7b);
+    }
+
+    table thead th {
+        color: #ffffff !important;
+        font-weight: 700 !important;
+    }
+
+    .new-bill-btn {
+        animation: newBillPulse 2s ease-in-out infinite;
+    }
+
+    .new-bill-btn:hover {
+        animation: none;
+        transform: scale(1.07);
+        transition: transform 0.15s ease;
+    }
+
+    @keyframes newBillPulse {
+        0%, 100% { transform: scale(1);    box-shadow: 0 4px 15px rgba(249,115,22,0.4); }
+        50%       { transform: scale(1.05); box-shadow: 0 8px 25px rgba(249,115,22,0.65); }
     }
 
     .badge {

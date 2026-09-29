@@ -143,8 +143,8 @@ class DashboardController extends Controller
                 ->when($user->role === 'cashier', fn($q) => $q->where('user_id', $user->id))
                 ->with('customer:id,name')
                 ->latest('sold_at')
-                ->take(6)
-                ->get(['id', 'invoice_number', 'customer_id', 'total', 'payment_status', 'sold_at', 'status']),
+                ->take(10)
+                ->get(['id', 'invoice_number', 'customer_id', 'table_number', 'total', 'payment_status', 'payment_method', 'sold_at', 'status']),
         ]);
     }
 }

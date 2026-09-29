@@ -1,8 +1,8 @@
 <template>
-  <div class="flex flex-col bg-gray-100 overflow-hidden" style="height: calc(100vh - 60px)">
+  <div class="flex flex-col overflow-hidden" style="height: calc(100vh - 60px); background:#f1f5f9">
 
     <!-- Top bar -->
-    <div class="flex items-center gap-2 px-4 py-2 bg-white border-b border-gray-200 shrink-0 flex-wrap">
+    <div class="flex items-center gap-2 px-4 py-2 bg-white border-b-2 border-amber-200 shrink-0 flex-wrap shadow-sm">
       <router-link to="/sales" class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-800 shrink-0">
         <ArrowLeftIcon class="w-4 h-4" /> Bills
       </router-link>
@@ -48,7 +48,7 @@
     <div class="flex flex-1 overflow-hidden">
 
       <!-- ── LEFT: Product browser ── -->
-      <div class="flex flex-col w-[56%] xl:w-[60%] overflow-hidden bg-white border-r border-gray-200">
+      <div class="flex flex-col w-[64%] xl:w-[67%] overflow-hidden bg-white border-r border-gray-200">
 
         <!-- Search + barcode -->
         <div class="flex gap-2 px-3 py-2 border-b border-gray-100 shrink-0">
@@ -80,7 +80,7 @@
         </div>
 
         <!-- Category tabs -->
-        <div class="flex gap-1.5 px-3 py-2 overflow-x-auto border-b border-gray-100 shrink-0">
+        <div class="flex gap-1.5 px-3 py-2 overflow-x-auto border-b-2 border-amber-100 shrink-0" style="background:#fffbf5">
           <button
             v-for="cat in categoryTabs"
             :key="cat"
@@ -149,7 +149,16 @@
       </div>
 
       <!-- ── RIGHT: Bill + Payment ── -->
-      <div class="flex flex-col w-[44%] xl:w-[40%] overflow-hidden">
+      <div class="flex flex-col w-[36%] xl:w-[33%] overflow-hidden" style="background:#f8fafc">
+
+        <!-- Cart header strip -->
+        <div class="px-3 py-2 shrink-0 flex items-center justify-between" style="background:linear-gradient(135deg,#1e3a5f,#1e4d7b)">
+          <div class="flex items-center gap-2">
+            <ShoppingCartIcon class="w-4 h-4 text-amber-400" />
+            <span class="text-sm font-bold text-white">Order</span>
+          </div>
+          <span class="text-xs text-blue-200">{{ form.items.filter(i=>i.product_id).length }} items</span>
+        </div>
 
         <!-- Table + Customer -->
         <div class="px-3 py-2.5 bg-white border-b border-gray-200 shrink-0 space-y-2">
@@ -198,7 +207,7 @@
         </div>
 
         <!-- Bill items (scrollable) -->
-        <div class="flex-1 overflow-y-auto bg-white">
+        <div class="flex-1 overflow-y-auto" style="background:#fafbfc">
           <div v-if="form.items.some(i => i.product_id)" class="flex justify-end px-3 py-1.5 border-b border-gray-100">
             <button @click="clearCart" type="button"
               class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors border border-red-200">
@@ -338,21 +347,22 @@
         </div>
 
         <!-- ── Totals + Payment (pinned bottom) ── -->
-        <div class="shrink-0 border-t border-gray-200 bg-white">
+        <div class="shrink-0 border-t-2 border-amber-400 bg-white">
 
           <!-- Total row (always visible) + collapsible detail -->
           <div class="border-b border-gray-100">
             <button
               @click="showPricingDetails = !showPricingDetails"
-              class="w-full flex items-center justify-between px-3 py-2 hover:bg-gray-50 transition-colors"
+              class="w-full flex items-center justify-between px-3 py-2.5 transition-colors"
+              style="background:linear-gradient(135deg,#fef3c7,#fde68a)"
             >
-              <div class="flex items-center gap-2 text-xs text-gray-400">
+              <div class="flex items-center gap-2 text-xs text-amber-700 font-semibold">
                 <span>TOTAL</span>
-                <span v-if="form.discount > 0" class="text-red-400">−{{ lkr(form.discount) }}</span>
-                <span v-if="form.tax > 0" class="text-blue-400">+tax {{ form.tax_rate }}%</span>
-                <span class="text-gray-300">{{ showPricingDetails ? '▲' : '▼' }}</span>
+                <span v-if="form.discount > 0" class="text-red-500">−{{ lkr(form.discount) }}</span>
+                <span v-if="form.tax > 0" class="text-blue-500">+tax {{ form.tax_rate }}%</span>
+                <span class="text-amber-400">{{ showPricingDetails ? '▲' : '▼' }}</span>
               </div>
-              <span class="text-xl font-bold text-amber-600">LKR {{ lkr(total) }}</span>
+              <span class="text-2xl font-black text-amber-800">LKR {{ lkr(total) }}</span>
             </button>
 
             <!-- Collapsible: subtotal / discount / tax -->
@@ -521,7 +531,7 @@
             <button
               @click="submit('draft')"
               :disabled="saving || !form.items.filter(i => i.product_id).length"
-              class="flex-1 flex items-center justify-center gap-1.5 py-2 bg-gray-500 hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl font-semibold text-sm transition-colors"
+              class="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-slate-600 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl font-semibold text-sm transition-colors"
             >
               <ArrowPathIcon v-if="saving" class="w-4 h-4 animate-spin" />
               <CheckCircleIcon v-else class="w-4 h-4" />
@@ -530,7 +540,8 @@
             <button
               @click="submit('completed')"
               :disabled="saving || !form.items.filter(i => i.product_id).length"
-              class="flex-[2] flex items-center justify-center gap-2 py-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl font-bold text-sm shadow-md transition-colors"
+              class="flex-[2] flex items-center justify-center gap-2 py-2.5 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl font-bold text-sm shadow-md transition-all"
+              style="background:linear-gradient(135deg,#f59e0b 0%,#f97316 50%,#c2410c 100%)"
             >
               <ArrowPathIcon v-if="saving" class="w-5 h-5 animate-spin" />
               <CheckCircleIcon v-else class="w-5 h-5" />

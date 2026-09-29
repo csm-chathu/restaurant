@@ -45,11 +45,11 @@
                   <button
                     v-if="!['received','completed','cancelled'].includes(p.status)"
                     @click="openStatusModal(p)"
-                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-amber-100 text-amber-700 hover:bg-amber-200 transition-colors"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500 text-white hover:bg-amber-600 transition-colors"
                   >
                     <AdjustmentsHorizontalIcon class="w-3.5 h-3.5" /> Update Status
                   </button>
-                  <button @click="del(p)" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200">
+                  <button @click="del(p)" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-500 text-white hover:bg-red-600">
                     <TrashIcon class="w-3.5 h-3.5" /> Delete
                   </button>
                 </div>

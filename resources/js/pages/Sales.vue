@@ -31,13 +31,13 @@
           <div class="flex items-center gap-1">
             <button @click="setQuick('week')"
               :class="quickFilter === 'week' ? 'bg-amber-500 text-white' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'"
-              class="px-2.5 py-1 rounded-md text-xs font-medium transition-colors">This Week</button>
+              class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors">This Week</button>
             <button @click="setQuick('today')"
               :class="quickFilter === 'today' ? 'bg-amber-500 text-white' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'"
-              class="px-2.5 py-1 rounded-md text-xs font-medium transition-colors">Today</button>
+              class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors">Today</button>
             <button @click="setQuick('month')"
               :class="quickFilter === 'month' ? 'bg-amber-500 text-white' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'"
-              class="px-2.5 py-1 rounded-md text-xs font-medium transition-colors">This Month</button>
+              class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors">This Month</button>
           </div>
         </template>
         <button v-if="search || statusFilter || quickFilter" @click="clearFilters"
@@ -71,58 +71,58 @@
 
     <!-- Summary cards -->
     <div v-if="!noShift" class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="card flex items-center gap-4">
-        <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
-          <BanknotesIcon class="w-5 h-5 text-amber-600" />
+      <!-- Total Revenue -->
+      <div class="rounded-xl p-4 flex items-center gap-4 shadow-sm border border-amber-100" style="background:linear-gradient(135deg,#fffbeb,#fef3c7)">
+        <div class="w-11 h-11 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
+          <BanknotesIcon class="w-6 h-6 text-amber-600" />
         </div>
         <div>
-          <p class="text-xs text-gray-500 uppercase tracking-wide">Total Revenue</p>
-          <p class="text-lg font-bold text-amber-700">LKR {{ lkr(summaryTotal) }}</p>
-          <p class="text-xs text-gray-400">{{ summaryTotalCount }} bill{{ summaryTotalCount !== 1 ? 's' : '' }}</p>
+          <p class="text-xs text-amber-700/70 uppercase tracking-wide font-semibold">Total Revenue</p>
+          <p class="text-xl font-black text-amber-800">LKR {{ lkr(summaryTotal) }}</p>
+          <p class="text-xs text-amber-600/60">{{ summaryTotalCount }} bill{{ summaryTotalCount !== 1 ? 's' : '' }}</p>
         </div>
       </div>
-      <div class="card flex items-center gap-4">
-        <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center shrink-0">
-          <CheckCircleIcon class="w-5 h-5 text-green-600" />
+      <!-- Paid -->
+      <div class="rounded-xl p-4 flex items-center gap-4 shadow-sm border border-green-100" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7)">
+        <div class="w-11 h-11 rounded-xl bg-green-100 flex items-center justify-center shrink-0">
+          <CheckCircleIcon class="w-6 h-6 text-green-600" />
         </div>
         <div class="min-w-0">
-          <p class="text-xs text-gray-500 uppercase tracking-wide">Paid</p>
-          <p class="text-lg font-bold text-green-700">LKR {{ lkr(summary.paid?.total ?? 0) }}</p>
-          <p class="text-xs text-gray-400">{{ summary.paid?.count ?? 0 }} bill{{ (summary.paid?.count ?? 0) !== 1 ? 's' : '' }}</p>
+          <p class="text-xs text-green-700/70 uppercase tracking-wide font-semibold">Paid</p>
+          <p class="text-xl font-black text-green-800">LKR {{ lkr(summary.paid?.total ?? 0) }}</p>
+          <p class="text-xs text-green-600/60">{{ summary.paid?.count ?? 0 }} bill{{ (summary.paid?.count ?? 0) !== 1 ? 's' : '' }}</p>
           <div class="flex gap-2 mt-1 flex-wrap">
-            <span v-if="paymentBreakdown.cash" class="inline-flex items-center gap-0.5 text-xs text-green-600 font-medium">
+            <span v-if="paymentBreakdown.cash" class="inline-flex items-center gap-0.5 text-xs text-green-700 font-medium">
               <span class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>
               Cash {{ lkr(paymentBreakdown.cash) }}
             </span>
-            <span v-if="paymentBreakdown.card" class="inline-flex items-center gap-0.5 text-xs text-blue-600 font-medium">
+            <span v-if="paymentBreakdown.card" class="inline-flex items-center gap-0.5 text-xs text-blue-700 font-medium">
               <span class="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block"></span>
               Card {{ lkr(paymentBreakdown.card) }}
-            </span>
-            <span v-if="paymentBreakdown.other" class="inline-flex items-center gap-0.5 text-xs text-gray-500 font-medium">
-              <span class="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block"></span>
-              Other {{ lkr(paymentBreakdown.other) }}
             </span>
           </div>
         </div>
       </div>
-      <div class="card flex items-center gap-4">
-        <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center shrink-0">
-          <ReceiptPercentIcon class="w-5 h-5 text-yellow-600" />
+      <!-- Pending -->
+      <div class="rounded-xl p-4 flex items-center gap-4 shadow-sm border border-orange-100" style="background:linear-gradient(135deg,#fff7ed,#ffedd5)">
+        <div class="w-11 h-11 rounded-xl bg-orange-100 flex items-center justify-center shrink-0">
+          <ReceiptPercentIcon class="w-6 h-6 text-orange-500" />
         </div>
         <div>
-          <p class="text-xs text-gray-500 uppercase tracking-wide">Pending</p>
-          <p class="text-lg font-bold text-yellow-700">LKR {{ lkr(summary.pending?.total ?? 0) }}</p>
-          <p class="text-xs text-gray-400">{{ summary.pending?.count ?? 0 }} bill{{ (summary.pending?.count ?? 0) !== 1 ? 's' : '' }}</p>
+          <p class="text-xs text-orange-700/70 uppercase tracking-wide font-semibold">Pending</p>
+          <p class="text-xl font-black text-orange-800">LKR {{ lkr(summary.pending?.total ?? 0) }}</p>
+          <p class="text-xs text-orange-600/60">{{ summary.pending?.count ?? 0 }} bill{{ (summary.pending?.count ?? 0) !== 1 ? 's' : '' }}</p>
         </div>
       </div>
-      <div class="card flex items-center gap-4">
-        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-          <ChartBarIcon class="w-5 h-5 text-blue-600" />
+      <!-- Partial -->
+      <div class="rounded-xl p-4 flex items-center gap-4 shadow-sm border border-blue-100" style="background:linear-gradient(135deg,#eff6ff,#dbeafe)">
+        <div class="w-11 h-11 rounded-xl bg-blue-100 flex items-center justify-center shrink-0">
+          <ChartBarIcon class="w-6 h-6 text-blue-600" />
         </div>
         <div>
-          <p class="text-xs text-gray-500 uppercase tracking-wide">Partial</p>
-          <p class="text-lg font-bold text-blue-700">LKR {{ lkr(summary.partial?.total ?? 0) }}</p>
-          <p class="text-xs text-gray-400">{{ summary.partial?.count ?? 0 }} bill{{ (summary.partial?.count ?? 0) !== 1 ? 's' : '' }}</p>
+          <p class="text-xs text-blue-700/70 uppercase tracking-wide font-semibold">Partial</p>
+          <p class="text-xl font-black text-blue-800">LKR {{ lkr(summary.partial?.total ?? 0) }}</p>
+          <p class="text-xs text-blue-600/60">{{ summary.partial?.count ?? 0 }} bill{{ (summary.partial?.count ?? 0) !== 1 ? 's' : '' }}</p>
         </div>
       </div>
     </div>
@@ -180,16 +180,16 @@
                 <td class="table-td text-center">
                   <div class="flex items-center justify-center gap-1.5">
                     <router-link v-if="s.status === 'draft'" :to="editDraftRoute(s.id)"
-                      class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-amber-100 text-amber-700 hover:bg-amber-200">
+                      class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500 text-white hover:bg-amber-600">
                       <PencilSquareIcon class="w-3.5 h-3.5" /> Edit
                     </router-link>
                     <router-link v-if="s.payment_status !== 'pending'" :to="`/sales/${s.id}`"
-                      class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-700 hover:bg-blue-200">
-                      <PrinterIcon class="w-3.5 h-3.5" /> Receipt
+                      class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-500 text-white hover:bg-blue-600">
+                      <PrinterIcon class="w-4 h-4" /> Receipt
                     </router-link>
                     <button v-if="!isCashier" @click="del(s)"
-                      class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200">
-                      <TrashIcon class="w-3.5 h-3.5" />
+                      class="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold bg-red-500 text-white hover:bg-red-600">
+                      <TrashIcon class="w-4 h-4" />
                     </button>
                   </div>
                 </td>

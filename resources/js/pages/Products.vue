@@ -31,7 +31,7 @@
 
       <div v-else class="overflow-x-auto">
         <table class="w-full">
-          <thead class="bg-gray-50 border-b border-gray-200">
+          <thead>
             <tr>
               <th class="table-th">Image</th>
               <th class="table-th">SKU</th>
@@ -44,7 +44,7 @@
               <th class="table-th">Sell Price (LKR)</th>
               <th class="table-th">Deposit</th>
               <th class="table-th">Status</th>
-              <th class="table-th sticky right-0 bg-gray-50 border-l border-gray-200">Actions</th>
+              <th class="table-th sticky right-0 border-l border-white/10" style="background:#1e4d7b">Actions</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
@@ -81,7 +81,7 @@
               <td class="table-td sticky right-0 bg-white border-l border-gray-200">
                 <div class="flex items-center gap-2 whitespace-nowrap">
                   <button @click="reprintBarcode(p)" :disabled="printingId === p.id"
-                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-100 text-emerald-700 hover:bg-emerald-200 disabled:opacity-60">
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-emerald-500 hover:bg-emerald-600 disabled:opacity-60 transition-colors">
                     <svg v-if="printingId === p.id" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
                       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                       <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
@@ -93,10 +93,10 @@
                     </svg>
                     {{ printingId === p.id ? 'Printing…' : 'Print' }}
                   </button>
-                  <button @click="openEdit(p)" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-700 hover:bg-blue-200">
+                  <button @click="openEdit(p)" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-blue-500 hover:bg-blue-600 transition-colors">
                     <PencilSquareIcon class="w-3.5 h-3.5" /> Edit
                   </button>
-                  <button @click="deleteProduct(p)" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200">
+                  <button @click="deleteProduct(p)" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-red-500 hover:bg-red-600 transition-colors">
                     <TrashIcon class="w-3.5 h-3.5" /> Delete
                   </button>
                 </div>

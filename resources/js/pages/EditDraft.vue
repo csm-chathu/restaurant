@@ -185,7 +185,7 @@
             </h3>
             <button @click="showNewCustomer = !showNewCustomer" type="button"
               class="inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-md transition-colors"
-              :class="showNewCustomer ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">
+              :class="showNewCustomer ? 'bg-blue-500 text-white hover:bg-blue-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">
               <UserPlusIcon class="w-3.5 h-3.5" />
               {{ showNewCustomer ? 'Cancel' : 'New Guest' }}
             </button>

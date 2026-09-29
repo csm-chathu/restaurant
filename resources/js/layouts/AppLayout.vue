@@ -1,99 +1,84 @@
 <template>
-  <div class="flex h-screen bg-gray-100 overflow-hidden">
+  <div class="flex h-screen overflow-hidden" style="background:#f1f5f9">
     <!-- Sidebar -->
-    <aside :class="sidebarHidden ? 'w-0 overflow-hidden' : collapsed ? 'w-16' : 'w-64'" class="bg-gray-900 text-white flex flex-col shrink-0 transition-all duration-200">
+    <aside :class="sidebarHidden ? 'w-0 overflow-hidden' : collapsed ? 'w-16' : 'w-[232px]'" class="bg-gray-900 text-white flex flex-col shrink-0 transition-all duration-200">
       <!-- Logo -->
       <div class="flex items-center gap-3 px-3 py-5 border-b border-gray-800 min-h-[72px]">
         <img v-if="restaurant.logo_url" :src="restaurant.logo_url" alt="Restaurant logo" class="w-10 h-10 rounded-lg object-cover border border-gray-700 shrink-0" />
         <span v-else class="text-2xl shrink-0">🍻</span>
         <div v-if="!collapsed" class="overflow-hidden">
-          <p class="font-bold text-gold-400 text-sm leading-tight truncate">{{ restaurant.name }}</p>
-          <p class="text-xs text-gray-400">POS & Inventory System</p>
+          <p class="font-bold text-gold-400 text-base leading-tight truncate">{{ restaurant.name }}</p>
+          <p class="text-sm text-gray-400">POS & Inventory System</p>
         </div>
       </div>
 
       <!-- Nav -->
-      <nav class="flex-1 py-4 overflow-y-auto overflow-x-hidden">
-        <div v-if="!collapsed" class="px-4 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Main</div>
+      <nav class="flex-1 py-4 overflow-y-auto overflow-x-hidden" style="scrollbar-width:thin; scrollbar-color:#f59e0b #1f2937">
+        <div v-if="!collapsed" class="px-4 mb-2 text-sm font-semibold text-gray-500 uppercase tracking-wider">Main</div>
         <router-link v-for="item in navItems" :key="item.to" :to="item.to"
           :title="collapsed ? item.label : ''"
           :class="[
-            'flex items-center py-2.5 mx-2 rounded-lg text-sm transition-colors',
+            'flex items-center py-2.5 mx-2 rounded-lg text-base transition-colors',
             collapsed ? 'justify-center px-0' : 'gap-3 px-4',
-            isNavActive(item.to) ? 'bg-purple-600 text-white hover:bg-purple-700' : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-          ]">
-          <component :is="item.icon" class="w-5 h-5 shrink-0" />
+            isNavActive(item.to) ? 'text-white shadow-md' : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+          ]"
+          :style="isNavActive(item.to) ? 'background: linear-gradient(135deg,#f59e0b,#ea580c)' : ''">
+          <component :is="item.icon" class="w-5 h-5 shrink-0 opacity-90" />
           <span v-if="!collapsed">{{ item.label }}</span>
         </router-link>
 
         <!-- Hotel section -->
         <template v-if="hotelNavItems.length > 0">
-          <div v-if="!collapsed" class="px-4 mt-4 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Hotel</div>
+          <div v-if="!collapsed" class="px-4 mt-4 mb-2 text-sm font-semibold text-gray-500 uppercase tracking-wider">Hotel</div>
           <div v-else class="my-3 mx-3 border-t border-gray-700"></div>
           <router-link v-for="item in hotelNavItems" :key="item.to" :to="item.to"
             :title="collapsed ? item.label : ''"
             :class="[
-              'flex items-center py-2.5 mx-2 rounded-lg text-sm transition-colors',
+              'flex items-center py-2.5 mx-2 rounded-lg text-base transition-colors',
               collapsed ? 'justify-center px-0' : 'gap-3 px-4',
-              isNavActive(item.to) ? 'bg-teal-600 text-white hover:bg-teal-700' : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-            ]">
-            <component :is="item.icon" class="w-5 h-5 shrink-0" />
+              isNavActive(item.to) ? 'text-white shadow-md' : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+            ]"
+            :style="isNavActive(item.to) ? 'background: linear-gradient(135deg,#f59e0b,#ea580c)' : ''">
+            <component :is="item.icon" class="w-5 h-5 shrink-0 opacity-90" />
             <span v-if="!collapsed">{{ item.label }}</span>
           </router-link>
         </template>
 
         <!-- Admin / feature section -->
         <template v-if="adminNavItems.length > 0">
-          <div v-if="!collapsed" class="px-4 mt-4 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Admin</div>
+          <div v-if="!collapsed" class="px-4 mt-4 mb-2 text-sm font-semibold text-gray-500 uppercase tracking-wider">Admin</div>
           <div v-else class="my-3 mx-3 border-t border-gray-700"></div>
           <router-link v-for="item in adminNavItems" :key="item.to" :to="item.to"
             :title="collapsed ? item.label : ''"
             :class="[
-              'flex items-center py-2.5 mx-2 rounded-lg text-sm transition-colors',
+              'flex items-center py-2.5 mx-2 rounded-lg text-base transition-colors',
               collapsed ? 'justify-center px-0' : 'gap-3 px-4',
-              isNavActive(item.to) ? 'bg-purple-600 text-white hover:bg-purple-700' : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-            ]">
-            <component :is="item.icon" class="w-5 h-5 shrink-0" />
+              isNavActive(item.to) ? 'text-white shadow-md' : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+            ]"
+            :style="isNavActive(item.to) ? 'background: linear-gradient(135deg,#f59e0b,#ea580c)' : ''">
+            <component :is="item.icon" class="w-5 h-5 shrink-0 opacity-90" />
             <span v-if="!collapsed">{{ item.label }}</span>
           </router-link>
         </template>
       </nav>
 
-      <!-- User info + collapse toggle -->
-      <div class="px-2 py-4 border-t border-gray-800 space-y-2">
-        <!-- Toggle button -->
+      <!-- Collapse toggle only -->
+      <div class="px-2 py-3 border-t border-gray-800">
         <button @click="toggleCollapse"
           :title="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
-          class="w-full flex items-center justify-center gap-2 py-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition-colors text-xs">
+          class="w-full flex items-center justify-center gap-2 py-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition-colors text-sm">
           <ChevronDoubleLeftIcon v-if="!collapsed" class="w-4 h-4" />
           <ChevronDoubleRightIcon v-else class="w-4 h-4" />
           <span v-if="!collapsed">Collapse</span>
         </button>
-
-        <div :class="collapsed ? 'justify-center' : 'gap-3'" class="flex items-center">
-          <div class="w-8 h-8 rounded-full bg-gold-600 flex items-center justify-center text-sm font-bold shrink-0">
-            {{ auth.user?.name?.charAt(0) }}
-          </div>
-          <div v-if="!collapsed" class="flex-1 min-w-0">
-            <p class="text-sm font-medium text-white truncate">{{ auth.user?.name }}</p>
-            <p class="text-xs text-gray-400 truncate">{{ auth.user?.email }}</p>
-          </div>
-          <button v-if="!collapsed" @click="doLogout" title="Logout"
-            class="p-1 rounded text-gray-400 hover:text-white hover:bg-gray-700 transition-colors">
-            <ArrowRightOnRectangleIcon class="w-5 h-5" />
-          </button>
-          <button v-else @click="doLogout" title="Logout"
-            class="p-1 rounded text-gray-400 hover:text-white hover:bg-gray-700 transition-colors">
-            <ArrowRightOnRectangleIcon class="w-4 h-4" />
-          </button>
-        </div>
       </div>
     </aside>
 
     <!-- Main area -->
     <div class="flex-1 flex flex-col min-h-0 min-w-0">
       <!-- Top bar -->
-      <header class="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
+      <header class="bg-white border-b border-gray-200 px-6 py-3 grid items-center" style="grid-template-columns:1fr auto 1fr">
+        <!-- LEFT: title + full screen + date -->
         <div class="flex items-center gap-3">
           <router-link v-if="sidebarHidden" to="/" title="Dashboard"
             class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold transition-colors">
@@ -101,8 +86,6 @@
             Home
           </router-link>
           <h1 class="text-lg font-semibold text-gray-800">{{ pageTitle }}</h1>
-        </div>
-        <div class="flex items-center gap-3 text-sm text-gray-500">
           <button @click="toggleSidebarHidden"
             class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors">
             <ArrowsPointingOutIcon v-if="!sidebarHidden" class="w-3.5 h-3.5" />
@@ -114,7 +97,14 @@
             class="p-1.5 rounded-lg border border-gray-200 text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-colors">
             <ArrowPathIcon class="w-4 h-4" />
           </button>
-          <span>{{ currentDate }}</span>
+          <span class="text-sm text-gray-500">{{ currentDate }}</span>
+        </div>
+
+        <!-- CENTER: page-specific content (e.g. order type toggle) -->
+        <div id="navbar-center" class="flex items-center justify-center"></div>
+
+        <!-- RIGHT: shift, user, logout -->
+        <div class="flex items-center gap-3 text-sm text-gray-500 justify-end">
           <button v-if="auth.user?.role === 'cashier'" @click="openShiftModal"
             :class="currentShift
               ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100'
@@ -136,10 +126,22 @@
             <span class="w-4 h-4 rounded-full bg-amber-500 text-white flex items-center justify-center text-[10px] font-bold leading-none">?</span>
             Getting Started
           </button>
-          <button v-if="sidebarHidden" @click="doLogout" title="Logout"
-            class="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors">
-            <ArrowRightOnRectangleIcon class="w-4 h-4" />
-          </button>
+          <!-- User info + logout -->
+          <div class="flex items-center gap-2 pl-3 border-l border-gray-200">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
+                 style="background: linear-gradient(135deg,#f59e0b,#ea580c)">
+              {{ auth.user?.name?.charAt(0) }}
+            </div>
+            <div class="hidden xl:block leading-tight">
+              <p class="text-xs font-semibold text-gray-800">{{ auth.user?.name }}</p>
+              <p class="text-[10px] text-gray-400">{{ auth.user?.email }}</p>
+            </div>
+            <button @click="doLogout"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 text-xs font-semibold transition-colors ml-1">
+              <ArrowRightOnRectangleIcon class="w-3.5 h-3.5" />
+              Logout
+            </button>
+          </div>
         </div>
       </header>
 
@@ -153,7 +155,8 @@
       </div>
 
       <!-- Page -->
-      <main :class="route.name === 'sales.new' ? 'flex-1 overflow-hidden' : 'flex-1 overflow-auto p-6'">
+      <main :class="route.name === 'sales.new' ? 'flex-1 overflow-hidden' : 'flex-1 overflow-auto p-6'"
+            class="text-[15px]">
         <router-view />
       </main>
     </div>
@@ -178,10 +181,15 @@ import {
   TruckIcon, ShoppingCartIcon, ArchiveBoxIcon,
   ArrowRightOnRectangleIcon, SparklesIcon,
   UserGroupIcon, ClipboardDocumentCheckIcon,
-  ClipboardDocumentListIcon, CurrencyDollarIcon, FireIcon, TableCellsIcon, ChartBarIcon, Cog6ToothIcon, BanknotesIcon,
+  ClipboardDocumentListIcon, CurrencyDollarIcon, FireIcon,
+  TableCellsIcon, ChartBarIcon, Cog6ToothIcon, BanknotesIcon,
   ChevronDoubleLeftIcon, ChevronDoubleRightIcon,
   ArrowsPointingOutIcon, ArrowsPointingInIcon, ArrowPathIcon,
   BuildingOfficeIcon, CalendarDaysIcon,
+  ClockIcon, DocumentChartBarIcon, CalendarIcon,
+  ReceiptPercentIcon, BeakerIcon, ScaleIcon,
+  PresentationChartLineIcon, DocumentTextIcon,
+  ArrowUturnLeftIcon, WalletIcon,
 } from '@heroicons/vue/24/outline'
 
 const auth      = useAuthStore()
@@ -217,7 +225,12 @@ async function checkHealth() {
 }
 
 watch(() => route.name, (name) => {
-  if (name === 'sales.new') collapsed.value = true
+  if (name === 'sales.new') {
+    collapsed.value = true
+  } else {
+    collapsed.value = false
+    localStorage.setItem('sidebar_collapsed', 'false')
+  }
 }, { immediate: true })
 
 function toggleCollapse() {
@@ -238,21 +251,21 @@ const allNavItems = [
   { to: '/tables',           label: 'Tables',          icon: TableCellsIcon,              feature: 'tables' },
   { to: '/suppliers',        label: 'Suppliers',       icon: TruckIcon,                   feature: 'suppliers' },
   { to: '/sales',            label: 'POS Billing',     icon: ShoppingCartIcon,            feature: 'pos_billing' },
-  { to: '/open-bottles',     label: 'Open Bottles',    icon: SparklesIcon,                feature: 'open_bottles' },
-  { to: '/my-shift-summary', label: 'My Shift',        icon: ChartBarIcon,                feature: 'my_shift' },
-  { to: '/reports',          label: 'Reports',         icon: ChartBarIcon,                feature: 'reports' },
-  { to: '/daily-report',     label: 'Daily Report',    icon: ChartBarIcon,                feature: 'daily_report' },
-  { to: '/purchases',        label: 'Purchase Orders', icon: ArchiveBoxIcon,              feature: 'purchases' },
+  { to: '/open-bottles',     label: 'Open Bottles',    icon: BeakerIcon,                  feature: 'open_bottles' },
+  { to: '/my-shift-summary', label: 'My Shift',        icon: ClockIcon,                   feature: 'my_shift' },
+  { to: '/reports',          label: 'Reports',         icon: PresentationChartLineIcon,   feature: 'reports' },
+  { to: '/daily-report',     label: 'Daily Report',    icon: CalendarIcon,                feature: 'daily_report' },
+  { to: '/purchases',        label: 'Purchase Orders', icon: ClipboardDocumentCheckIcon,  feature: 'purchases' },
 ]
 
 const allAdminNavItems = [
-  { to: '/price-matrix',     label: 'Price Matrix',    icon: SparklesIcon,                feature: 'price_matrix' },
-  { to: '/opening-balance',  label: 'Opening Balance', icon: ClipboardDocumentListIcon,   feature: 'opening_balance' },
-  { to: '/grn',              label: 'GRN',             icon: ClipboardDocumentCheckIcon,  feature: 'grn' },
-  { to: '/supplier-returns', label: 'Supplier Returns',icon: ArchiveBoxIcon,              feature: 'supplier_returns' },
+  { to: '/price-matrix',     label: 'Price Matrix',    icon: ScaleIcon,                   feature: 'price_matrix' },
+  { to: '/opening-balance',  label: 'Opening Balance', icon: WalletIcon,                  feature: 'opening_balance' },
+  { to: '/grn',              label: 'GRN',             icon: ArchiveBoxIcon,              feature: 'grn' },
+  { to: '/supplier-returns', label: 'Supplier Returns',icon: ArrowUturnLeftIcon,          feature: 'supplier_returns' },
   { to: '/bottle-deposits',  label: 'Bottle Deposits', icon: CurrencyDollarIcon,          feature: 'bottle_deposits' },
   { to: '/finance',          label: 'Finance',         icon: BanknotesIcon,               feature: 'finance' },
-  { to: '/shift-summary',    label: 'Shift Summary',   icon: ChartBarIcon,                feature: 'shift_summary' },
+  { to: '/shift-summary',    label: 'Shift Summary',   icon: DocumentChartBarIcon,        feature: 'shift_summary' },
   { to: '/damages',          label: 'Damages',         icon: FireIcon,                    feature: 'damages' },
   { to: '/audit-log',        label: 'Stock Ledger',    icon: ClipboardDocumentListIcon,   feature: 'stock_ledger' },
   { to: '/users',            label: 'Users & Roles',   icon: UserGroupIcon,               feature: 'users_roles' },

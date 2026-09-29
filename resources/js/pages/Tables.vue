@@ -164,15 +164,15 @@
                 <td class="table-td text-center">
                   <div class="flex items-center justify-center gap-1.5">
                     <button v-if="editingId === t.id" @click.stop="saveEdit(t)"
-                      class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium bg-green-100 text-green-700 hover:bg-green-200">
+                      class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-green-500 text-white hover:bg-green-600">
                       <CheckCircleIcon class="w-3.5 h-3.5" />
                     </button>
                     <button v-else @click.stop="startEdit(t)"
-                      class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-700 hover:bg-blue-200">
+                      class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-500 text-white hover:bg-blue-600">
                       <PencilSquareIcon class="w-3.5 h-3.5" />
                     </button>
                     <button @click.stop="deleteTable(t)"
-                      class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200">
+                      class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-500 text-white hover:bg-red-600">
                       <TrashIcon class="w-3.5 h-3.5" />
                     </button>
                   </div>

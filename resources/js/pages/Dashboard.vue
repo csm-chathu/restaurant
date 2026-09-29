@@ -1,213 +1,305 @@
 <template>
   <div class="space-y-5">
 
-    <!-- Cashier quick actions -->
+    <!-- ── Cashier quick actions ── -->
     <div v-if="isCashier" class="flex gap-3 justify-end">
       <router-link to="/sales/new"
-        class="flex items-center gap-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl px-4 py-2.5 shadow-sm transition-colors">
+        class="flex items-center gap-2.5 text-white rounded-xl px-4 py-2.5 shadow-md transition-all hover:scale-105"
+        style="background: linear-gradient(135deg,#f59e0b,#ea580c)">
         <ShoppingCartIcon class="w-5 h-5 shrink-0" />
         <div>
           <p class="text-sm font-semibold leading-tight">POS Billing</p>
-          <p class="text-xs opacity-75">Start a new bill</p>
+          <p class="text-xs opacity-80">Start a new bill</p>
         </div>
       </router-link>
       <router-link v-if="showOpenBottles" to="/open-bottles"
-        class="flex items-center gap-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-4 py-2.5 shadow-sm transition-colors">
+        class="flex items-center gap-2.5 text-white rounded-xl px-4 py-2.5 shadow-md transition-all hover:scale-105"
+        style="background: linear-gradient(135deg,#6366f1,#8b5cf6)">
         <SparklesIcon class="w-5 h-5 shrink-0" />
         <div>
           <p class="text-sm font-semibold leading-tight">Open Bottles</p>
-          <p class="text-xs opacity-75">Track open bottle pours</p>
+          <p class="text-xs opacity-80">Track open bottle pours</p>
         </div>
       </router-link>
     </div>
 
-    <!-- KPI cards -->
+    <!-- ── KPI cards ── -->
     <div v-if="!isCashier" class="flex items-center gap-3">
-      <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 flex-1">
-        <div v-for="card in kpiCards" :key="card.label"
-          class="bg-white rounded-2xl border border-gray-300 shadow-md px-4 py-3 flex flex-col gap-1">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-medium text-gray-400 uppercase tracking-wide">{{ card.label }}</span>
-            <span class="text-lg">{{ card.icon }}</span>
+      <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3 flex-1">
+
+        <!-- Today Revenue -->
+        <div class="rounded-2xl shadow-md px-4 py-3 flex flex-col gap-1 text-white relative overflow-hidden"
+             style="background: linear-gradient(135deg,#fbbf24 0%,#f59e0b 40%,#b45309 100%)">
+          <div class="absolute right-3 top-3 w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+            <!-- Cash / banknote icon -->
+            <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="2" y="6" width="20" height="12" rx="2"/>
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M6 9v.01M18 15v.01"/>
+            </svg>
           </div>
-          <p class="text-xl font-bold" :class="card.color">{{ card.value }}</p>
-          <p v-if="card.sub" class="text-xs text-gray-400">{{ card.sub }}</p>
+          <span class="text-xs font-semibold uppercase tracking-wide opacity-80">Today's Revenue</span>
+          <p class="text-xl font-black">{{ kpiCards[0]?.value }}</p>
+          <p class="text-xs opacity-70">{{ kpiCards[0]?.sub }}</p>
         </div>
+
+        <!-- Month Revenue -->
+        <div class="rounded-2xl shadow-md px-4 py-3 flex flex-col gap-1 text-white relative overflow-hidden"
+             style="background: linear-gradient(135deg,#34d399 0%,#10b981 40%,#065f46 100%)">
+          <div class="absolute right-3 top-3 w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+            <!-- Trending up chart icon -->
+            <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+              <polyline points="17 6 23 6 23 12"/>
+            </svg>
+          </div>
+          <span class="text-xs font-semibold uppercase tracking-wide opacity-80">Month Revenue</span>
+          <p class="text-xl font-black">{{ kpiCards[1]?.value }}</p>
+        </div>
+
+        <!-- Purchases -->
+        <div class="rounded-2xl shadow-md px-4 py-3 flex flex-col gap-1 text-white relative overflow-hidden"
+             style="background: linear-gradient(135deg,#60a5fa 0%,#3b82f6 40%,#1e3a8a 100%)">
+          <div class="absolute right-3 top-3 w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+            <!-- Shopping bag icon -->
+            <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <path d="M16 10a4 4 0 0 1-8 0"/>
+            </svg>
+          </div>
+          <span class="text-xs font-semibold uppercase tracking-wide opacity-80">Purchases</span>
+          <p class="text-xl font-black">{{ kpiCards[2]?.value }}</p>
+        </div>
+
+        <!-- Pending Bills -->
+        <div class="rounded-2xl shadow-md px-4 py-3 flex flex-col gap-1 text-white relative overflow-hidden"
+             style="background: linear-gradient(135deg,#fb923c 0%,#f97316 40%,#9a3412 100%)">
+          <div class="absolute right-3 top-3 w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+            <!-- Receipt / bill icon -->
+            <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16l3-2 2 2 2-2 2 2 3 2V4a2 2 0 0 0-2-2z"/>
+              <line x1="9" y1="9" x2="15" y2="9"/>
+              <line x1="9" y1="13" x2="15" y2="13"/>
+            </svg>
+          </div>
+          <span class="text-xs font-semibold uppercase tracking-wide opacity-80">Pending Bills</span>
+          <p class="text-xl font-black">{{ kpiCards[3]?.value }}</p>
+          <p class="text-xs opacity-70">{{ kpiCards[3]?.sub }}</p>
+        </div>
+
+
+        <!-- Customers -->
+        <div class="rounded-2xl shadow-md px-4 py-3 flex flex-col gap-1 text-white relative overflow-hidden"
+             style="background: linear-gradient(135deg,#a78bfa 0%,#8b5cf6 40%,#4c1d95 100%)">
+          <div class="absolute right-3 top-3 w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+            <!-- Users icon -->
+            <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+          <span class="text-xs font-semibold uppercase tracking-wide opacity-80">Customers</span>
+          <p class="text-xl font-black">{{ kpiCards[5]?.value }}</p>
+        </div>
+
       </div>
+
+      <!-- New Bill CTA -->
       <router-link to="/sales/new"
-        class="flex flex-col items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl px-7 shadow-sm transition-colors shrink-0 font-bold text-base whitespace-nowrap self-stretch">
+        class="flex flex-col items-center justify-center gap-2 text-white rounded-2xl px-7 shadow-lg shrink-0 font-bold text-base whitespace-nowrap self-stretch new-bill-btn"
+        style="background: linear-gradient(160deg,#fbbf24 0%,#f97316 50%,#c2410c 100%)">
         <ShoppingCartIcon class="w-8 h-8" />
         New Bill
       </router-link>
     </div>
 
-    <!-- Row 2: Revenue trend + Monthly bar -->
+    <!-- ── Row 2: Revenue trend + Fast moving items ── -->
     <div v-if="!isCashier" class="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
-      <!-- Revenue trend (30 days) -->
-      <div class="lg:col-span-2 bg-white rounded-2xl border border-gray-300 shadow-md p-4">
-        <div class="flex items-center justify-between mb-3">
+      <!-- Revenue trend -->
+      <div class="lg:col-span-2 bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+        <div class="px-4 pt-4 pb-3 flex items-center justify-between"
+             style="background: linear-gradient(90deg,#fffbeb,#fff7ed)">
           <div>
-            <h3 class="font-semibold text-gray-700 text-sm">Revenue Trend</h3>
+            <h3 class="font-bold text-gray-800 text-sm">Revenue Trend</h3>
             <p class="text-xs text-gray-400">Last 30 days — revenue & bill count</p>
           </div>
-          <span class="text-xs bg-amber-50 text-amber-600 font-semibold px-2 py-1 rounded-full border border-amber-100">30 days</span>
+          <span class="text-xs font-bold px-3 py-1 rounded-full text-amber-700"
+                style="background: linear-gradient(90deg,#fde68a,#fcd34d)">30 days</span>
         </div>
-        <div class="h-56">
-          <Line v-if="revenueTrendData" :data="revenueTrendData" :options="trendOptions" />
+        <div class="p-4 h-56">
+          <Bar v-if="revenueTrendData" :data="revenueTrendData" :options="trendOptions" />
           <ChartEmpty v-else :loaded="loaded" />
         </div>
       </div>
 
       <!-- Fast moving items -->
-      <div class="bg-white rounded-2xl border border-gray-300 shadow-md p-4 flex flex-col">
-        <div class="mb-3">
-          <h3 class="font-semibold text-gray-700 text-sm">Fast Moving Items</h3>
+      <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden flex flex-col">
+        <div class="px-4 pt-4 pb-3" style="background: linear-gradient(90deg,#ecfdf5,#f0fdf4)">
+          <h3 class="font-bold text-gray-800 text-sm">Fast Moving Items</h3>
           <p class="text-xs text-gray-400">This month · sorted by qty sold</p>
         </div>
-        <div v-if="!loaded" class="flex-1 flex items-center justify-center">
-          <div class="w-5 h-5 border-2 border-gray-200 border-t-amber-400 rounded-full animate-spin"></div>
-        </div>
-        <div v-else-if="!data.top_products?.length" class="flex-1 flex flex-col items-center justify-center text-gray-300 gap-2">
-          <span class="text-3xl">📦</span>
-          <span class="text-xs">No sales this month</span>
-        </div>
-        <div v-else class="space-y-3 overflow-y-auto flex-1" style="max-height: 230px">
-          <div v-for="p in data.top_products" :key="p.id" class="flex items-center gap-2.5">
-            <!-- Thumbnail -->
-            <div class="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 border border-gray-100 shrink-0">
-              <img v-if="p.image" :src="p.image" :alt="p.name" class="w-full h-full object-cover" />
-              <div v-else class="w-full h-full flex items-center justify-center text-gray-300 text-base">📦</div>
-            </div>
-            <!-- Info -->
-            <div class="flex-1 min-w-0">
-              <p class="text-xs font-semibold text-gray-800 truncate">{{ p.name }}</p>
-              <div class="mt-1 flex items-center gap-1.5">
-                <div class="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                  <div class="h-full bg-amber-400 rounded-full transition-all" :style="{ width: (Number(p.total_sold) / maxTopSold * 100) + '%' }"></div>
-                </div>
-                <span class="text-xs text-gray-400 shrink-0">×{{ p.total_sold }}</span>
+        <div class="p-4 flex-1 flex flex-col">
+          <div v-if="!loaded" class="flex-1 flex items-center justify-center">
+            <div class="w-5 h-5 border-2 border-gray-200 border-t-amber-400 rounded-full animate-spin"></div>
+          </div>
+          <div v-else-if="!data.top_products?.length" class="flex-1 flex flex-col items-center justify-center text-gray-300 gap-2">
+            <span class="text-3xl">📦</span>
+            <span class="text-xs">No sales this month</span>
+          </div>
+          <div v-else class="space-y-3 overflow-y-auto flex-1" style="max-height: 220px">
+            <div v-for="p in data.top_products" :key="p.id" class="flex items-center gap-2.5">
+              <div class="w-10 h-10 rounded-xl overflow-hidden bg-amber-50 border border-amber-100 shrink-0">
+                <img v-if="p.image" :src="p.image" :alt="p.name" class="w-full h-full object-cover" />
+                <div v-else class="w-full h-full flex items-center justify-center text-amber-300 text-base">🍽️</div>
               </div>
-              <p class="text-xs font-bold text-amber-600 mt-0.5">LKR {{ shortNum(p.total_revenue) }}</p>
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-semibold text-gray-800 truncate">{{ p.name }}</p>
+                <div class="mt-1 flex items-center gap-1.5">
+                  <div class="flex-1 h-1.5 rounded-full overflow-hidden" style="background:#f3f4f6">
+                    <div class="h-full rounded-full transition-all"
+                         style="background: linear-gradient(90deg,#f59e0b,#ea580c)"
+                         :style="{ width: (Number(p.total_sold) / maxTopSold * 100) + '%' }"></div>
+                  </div>
+                  <span class="text-xs text-gray-400 shrink-0">×{{ p.total_sold }}</span>
+                </div>
+                <p class="text-xs font-bold text-orange-600 mt-0.5">LKR {{ shortNum(p.total_revenue) }}</p>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Row 3: Payment methods + Category breakdown + Hourly pattern -->
-    <div v-if="!isCashier" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-      <!-- Payment methods donut -->
-      <div class="bg-white rounded-2xl border border-gray-300 shadow-md p-4">
-        <h3 class="font-semibold text-gray-700 text-sm mb-0.5">Payment Methods</h3>
-        <p class="text-xs text-gray-400 mb-3">This month by revenue</p>
-        <div class="h-48">
-          <Doughnut v-if="paymentMethodData" :data="paymentMethodData" :options="doughnutOptions" />
-          <ChartEmpty v-else :loaded="loaded" message="No sales this month" />
-        </div>
-        <!-- Legend totals -->
-        <div v-if="data.payment_methods?.length" class="mt-3 space-y-1">
-          <div v-for="(m, i) in data.payment_methods" :key="m.payment_method" class="flex items-center justify-between text-xs">
-            <div class="flex items-center gap-1.5">
-              <span class="w-2.5 h-2.5 rounded-full shrink-0" :style="{ background: donutColors[i % donutColors.length] }"></span>
-              <span class="text-gray-600 capitalize">{{ m.payment_method.replace('_', ' ') }}</span>
-            </div>
-            <span class="font-semibold text-gray-700">{{ m.count }} bills</span>
-          </div>
-        </div>
+    <!-- ── Row 3: Recent bills ── -->
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+      <div class="px-4 pt-4 pb-3 flex items-center justify-between"
+           style="background: linear-gradient(90deg,#fafafa,#fff8f0)">
+        <h3 class="font-bold text-gray-800 text-sm flex items-center gap-2">
+          <span class="w-3 h-3 rounded-full" style="background:linear-gradient(135deg,#f59e0b,#ea580c)"></span>
+          Recent Bills
+        </h3>
       </div>
-
-      <!-- Category breakdown donut -->
-      <div class="bg-white rounded-2xl border border-gray-300 shadow-md p-4">
-        <h3 class="font-semibold text-gray-700 text-sm mb-0.5">Category Sales</h3>
-        <p class="text-xs text-gray-400 mb-3">This month by revenue</p>
-        <div class="h-48">
-          <Doughnut v-if="categorySalesData" :data="categorySalesData" :options="doughnutOptions" />
-          <ChartEmpty v-else :loaded="loaded" message="No sales this month" />
-        </div>
-        <div v-if="data.category_sales?.length" class="mt-3 space-y-1">
-          <div v-for="(c, i) in data.category_sales.slice(0, 4)" :key="c.category" class="flex items-center justify-between text-xs">
-            <div class="flex items-center gap-1.5">
-              <span class="w-2.5 h-2.5 rounded-full shrink-0" :style="{ background: categoryColors[i % categoryColors.length] }"></span>
-              <span class="text-gray-600 truncate max-w-[100px]">{{ c.category }}</span>
-            </div>
-            <span class="font-semibold text-gray-700">LKR {{ shortNum(c.revenue) }}</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Hourly pattern bar -->
-      <div class="bg-white rounded-2xl border border-gray-300 shadow-md p-4">
-        <h3 class="font-semibold text-gray-700 text-sm mb-0.5">Busiest Hours</h3>
-        <p class="text-xs text-gray-400 mb-3">Bill count by hour — last 7 days</p>
-        <div class="h-48">
-          <Bar v-if="hourlyPatternData" :data="hourlyPatternData" :options="hourlyOptions" />
-          <ChartEmpty v-else :loaded="loaded" message="No data for last 7 days" />
-        </div>
-        <div v-if="peakHour !== null" class="mt-3 flex items-center gap-1.5 text-xs text-gray-500">
-          <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-          Peak: <span class="font-semibold text-gray-700">{{ formatHour(peakHour) }}</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Row 4: Recent bills (full width) -->
-    <div class="bg-white rounded-2xl border border-gray-300 shadow-md p-4">
-      <h3 class="font-semibold text-gray-700 text-sm mb-3">Recent Bills</h3>
-      <div class="overflow-x-auto">
+      <div class="px-4 pb-4 overflow-x-auto">
         <table class="w-full text-sm">
           <thead>
-            <tr class="text-xs text-gray-400 uppercase tracking-wide border-b border-gray-100">
-              <th class="text-left pb-2 pr-4 font-medium">Invoice</th>
-              <th class="text-left pb-2 pr-4 font-medium">Customer</th>
-              <th class="text-left pb-2 pr-4 font-medium">Status</th>
-              <th class="text-right pb-2 font-medium">Total</th>
+            <tr class="text-xs text-gray-400 uppercase tracking-wide border-b-2 border-orange-100">
+              <th class="text-left py-2 pr-3 font-semibold">#</th>
+              <th class="text-left py-2 pr-3 font-semibold">Invoice</th>
+              <th class="text-left py-2 pr-3 font-semibold">Customer</th>
+              <th class="text-left py-2 pr-3 font-semibold">Table</th>
+              <th class="text-left py-2 pr-3 font-semibold">Date & Time</th>
+              <th class="text-left py-2 pr-3 font-semibold">Payment</th>
+              <th class="text-left py-2 pr-3 font-semibold">Status</th>
+              <th class="text-right py-2 pr-3 font-semibold">Total</th>
+              <th class="text-center py-2 font-semibold">Bill</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-50">
-            <tr v-for="sale in data.recent_sales" :key="sale.id" class="hover:bg-gray-50 transition-colors">
-              <td class="py-2 pr-4 font-mono text-xs font-semibold text-gray-800">{{ sale.invoice_number }}</td>
-              <td class="py-2 pr-4 text-xs text-gray-500">{{ sale.customer?.name ?? 'Walk-in' }}</td>
-              <td class="py-2 pr-4">
+          <tbody class="divide-y divide-orange-50">
+            <tr v-for="(sale, idx) in data.recent_sales" :key="sale.id"
+                class="transition-colors hover:bg-orange-50 group">
+              <!-- Row number -->
+              <td class="py-2.5 pr-3 text-xs text-gray-300 font-medium">{{ idx + 1 }}</td>
+
+              <!-- Invoice -->
+              <td class="py-2.5 pr-3">
+                <span class="font-mono text-xs font-bold text-gray-800">{{ sale.invoice_number }}</span>
+              </td>
+
+              <!-- Customer -->
+              <td class="py-2.5 pr-3">
+                <div class="flex items-center gap-1.5">
+                  <div class="w-6 h-6 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0"
+                       style="background:linear-gradient(135deg,#f59e0b,#ea580c)">
+                    {{ (sale.customer?.name ?? 'W')[0].toUpperCase() }}
+                  </div>
+                  <span class="text-xs text-gray-600">{{ sale.customer?.name ?? 'Walk-in' }}</span>
+                </div>
+              </td>
+
+              <!-- Table -->
+              <td class="py-2.5 pr-3">
+                <span v-if="sale.table" class="text-xs px-2 py-0.5 rounded-full font-semibold bg-amber-50 text-amber-700 border border-amber-100">
+                  {{ sale.table_number }}
+                </span>
+                <span v-else class="text-xs text-gray-300">—</span>
+              </td>
+
+              <!-- Date & Time -->
+              <td class="py-2.5 pr-3 text-xs text-gray-500 whitespace-nowrap">
+                <div>{{ new Date(sale.sold_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) }}</div>
+                <div class="text-gray-400">{{ new Date(sale.sold_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) }}</div>
+              </td>
+
+              <!-- Payment method -->
+              <td class="py-2.5 pr-3">
+                <span class="text-xs capitalize font-medium text-gray-600">
+                  {{ sale.payment_method ? sale.payment_method.replace('_', ' ') : '—' }}
+                </span>
+              </td>
+
+              <!-- Payment status -->
+              <td class="py-2.5 pr-3">
                 <span class="text-xs px-2 py-0.5 rounded-full font-semibold" :class="statusClass(sale.payment_status)">
                   {{ sale.payment_status }}
                 </span>
               </td>
-              <td class="py-2 text-right text-xs font-bold text-gray-800">LKR {{ shortNum(sale.total) }}</td>
+
+              <!-- Total -->
+              <td class="py-2.5 pr-3 text-right">
+                <span class="text-sm font-black text-orange-600">LKR {{ shortNum(sale.total) }}</span>
+              </td>
+
+              <!-- View receipt -->
+              <td class="py-2.5 text-center">
+                <router-link :to="`/sales/${sale.id}/receipt`"
+                  class="inline-flex items-center justify-center w-7 h-7 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:scale-110"
+                  style="background:linear-gradient(135deg,#f59e0b,#ea580c)" title="View receipt">
+                  <svg class="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16l3-2 2 2 2-2 2 2 3 2V4a2 2 0 0 0-2-2z"/>
+                    <line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/>
+                  </svg>
+                </router-link>
+              </td>
             </tr>
             <tr v-if="!data.recent_sales?.length">
-              <td colspan="4" class="py-6 text-center text-sm text-gray-400">No sales yet</td>
+              <td colspan="9" class="py-8 text-center text-sm text-gray-400">No sales yet</td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- Row 5: Low stock -->
-    <div v-if="data.low_stock?.length" class="bg-white rounded-2xl border border-red-300 shadow-md p-4">
-      <h3 class="font-semibold text-gray-700 text-sm mb-3 flex items-center gap-2">
-        <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-        Low Stock Alerts ({{ data.low_stock.length }})
-      </h3>
-      <div class="overflow-x-auto">
+    <!-- ── Row 5: Low stock ── -->
+    <div v-if="data.low_stock?.length" class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+      <div class="px-4 pt-4 pb-3" style="background: linear-gradient(90deg,#fff1f2,#fff)">
+        <h3 class="font-bold text-red-700 text-sm flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse shrink-0"></span>
+          Low Stock Alerts ({{ data.low_stock.length }})
+        </h3>
+      </div>
+      <div class="px-4 pb-4 overflow-x-auto">
         <table class="w-full text-sm">
           <thead>
-            <tr class="text-xs text-gray-400 uppercase tracking-wide">
-              <th class="text-left pb-2 pr-4">SKU</th>
-              <th class="text-left pb-2 pr-4">Product</th>
-              <th class="text-left pb-2 pr-4">Category</th>
-              <th class="text-right pb-2 pr-4">Stock</th>
-              <th class="text-right pb-2">Min Level</th>
+            <tr class="text-xs text-gray-400 uppercase tracking-wide border-b-2 border-red-100">
+              <th class="text-left py-2 pr-4">SKU</th>
+              <th class="text-left py-2 pr-4">Product</th>
+              <th class="text-left py-2 pr-4">Category</th>
+              <th class="text-right py-2 pr-4">Stock</th>
+              <th class="text-right py-2">Min Level</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-50">
+          <tbody class="divide-y divide-red-50">
             <tr v-for="p in data.low_stock" :key="p.id" class="hover:bg-red-50 transition-colors">
-              <td class="py-1.5 pr-4 font-mono text-xs text-gray-500">{{ p.sku }}</td>
-              <td class="py-1.5 pr-4 font-medium text-gray-800">{{ p.name }}</td>
+              <td class="py-1.5 pr-4 font-mono text-xs text-gray-400">{{ p.sku }}</td>
+              <td class="py-1.5 pr-4 font-semibold text-gray-800">{{ p.name }}</td>
               <td class="py-1.5 pr-4 text-xs text-gray-400">{{ p.category?.name ?? '—' }}</td>
               <td class="py-1.5 pr-4 text-right">
-                <span class="px-2 py-0.5 bg-red-100 text-red-700 rounded-full text-xs font-bold">{{ p.stock_quantity }}</span>
+                <span class="px-2 py-0.5 rounded-full text-xs font-bold text-white"
+                      style="background:linear-gradient(90deg,#ef4444,#dc2626)">{{ p.stock_quantity }}</span>
               </td>
               <td class="py-1.5 text-right text-xs text-gray-400">{{ p.min_stock_level }}</td>
             </tr>
@@ -295,24 +387,19 @@ const revenueTrendData = computed(() => {
       {
         label: 'Revenue (LKR)',
         data: sales.map(s => Number(s.revenue)),
-        borderColor: '#d97706',
-        backgroundColor: 'rgba(217,119,6,0.12)',
-        fill: true,
-        tension: 0.4,
-        pointRadius: 2,
-        pointHoverRadius: 5,
+        backgroundColor: sales.map(() => 'rgba(217,119,6,0.75)'),
+        hoverBackgroundColor: '#d97706',
+        borderRadius: 6,
+        borderSkipped: false,
         yAxisID: 'y',
       },
       {
         label: 'Bills',
         data: sales.map(s => Number(s.count)),
-        borderColor: '#3b82f6',
-        backgroundColor: 'transparent',
-        fill: false,
-        tension: 0.4,
-        pointRadius: 2,
-        pointHoverRadius: 5,
-        borderDash: [4, 3],
+        backgroundColor: 'rgba(59,130,246,0.6)',
+        hoverBackgroundColor: '#3b82f6',
+        borderRadius: 6,
+        borderSkipped: false,
         yAxisID: 'y1',
       },
     ],

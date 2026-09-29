@@ -90,7 +90,7 @@
             <td class="table-td">LKR {{ Number(d.estimated_loss).toLocaleString() }}</td>
             <td class="table-td">{{ formatDate(d.occurred_at) }}</td>
             <td class="table-td">
-              <button class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-700 hover:bg-blue-200" @click="openEdit(d)">
+              <button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-500 text-white hover:bg-blue-600" @click="openEdit(d)">
                 Edit
               </button>
             </td>
