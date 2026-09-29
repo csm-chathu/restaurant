@@ -78,7 +78,7 @@
 
       <!-- ── Right: Login card ── -->
       <div class="w-full max-w-lg shrink-0">
-        <div class="bg-white rounded-3xl shadow-2xl px-16 py-16 relative overflow-hidden">
+        <div class="bg-white rounded-3xl px-16 py-16 relative overflow-hidden border border-orange-100" style="box-shadow: 0 25px 60px rgba(249,115,22,0.15), 0 8px 25px rgba(0,0,0,0.08), 0 0 0 1px rgba(249,115,22,0.08)">
           <!-- Orange top-right accent blob inside card -->
           <div class="absolute -top-6 -right-6 w-20 h-20 rounded-full pointer-events-none"
                style="background: linear-gradient(135deg,#fed7aa,#f97316); opacity:0.35;"></div>

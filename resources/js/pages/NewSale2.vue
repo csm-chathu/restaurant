@@ -127,14 +127,15 @@
               @click="addProductFromGrid(product)"
               :disabled="isStockTracked(product) && product.stock_quantity < 1 && !(product.open_bottles_remaining_ml > 0)"
               type="button"
-              class="relative flex flex-col rounded-xl border-2 text-left transition-all select-none overflow-hidden group bg-white shadow-sm"
+              class="relative flex flex-col rounded-xl border-2 text-left transition-all select-none overflow-hidden group bg-white"
+              style="box-shadow:0 2px 8px rgba(0,0,0,0.10),0 1px 3px rgba(0,0,0,0.06)"
               :class="isStockTracked(product) && product.stock_quantity < 1 && !(product.open_bottles_remaining_ml > 0)
-                ? 'border-gray-100 opacity-40 cursor-not-allowed'
+                ? 'border-gray-200 opacity-40 cursor-not-allowed'
                 : gridFocusIndex === idx
                   ? 'border-amber-500 ring-2 ring-amber-400 shadow-xl shadow-amber-100'
                   : isInBill(product.id)
                     ? 'border-amber-400 shadow-lg shadow-amber-100'
-                    : 'border-gray-200 hover:border-amber-300 hover:shadow-md active:scale-95'"
+                    : 'border-gray-300 hover:border-amber-400 hover:shadow-lg active:scale-95'"
             >
               <div
                 v-if="isInBill(product.id)"
@@ -142,8 +143,14 @@
               >{{ getBillQty(product.id) }}</div>
               <div class="w-full aspect-[4/3] overflow-hidden bg-gray-100 shrink-0 relative">
                 <img v-if="product.image" :src="product.image" :alt="product.name" class="w-full h-full object-cover" />
-                <div v-else class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-                  <ShoppingBagIcon class="w-7 h-7 text-gray-300" />
+                <div v-else class="w-full h-full flex flex-col items-center justify-center gap-1.5"
+                     style="background:linear-gradient(135deg,#fff7ed 0%,#ffedd5 50%,#fed7aa 100%)">
+                  <svg class="w-9 h-9 opacity-40" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2"/>
+                    <path d="M7 2v20"/>
+                    <path d="M21 15V2a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/>
+                  </svg>
+                  <span class="text-[9px] font-semibold text-orange-300 tracking-wide uppercase">No Image</span>
                 </div>
                 <div class="absolute inset-x-0 bottom-0 py-1 px-1 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex justify-end"
                      v-if="!(isStockTracked(product) && product.stock_quantity < 1 && !(product.open_bottles_remaining_ml > 0))">
@@ -243,13 +250,33 @@
             v-for="(cat, idx) in categoryTabs"
             :key="cat"
             @click="activeCategory = cat; showProductPanel = true"
-            class="flex flex-col items-center justify-center gap-1 px-1 py-3 text-center transition-all border-b border-r border-gray-200 relative"
+            class="flex flex-col items-center justify-center gap-0 p-0 text-center transition-all border-b border-r border-gray-200 relative overflow-hidden"
             :class="activeCategory === cat
-              ? 'bg-amber-500 text-white shadow-inner'
-              : 'text-gray-600 hover:bg-amber-50 hover:text-amber-700'"
+              ? 'bg-amber-500 text-white'
+              : 'bg-white text-slate-500 hover:bg-amber-50 hover:text-amber-700'"
           >
-            <span class="text-2xl leading-none">{{ getCategoryEmoji(cat) }}</span>
-            <span class="text-[11px] font-semibold leading-tight w-full text-center line-clamp-2 px-0.5">{{ cat }}</span>
+            <!-- Icon fills the top portion -->
+            <div
+              class="w-full flex items-center justify-center pt-3 pb-2 transition-all"
+              :style="activeCategory === cat
+                ? 'background:linear-gradient(160deg,#fbbf24 0%,#f59e0b 60%,#d97706 100%)'
+                : 'background:linear-gradient(160deg,#f8fafc 0%,#f1f5f9 100%)'">
+              <div class="w-12 h-12 rounded-2xl flex items-center justify-center"
+                   :style="activeCategory === cat
+                     ? 'background:rgba(255,255,255,0.22);box-shadow:0 2px 8px rgba(0,0,0,0.18),inset 0 1px 0 rgba(255,255,255,0.5)'
+                     : 'background:linear-gradient(145deg,#ffffff,#e2e8f0);box-shadow:3px 3px 8px rgba(0,0,0,0.13),-2px -2px 6px rgba(255,255,255,1)'">
+                <svg class="w-6 h-6 shrink-0" viewBox="0 0 24 24" fill="none"
+                     :stroke="activeCategory === cat ? '#7c2d12' : '#475569'"
+                     stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+                     v-html="getCategoryIcon(cat)"></svg>
+              </div>
+            </div>
+            <!-- Label strip -->
+            <div class="w-full py-1.5 px-0.5"
+                 :style="activeCategory === cat ? 'background:#f59e0b' : 'background:#f8fafc;border-top:1px solid #e2e8f0'">
+              <span class="text-[10px] font-bold leading-tight w-full text-center line-clamp-1 tracking-wide uppercase block"
+                    :style="activeCategory === cat ? 'color:#7c2d12' : 'color:#475569'">{{ cat }}</span>
+            </div>
           </button>
         </div>
       </div>
@@ -569,7 +596,18 @@
                     >
                       <svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
                     </span>
-                    <span class="text-xl leading-none">{{ opt.icon }}</span>
+                    <!-- Cash icon: banknote -->
+                    <svg v-if="opt.value === 'cash'" class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="2" y="7" width="20" height="10" rx="2"/>
+                      <circle cx="12" cy="12" r="2.5"/>
+                      <path d="M6 10v4M18 10v4"/>
+                    </svg>
+                    <!-- Card icon: credit card -->
+                    <svg v-else-if="opt.value === 'card'" class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="2" y="5" width="20" height="14" rx="2"/>
+                      <path d="M2 10h20"/>
+                      <path d="M6 15h3M14 15h4"/>
+                    </svg>
                     <span class="text-xs">{{ opt.label }}</span>
                   </button>
                 </template>
@@ -587,7 +625,15 @@
                   >
                     <svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
                   </span>
-                  <span class="text-xl leading-none">✂️</span>
+                  <!-- Split icon: two arrows diverging -->
+                  <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 3h5v5"/>
+                    <path d="M8 3H3v5"/>
+                    <path d="M21 3l-7 7"/>
+                    <path d="M3 3l7 7"/>
+                    <path d="M10 14l-7 7"/>
+                    <path d="M14 14l7 7"/>
+                  </svg>
                   <span class="text-xs">Split</span>
                 </button>
                 <!-- Status -->
@@ -600,7 +646,20 @@
                       ? 'background:#f97316; border-color:#f97316'
                       : 'background:#22c55e; border-color:#22c55e'"
                 >
-                  <span class="text-xl leading-none">{{ form.payment_status === 'pending' ? '⏳' : form.payment_status === 'partial' ? '⚡' : '✅' }}</span>
+                  <!-- Pending: clock; Partial: half-circle; Paid: check circle -->
+                  <svg v-if="form.payment_status === 'pending'" class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="9"/>
+                    <path d="M12 7v5l3 3"/>
+                  </svg>
+                  <svg v-else-if="form.payment_status === 'partial'" class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 3a9 9 0 100 18"/>
+                    <path d="M12 3v18"/>
+                    <path d="M12 8v8"/>
+                  </svg>
+                  <svg v-else class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="9"/>
+                    <path d="M8 12l3 3 5-5"/>
+                  </svg>
                   <span class="text-xs">{{ form.payment_status === 'pending' ? 'Pending' : form.payment_status === 'partial' ? 'Partial' : 'Paid' }}</span>
                 </button>
               </div>
@@ -617,13 +676,13 @@
             <div v-if="splitPayment" class="px-3 pb-2 space-y-2">
               <div class="grid grid-cols-2 gap-2">
                 <div>
-                  <label class="text-xs font-bold text-gray-500 mb-1 block">💵 Cash</label>
+                  <label class="text-xs font-bold text-gray-500 mb-1 block">Cash</label>
                   <input v-model.number="splitCash" type="number" min="0" step="1"
                     class="w-full px-3 py-2.5 rounded-xl border-2 border-gray-200 text-lg font-bold text-center text-gray-900 focus:outline-none focus:border-amber-500"
                     @input="onSplitCashInput" @wheel.prevent />
                 </div>
                 <div>
-                  <label class="text-xs font-bold text-gray-500 mb-1 block">💳 Card</label>
+                  <label class="text-xs font-bold text-gray-500 mb-1 block">Card</label>
                   <input v-model.number="splitCard" type="number" min="0" step="1"
                     class="w-full px-3 py-2.5 rounded-xl border-2 border-gray-200 text-lg font-bold text-center text-gray-900 focus:outline-none focus:border-amber-500"
                     @input="onSplitCardInput" @wheel.prevent />
@@ -1026,25 +1085,70 @@ function getCategoryActiveBg(cat, idx) {
   return categoryColorMap[idx % categoryColorMap.length] || 'bg-amber-500'
 }
 
-function getCategoryEmoji(name) {
-  const lower = (name || '').toLowerCase()
-  if (lower === 'all') return '🏪'
-  if (lower.includes('liquor') || lower.includes('beer') || lower.includes('alcohol')) return '🍺'
-  if (lower.includes('whisky') || lower.includes('whiskey') || lower.includes('bourbon')) return '🥃'
-  if (lower.includes('wine')) return '🍷'
-  if (lower.includes('vodka') || lower.includes('gin') || lower.includes('rum')) return '🍸'
-  if (lower.includes('food') || lower.includes('meal') || lower.includes('main')) return '🍽️'
-  if (lower.includes('snack') || lower.includes('starter') || lower.includes('appetizer')) return '🍟'
-  if (lower.includes('dessert') || lower.includes('cake') || lower.includes('sweet')) return '🍰'
-  if (lower.includes('coffee') || lower.includes('espresso')) return '☕'
-  if (lower.includes('tea')) return '🍵'
-  if (lower.includes('juice') || lower.includes('soft') || lower.includes('soda')) return '🥤'
-  if (lower.includes('water')) return '💧'
-  if (lower.includes('rice') || lower.includes('pasta') || lower.includes('noodle')) return '🍜'
-  if (lower.includes('chicken') || lower.includes('beef') || lower.includes('pork') || lower.includes('meat')) return '🍗'
-  if (lower.includes('fish') || lower.includes('seafood') || lower.includes('shrimp')) return '🐟'
-  if (lower.includes('veg') || lower.includes('salad')) return '🥗'
-  return '📦'
+function getCategoryIcon(name) {
+  const l = (name || '').toLowerCase()
+  // All / store
+  if (l === 'all')
+    return '<path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/>'
+  // Beer / lager / alcohol
+  if (l.includes('beer') || l.includes('lager') || l.includes('ale'))
+    return '<path d="M5 8h14l-1.5 10a2 2 0 01-2 1.8H8.5a2 2 0 01-2-1.8L5 8z"/><path d="M5 8V6a1 1 0 011-1h12a1 1 0 011 1v2"/><path d="M19 10h2a1 1 0 011 1v3a1 1 0 01-1 1h-2"/>'
+  // Whisky / bourbon
+  if (l.includes('whisky') || l.includes('whiskey') || l.includes('bourbon') || l.includes('scotch'))
+    return '<path d="M8 3h8l1 5H7L8 3z"/><path d="M7 8v10a2 2 0 002 2h6a2 2 0 002-2V8"/><path d="M10 13h4"/>'
+  // Wine
+  if (l.includes('wine'))
+    return '<path d="M8 3h8l1 7a5 5 0 01-10 0L8 3z"/><path d="M12 15v6"/><path d="M9 21h6"/>'
+  // Cocktail / vodka / gin / rum / spirits
+  if (l.includes('vodka') || l.includes('gin') || l.includes('rum') || l.includes('cocktail') || l.includes('spirit'))
+    return '<path d="M7 3h10l-5 8v10"/><path d="M8 21h8"/><path d="M7 3l5 8 5-8"/>'
+  // Liquor / bar (generic)
+  if (l.includes('liquor') || l.includes('bar') || l.includes('alcohol') || l.includes('drink'))
+    return '<path d="M9 3h6l1 7a4 4 0 01-8 0L9 3z"/><path d="M12 14v7"/><path d="M9 21h6"/>'
+  // Coffee / espresso / cappuccino
+  if (l.includes('coffee') || l.includes('espresso') || l.includes('cappuccino') || l.includes('latte'))
+    return '<path d="M17 8h1a4 4 0 010 8h-1"/><path d="M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z"/><path d="M6 2v3"/><path d="M10 2v3"/><path d="M14 2v3"/>'
+  // Tea
+  if (l.includes('tea'))
+    return '<path d="M17 8h1a4 4 0 010 8h-1"/><path d="M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z"/>'
+  // Juice / soft / soda / beverage
+  if (l.includes('juice') || l.includes('soft') || l.includes('soda') || l.includes('beverage'))
+    return '<rect x="6" y="3" width="12" height="18" rx="2"/><path d="M9 3v4"/><path d="M15 3v4"/><path d="M9 13h6"/>'
+  // Water
+  if (l.includes('water'))
+    return '<path d="M12 2C6.48 2 2 9 2 13a10 10 0 0020 0c0-4-4.48-11-10-11z"/>'
+  // Rice / pasta / noodle / kottu
+  if (l.includes('rice') || l.includes('pasta') || l.includes('noodle') || l.includes('kottu'))
+    return '<path d="M3 5h18"/><path d="M5 5v5a7 7 0 0014 0V5"/><path d="M8 19h8"/><path d="M12 15v4"/>'
+  // Bread / bakery / bun
+  if (l.includes('bread') || l.includes('bakery') || l.includes('bun') || l.includes('baked'))
+    return '<path d="M5 12a7 7 0 0114 0v8H5v-8z"/><path d="M5 12H2"/><path d="M22 12h-3"/>'
+  // Cake / dessert / sweet / pastry
+  if (l.includes('cake') || l.includes('dessert') || l.includes('sweet') || l.includes('pastry'))
+    return '<rect x="3" y="11" width="18" height="10" rx="2"/><path d="M3 11a3 3 0 016 0 3 3 0 006 0 3 3 0 016 0"/><path d="M12 3v4"/><path d="M9 7h6"/>'
+  // Snack / starter / appetizer / fried
+  if (l.includes('snack') || l.includes('starter') || l.includes('appetizer') || l.includes('fries') || l.includes('savoury'))
+    return '<rect x="5" y="10" width="14" height="11" rx="2"/><path d="M9 10V7a3 3 0 016 0v3"/><path d="M8 21h8"/>'
+  // Fish / seafood / shrimp
+  if (l.includes('fish') || l.includes('seafood') || l.includes('shrimp') || l.includes('prawn'))
+    return '<path d="M21 12c-2.4 4-6 6-9 6s-6-2-9-6c3-4 6-6 9-6s6.6 2 9 6z"/><circle cx="12" cy="12" r="2"/>'
+  // Veg / salad / green
+  if (l.includes('veg') || l.includes('salad') || l.includes('green') || l.includes('plant'))
+    return '<path d="M12 22V12"/><path d="M17 7a5 5 0 00-10 0c0 4 5 5 5 10"/><path d="M12 12a5 5 0 005-5"/>'
+  // Chicken / beef / meat / pork / grill
+  if (l.includes('chicken') || l.includes('beef') || l.includes('pork') || l.includes('meat') || l.includes('grill') || l.includes('bbq'))
+    return '<path d="M14.5 2.5c1 1 .9 3-.3 4.2L6 15h3l-3 7 7-3v3l8.2-8.2c1.2-1.2 3.2-1.3 4.2-.3"/><path d="M3.5 20.5l2-2"/>'
+  // Yogurt / dairy
+  if (l.includes('yogurt') || l.includes('dairy') || l.includes('milk'))
+    return '<rect x="7" y="4" width="10" height="16" rx="3"/><path d="M10 4V2"/><path d="M14 4V2"/><path d="M9 10h6"/><path d="M9 14h4"/>'
+  // Dry / grocery / pantry
+  if (l.includes('dry') || l.includes('grocery') || l.includes('pantry') || l.includes('store'))
+    return '<path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 01-8 0"/>'
+  // Butter / spread
+  if (l.includes('butter') || l.includes('spread'))
+    return '<rect x="3" y="8" width="18" height="10" rx="2"/><path d="M7 8V6a2 2 0 012-2h6a2 2 0 012 2v2"/><path d="M3 13h18"/>'
+  // Food / meal / main / other — default plate/fork
+  return '<circle cx="12" cy="12" r="9"/><path d="M12 3v9"/><path d="M9 12h6"/>'
 }
 
 // Payment options with icons
