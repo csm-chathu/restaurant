@@ -400,6 +400,12 @@ onUnmounted(() => {
 })
 
 onMounted(async () => {
+  // Apply saved UI scale on every page load
+  const savedScale = localStorage.getItem('pos_ui_scale')
+  if (savedScale && savedScale !== '100') {
+    document.documentElement.style.zoom = `${savedScale}%`
+  }
+
   checkHealth()
   healthInterval = setInterval(checkHealth, 60000)
   loadRestaurant()

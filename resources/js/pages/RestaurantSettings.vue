@@ -37,6 +37,32 @@
         </div>
       </div>
 
+      <!-- UI Scale -->
+      <div class="flex items-center justify-between py-3 border-t border-gray-100 gap-4">
+        <div class="min-w-0">
+          <p class="text-sm font-medium text-gray-800">UI Scale</p>
+          <p class="text-xs text-gray-500 mt-0.5">Adjust the zoom level of the entire interface on this device. Default is 100%.</p>
+        </div>
+        <div class="flex items-center gap-3 shrink-0">
+          <input
+            type="range"
+            v-model.number="uiScale"
+            @input="applyUiScale"
+            min="70"
+            max="125"
+            step="5"
+            class="w-32 accent-amber-500 cursor-pointer"
+          />
+          <span class="text-sm font-bold text-amber-600 w-10 text-right">{{ uiScale }}%</span>
+          <button
+            v-if="uiScale !== 100"
+            type="button"
+            @click="uiScale = 100; applyUiScale()"
+            class="text-xs text-gray-400 hover:text-gray-700 underline shrink-0"
+          >Reset</button>
+        </div>
+      </div>
+
       <div class="flex items-center justify-between py-3 border-t border-gray-100">
         <div>
           <p class="text-sm font-medium text-gray-800">Kitchen Order Tickets</p>
@@ -209,6 +235,13 @@ const error = ref('')
 // POS preferences — stored in localStorage (per device)
 const kbShortcutsEnabled = ref(localStorage.getItem('pos_keyboard_shortcuts') !== 'false')
 const billLayout = ref(localStorage.getItem('pos_bill_layout') || '1')
+const uiScale = ref(Number(localStorage.getItem('pos_ui_scale') || 100))
+
+function applyUiScale() {
+  const v = uiScale.value
+  localStorage.setItem('pos_ui_scale', v)
+  document.documentElement.style.zoom = v === 100 ? '' : `${v}%`
+}
 
 function toggleKbShortcuts() {
   kbShortcutsEnabled.value = !kbShortcutsEnabled.value
