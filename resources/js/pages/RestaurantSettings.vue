@@ -240,7 +240,8 @@ const uiScale = ref(Number(localStorage.getItem('pos_ui_scale') || 100))
 function applyUiScale() {
   const v = uiScale.value
   localStorage.setItem('pos_ui_scale', v)
-  document.documentElement.style.zoom = v === 100 ? '' : `${v}%`
+  document.body.style.zoom = v === 100 ? '' : `${v}%`
+  document.body.style.width = v === 100 ? '' : `${(100 / v) * 100}%`
 }
 
 function toggleKbShortcuts() {

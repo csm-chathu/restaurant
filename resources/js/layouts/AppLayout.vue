@@ -401,9 +401,10 @@ onUnmounted(() => {
 
 onMounted(async () => {
   // Apply saved UI scale on every page load
-  const savedScale = localStorage.getItem('pos_ui_scale')
-  if (savedScale && savedScale !== '100') {
-    document.documentElement.style.zoom = `${savedScale}%`
+  const savedScale = Number(localStorage.getItem('pos_ui_scale') || 100)
+  if (savedScale !== 100) {
+    document.body.style.zoom = `${savedScale}%`
+    document.body.style.width = `${(100 / savedScale) * 100}%`
   }
 
   checkHealth()
