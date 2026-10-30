@@ -15,6 +15,7 @@
 |   'shop2.example.com' => 'lmuc_shop2',
 */
 
+
 return [
     'localhost' => 'rahula',
     'cafe1-restaurant.lumac.cc' => 'cafe1',
