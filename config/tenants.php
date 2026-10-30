@@ -18,8 +18,7 @@
 return [
     'localhost' => 'rahula',
     'cafe1-restaurant.lumac.cc' => 'cafe1',
-    'daily-restaurant.lumac.cc' => 'daily_dose',
-    // 'rahula-restaurant.lumac.cc' => 'rahula_bakery',
+    'rahula-restaurant.lumac.cc' => 'rahula_bakery',
     'yummy-restaurant.lumac.cc' => 'yummy_restaurant',
-    'harambathenna-restaurant.lumac.cc' => 'harambathenna',
+    'gb-restaurant.lumac.cc' => 'gb_cafe_and_restaurant',
 ];
